@@ -5,5 +5,5 @@
         android:id="@+id/user"
         android:icon="@drawable/ic_baseline_person_48"
         android:title="user"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
 </menu>

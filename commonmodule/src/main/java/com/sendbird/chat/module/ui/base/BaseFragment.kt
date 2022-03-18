@@ -1,16 +1,11 @@
 package com.sendbird.chat.module.ui.base
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.*
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
-import com.sendbird.chat.module.R
-import com.sendbird.chat.module.databinding.ActivityMainBinding
-import com.sendbird.chat.module.utils.Constants
-import com.sendbird.chat.module.utils.getAppName
-import com.sendbird.chat.module.utils.showLongToast
 
 typealias Inflate<T> = (LayoutInflater, ViewGroup?, Boolean) -> T
 
@@ -20,6 +15,7 @@ abstract class BaseFragment<VB : ViewBinding>(
 
     private var _binding: VB? = null
     val binding get() = _binding!!
+    var bindingState = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,11 +23,13 @@ abstract class BaseFragment<VB : ViewBinding>(
         savedInstanceState: Bundle?
     ): View? {
         _binding = inflate.invoke(inflater, container, false)
+        bindingState = true
         return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        bindingState = false
     }
 }

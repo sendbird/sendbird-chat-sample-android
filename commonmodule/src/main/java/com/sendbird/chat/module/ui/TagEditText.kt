@@ -55,4 +55,5 @@ class TagEditText : FrameLayout {
     fun setText(text: String) {
         binding.edittext.setText(text)
     }
+
 }

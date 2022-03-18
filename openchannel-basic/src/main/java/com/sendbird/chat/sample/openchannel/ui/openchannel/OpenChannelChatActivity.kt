@@ -9,25 +9,24 @@ import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.sendbird.android.*
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.BaseChannel
+import com.sendbird.android.channel.OpenChannel
+import com.sendbird.android.handler.ConnectionHandler
+import com.sendbird.android.handler.OpenChannelHandler
+import com.sendbird.android.message.BaseMessage
+import com.sendbird.android.message.FileMessage
+import com.sendbird.android.message.UserMessage
+import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
-import com.sendbird.chat.module.utils.Constants.CHANNEL_HANDLER_ID
-import com.sendbird.chat.module.utils.Constants.CONNECTION_HANDLER_ID
-import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_TITLE
-import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_URL
-import com.sendbird.chat.module.utils.Constants.PERMISSION_REQUEST_CODE
 import com.sendbird.chat.sample.openchannel.R
 import com.sendbird.chat.sample.openchannel.databinding.ActivityOpenChannelChatBinding
 
-
 class OpenChannelChatActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityOpenChannelChatBinding
     private lateinit var adapter: OpenChannelChatAdapter
     private lateinit var recyclerObserver: ChatRecyclerDataObserver
-
-
     private var currentOpenChannel: OpenChannel? = null
     private var channelUrl: String = ""
     private var channelTitle: String = ""
@@ -37,11 +36,10 @@ class OpenChannelChatActivity : AppCompatActivity() {
 
     private val startForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
-            SendBird.setAutoBackgroundDetection(true)
+            SendbirdChat.autoBackgroundDetection = true
             if (data.resultCode == RESULT_OK) {
-                data.data?.data?.let {
-                    sendFileMessage(it)
-                }
+                val uri = data.data?.data
+                sendFileMessage(uri)
             }
         }
 
@@ -51,10 +49,12 @@ class OpenChannelChatActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val intent = intent
-        channelUrl = intent.getStringExtra(INTENT_KEY_CHANNEL_URL) ?: ""
-        channelTitle = intent.getStringExtra(INTENT_KEY_CHANNEL_TITLE) ?: ""
+        channelUrl = intent.getStringExtra(Constants.INTENT_KEY_CHANNEL_URL) ?: ""
+        channelTitle = intent.getStringExtra(Constants.INTENT_KEY_CHANNEL_TITLE) ?: ""
 
         init()
+        initRecyclerView()
+        enterChannel(channelUrl)
         addHandler()
     }
 
@@ -64,9 +64,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        initRecyclerView()
-        enterChannel(channelUrl)
-
         binding.chatInputView.setOnSendMessageClickListener(object :
             ChatInputView.OnSendMessageClickListener {
             override fun onUserMessageSend() {
@@ -75,7 +72,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
             }
 
             override fun onFileMessageSend() {
-                SendBird.setAutoBackgroundDetection(false)
+                SendbirdChat.autoBackgroundDetection = false
                 FileUtils.selectFile(
                     Constants.DATA_TYPE_IMAGE_AND_VIDEO,
                     startForResult,
@@ -86,66 +83,50 @@ class OpenChannelChatActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        adapter =
-            OpenChannelChatAdapter({ baseMessage, view, position ->
-                view.setOnCreateContextMenuListener { contextMenu, _, _ ->
-                    if (SendBird.getCurrentUser() != null && baseMessage.sender.userId == SendBird.getCurrentUser().userId) {
-                        val deleteMenu =
-                            contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
-                        deleteMenu.setOnMenuItemClickListener {
-                            currentOpenChannel?.deleteMessage(baseMessage) {
-                                if (it != null) {
-                                    showToast("${it.message}")
-                                }
-                            }
+        adapter = OpenChannelChatAdapter({ baseMessage, view, _ ->
+            view.setOnCreateContextMenuListener { contextMenu, _, _ ->
+                val currentUser = SendbirdChat.currentUser
+                if (currentUser != null && baseMessage.sender?.userId == currentUser.userId) {
+                    val deleteMenu =
+                        contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
+                    deleteMenu.setOnMenuItemClickListener {
+                        deleteMessage(baseMessage)
+                        return@setOnMenuItemClickListener false
+                    }
+                    if (baseMessage is UserMessage) {
+                        val updateMenu =
+                            contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
+                        updateMenu.setOnMenuItemClickListener {
+                            showInputDialog(
+                                getString(R.string.update),
+                                null,
+                                baseMessage.message,
+                                getString(R.string.update),
+                                getString(R.string.cancel),
+                                { updateMessage(it, baseMessage) },
+                            )
                             return@setOnMenuItemClickListener false
                         }
-                        if (baseMessage is UserMessage) {
-                            val updateMenu =
-                                contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
-                            updateMenu.setOnMenuItemClickListener {
-                                showInputDialog(
-                                    getString(R.string.update),
-                                    null,
-                                    baseMessage.message,
-                                    getString(R.string.update),
-                                    getString(R.string.cancel),
-                                    {
-                                        if (it.isBlank()) {
-                                            showToast(R.string.enter_message_msg)
-                                            return@showInputDialog
-                                        }
-                                        val params = UserMessageParams()
-                                            .setMessage(it)
-                                        currentOpenChannel?.updateUserMessage(
-                                            baseMessage.messageId,
-                                            params
-                                        ) { baseMessage, e ->
-                                            if (e != null) {
-                                                showToast("${e.message}")
-                                                return@updateUserMessage
-                                            }
-                                            adapter.updateItem(
-                                                baseMessage
-                                            )
-                                        }
-                                    },
-                                )
-                                return@setOnMenuItemClickListener false
-                            }
-                        }
                     }
                 }
-            }, {
-                showListDialog(
-                    listOf(getString(R.string.retry), getString(R.string.delete))
-                ) { _, position ->
-                    when (position) {
-                        0 -> resendMessage(it)
-                        1 -> adapter.deletePendingItem(it)
+                if (baseMessage is UserMessage) {
+                    val copyMenu = contextMenu.add(Menu.NONE, 2, 2, getString(R.string.copy))
+                    copyMenu.setOnMenuItemClickListener {
+                        copy(baseMessage.message)
+                        return@setOnMenuItemClickListener true
                     }
                 }
-            })
+            }
+        }, {
+            showListDialog(
+                listOf(getString(R.string.retry), getString(R.string.delete))
+            ) { _, position ->
+                when (position) {
+                    0 -> resendMessage(it)
+                    1 -> adapter.deletePendingMessage(it)
+                }
+            }
+        })
         binding.recyclerviewChat.adapter = adapter
         binding.recyclerviewChat.itemAnimator = null
         recyclerObserver = ChatRecyclerDataObserver(binding.recyclerviewChat, adapter)
@@ -163,67 +144,117 @@ class OpenChannelChatActivity : AppCompatActivity() {
         })
     }
 
+    private fun enterChannel(channelUrl: String) {
+        if (channelUrl.isBlank()) {
+            showToast(getString(R.string.channel_url_error))
+            finish()
+            return
+        }
+        OpenChannel.getChannel(channelUrl) { openChannel, e ->
+            if (e != null) {
+                showToast("${e.message}")
+                return@getChannel
+            }
+            openChannel?.enter { e2 ->
+                if (e2 != null) {
+                    showToast("${e2.message}")
+                    return@enter
+                }
+                currentOpenChannel = openChannel
+                loadMessagesPreviousMessages(Long.MAX_VALUE)
+            }
+        }
+    }
+
     private fun addHandler() {
-        SendBird.addConnectionHandler(CONNECTION_HANDLER_ID, object : SendBird.ConnectionHandler {
-            override fun onReconnectStarted() {
-            }
+        SendbirdChat.addConnectionHandler(
+            Constants.CONNECTION_HANDLER_ID,
+            object : ConnectionHandler {
+                override fun onReconnectStarted() {}
 
-            override fun onReconnectSucceeded() {
-                if (changelogToken != null) {
-                    getMessageChangeLogsSinceToken()
-                } else {
-                    val lastMessage = adapter.currentList.lastOrNull()
-                    if (lastMessage != null) {
-                        getMessageChangeLogsSinceTimestamp(lastMessage.createdAt)
+                override fun onReconnectSucceeded() {
+                    if (changelogToken != null) {
+                        getMessageChangeLogsSinceToken()
+                    } else {
+                        val lastMessage = adapter.currentList.lastOrNull()
+                        if (lastMessage != null) {
+                            getMessageChangeLogsSinceTimestamp(lastMessage.createdAt)
+                        }
                     }
+                    loadToLatestMessages(adapter.currentList.lastOrNull()?.createdAt ?: 0)
                 }
-                loadToLatestMessages(adapter.currentList.lastOrNull()?.createdAt ?: 0)
-            }
 
-            override fun onReconnectFailed() {
-            }
-        })
+                override fun onConnected(userId: String) {}
 
-        SendBird.addChannelHandler(CHANNEL_HANDLER_ID, object : SendBird.ChannelHandler() {
-            override fun onMessageReceived(baseChannel: BaseChannel?, baseMessage: BaseMessage?) {
-                val channel = currentOpenChannel ?: return
-                if (baseChannel != null && baseMessage != null) {
-                    if (baseChannel.url == channel.url) {
-                        adapter.addItem(baseMessage)
-                    }
+                override fun onDisconnected(userId: String) {}
+
+                override fun onReconnectFailed() {}
+            })
+
+        SendbirdChat.addChannelHandler(Constants.CHANNEL_HANDLER_ID, object : OpenChannelHandler() {
+
+            override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {
+                if (channel.url == currentOpenChannel?.url) {
+                    adapter.addMessage(message)
                 }
             }
 
-            override fun onMessageDeleted(baseChannel: BaseChannel?, msgId: Long) {
-                val channel = currentOpenChannel ?: return
-                if (baseChannel != null) {
-                    if (baseChannel.url == channel.url) {
-                        adapter.deleteItem(msgId)
-                    }
+            override fun onMessageDeleted(channel: BaseChannel, msgId: Long) {
+                if (channel.url == currentOpenChannel?.url) {
+                    adapter.deleteMessages(listOf(msgId))
                 }
-                super.onMessageDeleted(baseChannel, msgId)
             }
 
-            override fun onMessageUpdated(baseChannel: BaseChannel?, baseMessage: BaseMessage?) {
-                val channel = currentOpenChannel ?: return
-                if (baseChannel != null && baseMessage != null) {
-                    if (baseChannel.url == channel.url) {
-                        adapter.updateItem(baseMessage)
-                    }
+            override fun onMessageUpdated(channel: BaseChannel, message: BaseMessage) {
+                if (channel.url == currentOpenChannel?.url) {
+                    adapter.updateMessages(listOf(message))
                 }
-                super.onMessageUpdated(baseChannel, baseMessage)
             }
 
-            override fun onChannelChanged(channel: BaseChannel?) {
-                super.onChannelChanged(channel)
+            override fun onChannelDeleted(
+                channelUrl: String,
+                channelType: BaseChannel.ChannelType
+            ) {
+                showToast(R.string.channel_deleted_event_msg)
+                finish()
+            }
+
+            override fun onChannelChanged(channel: BaseChannel) {
                 updateChannel(channel as OpenChannel)
             }
+
         })
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.chat_menu, menu)
-        return true
+    private fun deleteMessage(baseMessage: BaseMessage) {
+        currentOpenChannel?.deleteMessage(baseMessage) {
+            if (it != null) {
+                showToast("${it.message}")
+            }
+        }
+    }
+
+    private fun updateMessage(msg: String, baseMessage: BaseMessage) {
+        if (msg.isBlank()) {
+            showToast(R.string.enter_message_msg)
+            return
+        }
+        val params = UserMessageUpdateParams()
+            .setMessage(msg)
+        currentOpenChannel?.updateUserMessage(
+            baseMessage.messageId,
+            params
+        ) { message, e ->
+            if (e != null) {
+                showToast("${e.message}")
+                return@updateUserMessage
+            }
+            if (message != null) {
+                adapter.updateMessages(
+                    listOf(message)
+                )
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -234,14 +265,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
                     getString(R.string.channel_delete_msg),
                     getString(R.string.delete),
                     getString(R.string.cancel),
-                    {
-                        currentOpenChannel?.delete {
-                            if (it != null) {
-                                showToast("$it")
-                            }
-                            finish()
-                        }
-                    },
+                    { deleteChannel() },
                 )
                 true
             }
@@ -254,21 +278,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
                     channel.name,
                     getString(R.string.update),
                     getString(R.string.cancel),
-                    {
-                        if (it.isBlank()) {
-                            showToast(R.string.enter_message_msg)
-                            return@showInputDialog
-                        }
-                        val params = OpenChannelParams()
-                            .setName(it)
-                        channel.updateChannel(
-                            params
-                        ) { _, e ->
-                            if (e != null) {
-                                showToast("${e.message}")
-                            }
-                        }
-                    },
+                    { updateChannel(it, channel) },
                 )
                 true
             }
@@ -281,25 +291,25 @@ class OpenChannelChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun enterChannel(channelUrl: String) {
-        if (channelUrl.isBlank()) {
-            showToast(getString(R.string.channel_url_error))
+    private fun deleteChannel() {
+        currentOpenChannel?.delete {
+            if (it != null) {
+                showToast("$it")
+            }
             finish()
+        }
+    }
+
+    private fun updateChannel(name: String, channel: OpenChannel) {
+        if (name.isBlank()) {
+            showToast(R.string.enter_message_msg)
             return
         }
-        OpenChannel.getChannel(
-            channelUrl
-        ) { openChannel, e ->
-            if (e != null || openChannel == null) {
-                showToast(getString(R.string.error) + e.message)
-            } else {
-                openChannel.enter { e2 ->
-                    if (e2 != null) {
-                        showToast(getString(R.string.error) + e2.message)
-                    }
-                    currentOpenChannel = openChannel
-                    loadMessagesPreviousMessages(Long.MAX_VALUE)
-                }
+        val params = OpenChannelUpdateParams()
+            .setName(name)
+        channel.updateChannel(params) { _, e ->
+            if (e != null) {
+                showToast("${e.message}")
             }
         }
     }
@@ -312,17 +322,16 @@ class OpenChannelChatActivity : AppCompatActivity() {
         val params = MessageListParams().apply {
             previousResultSize = 20
             nextResultSize = 0
-            setReverse(false)
+            reverse = false
         }
-        channel.getMessagesByTimestamp(
-            timeStamp, params
-        ) { messages, e ->
+        channel.getMessagesByTimestamp(timeStamp, params) { messages, e ->
             if (e != null) {
                 showToast("${e.message}")
-            } else {
-                if (!messages.isNullOrEmpty()) {
+            }
+            if (messages != null) {
+                if (messages.isNotEmpty()) {
                     hasPrevious = messages.size >= params.previousResultSize
-                    adapter.addPreviousItems(messages)
+                    adapter.addPreviousMessages(messages)
                 } else {
                     hasPrevious = false
                 }
@@ -336,17 +345,14 @@ class OpenChannelChatActivity : AppCompatActivity() {
         isMessageLoading = true
         val params = MessageListParams().apply {
             nextResultSize = 100
-            setReverse(false)
+            reverse = false
         }
-        channel.getMessagesByTimestamp(
-            timeStamp,
-            params
-        ) { messages, e ->
+        channel.getMessagesByTimestamp(timeStamp, params) { messages, e ->
             if (e != null) {
                 showToast("${e.message}")
             }
             if (!messages.isNullOrEmpty()) {
-                adapter.addNextItems(messages)
+                adapter.addNextMessages(messages)
                 if (messages.size >= params.nextResultSize) {
                     loadToLatestMessages(messages.last().createdAt)
                 } else {
@@ -358,29 +364,35 @@ class OpenChannelChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendMessage(message: String) {
-        if (message.isBlank()) {
+    private fun sendMessage(msg: String) {
+        if (msg.isBlank()) {
             showToast(R.string.enter_message_msg)
             return
         }
         val channel = currentOpenChannel ?: return
-        val params: UserMessageParams = UserMessageParams().setMessage(message.trim())
+        val params = UserMessageCreateParams()
+            .setMessage(msg.trim())
         binding.chatInputView.clearText()
-        val pendingMessage = channel.sendUserMessage(params) { userMessage, e ->
+        val pendingMessage = channel.sendUserMessage(params) { message, e ->
             if (e != null) {
                 //failed
-                adapter.updatePendingItem(userMessage)
+                showToast("${e.message}")
+                adapter.updatePendingMessage(message)
                 return@sendUserMessage
             }
             //succeeded
-            adapter.updateSucceedItem(userMessage)
-            recyclerObserver.scrollToBottom(true)
+            adapter.updateSucceedMessage(message)
         }
         //pending
-        adapter.addPendingItem(pendingMessage)
+        adapter.addPendingMessage(pendingMessage)
+        recyclerObserver.scrollToBottom(true)
     }
 
-    private fun sendFileMessage(imgUri: Uri) {
+    private fun sendFileMessage(imgUri: Uri?) {
+        if (imgUri == null) {
+            showToast(R.string.file_transfer_error)
+            return
+        }
         val channel = currentOpenChannel ?: return
         val thumbnailSizes = listOf(
             FileMessage.ThumbnailSize(100, 100),
@@ -388,7 +400,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
         )
         val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
         if (fileInfo != null) {
-            val params = FileMessageParams()
+            val params = FileMessageCreateParams()
                 .setFile(fileInfo.file)
                 .setFileName(fileInfo.name)
                 .setFileSize(fileInfo.size)
@@ -399,15 +411,16 @@ class OpenChannelChatActivity : AppCompatActivity() {
             ) sendFileMessageLabel@{ fileMessage, e ->
                 if (e != null) {
                     //failed
-                    adapter.updatePendingItem(fileMessage)
+                    showToast("${e.message}")
+                    adapter.updatePendingMessage(fileMessage)
                     return@sendFileMessageLabel
                 }
                 //succeeded
-                adapter.updateSucceedItem(fileMessage)
-                recyclerObserver.scrollToBottom(true)
+                adapter.updateSucceedMessage(fileMessage)
             }
             //pending
-            adapter.addPendingItem(pendingMessage)
+            adapter.addPendingMessage(pendingMessage)
+            recyclerObserver.scrollToBottom(true)
         } else {
             showToast(R.string.file_transfer_error)
         }
@@ -424,9 +437,8 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 if (params != null) {
                     channel.resendMessage(
                         baseMessage,
-                        params.file,
-                        null as BaseChannel.ResendFileMessageHandler?
-                    )
+                        params.file
+                    ) { _, _ -> }
                 }
             }
         }
@@ -435,7 +447,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
     private fun getMessageChangeLogsSinceTimestamp(timeStamp: Long) {
         val channel = currentOpenChannel ?: return
         val params = MessageChangeLogsParams()
-        params.replyTypeFilter = ReplyTypeFilter.NONE
         channel.getMessageChangeLogsSinceTimestamp(
             timeStamp,
             params
@@ -444,8 +455,8 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 showToast("$e")
                 return@getMessageChangeLogsSinceTimestampLabel
             }
-            adapter.updateItems(updatedMessages)
-            adapter.deleteItems(deletedMessageIds)
+            adapter.updateMessages(updatedMessages)
+            adapter.deleteMessages(deletedMessageIds)
             changelogToken = token
             if (hasMore) {
                 getMessageChangeLogsSinceToken()
@@ -462,7 +473,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
             return
         }
         val params = MessageChangeLogsParams()
-        params.replyTypeFilter = ReplyTypeFilter.NONE
         channel.getMessageChangeLogsSinceToken(
             changelogToken,
             params
@@ -471,8 +481,8 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 showToast("$e")
                 return@getMessageChangeLogsSinceTokenLabel
             }
-            adapter.updateItems(updatedMessages)
-            adapter.deleteItems(deletedMessageIds)
+            adapter.updateMessages(updatedMessages)
+            adapter.deleteMessages(deletedMessageIds)
             changelogToken = token
             if (hasMore) {
                 getMessageChangeLogsSinceToken()
@@ -482,18 +492,20 @@ class OpenChannelChatActivity : AppCompatActivity() {
 
     private fun updateChannel(openChannel: OpenChannel) {
         currentOpenChannel = openChannel
-        if (currentOpenChannel == null) {
-            showToast(R.string.channel_error)
-            return
-        }
         binding.toolbar.title = openChannel.name
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.chat_menu, menu)
+        return true
+    }
+
     override fun onDestroy() {
-        SendBird.removeConnectionHandler(CONNECTION_HANDLER_ID)
-        SendBird.removeChannelHandler(CHANNEL_HANDLER_ID)
-        currentOpenChannel?.exit {}
         super.onDestroy()
+        SendbirdChat.removeConnectionHandler(Constants.CONNECTION_HANDLER_ID)
+        SendbirdChat.removeChannelHandler(Constants.CHANNEL_HANDLER_ID)
+        SendbirdChat.autoBackgroundDetection = true
+        currentOpenChannel?.exit {}
     }
 
     override fun onRequestPermissionsResult(
@@ -501,11 +513,11 @@ class OpenChannelChatActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            PERMISSION_REQUEST_CODE -> {
+            Constants.PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty()) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         showToast(getString(R.string.permission_granted))
-                        SendBird.setAutoBackgroundDetection(false)
+                        SendbirdChat.autoBackgroundDetection = false
                         FileUtils.selectFile(
                             Constants.DATA_TYPE_IMAGE_AND_VIDEO,
                             startForResult,
@@ -515,7 +527,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
                         if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                             requestPermissions(
                                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                                PERMISSION_REQUEST_CODE
+                                Constants.PERMISSION_REQUEST_CODE
                             )
                         } else {
                             showToast(getString(R.string.permission_denied))

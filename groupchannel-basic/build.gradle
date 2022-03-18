@@ -41,7 +41,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
 
     //sendbird
-    implementation "com.sendbird.sdk:sendbird-android-sdk:$sendbirdVersion"
+    implementation files('./libs/sendbird-android-v4-debug.aar')
     //
 
     //fragment
@@ -54,7 +54,6 @@ dependencies {
 
     implementation "androidx.legacy:legacy-support-v4:$legacySupportVersion"
     implementation project(path: ':commonmodule')
-
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"

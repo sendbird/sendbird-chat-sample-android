@@ -14,7 +14,6 @@ import com.sendbird.chat.module.utils.showLongToast
 
 abstract class BaseMainActivity : AppCompatActivity() {
     abstract fun getFragmentItems(): List<Fragment>
-
     private lateinit var binding: ActivityMainBinding
     private val fragmentManager = supportFragmentManager
 
@@ -24,18 +23,18 @@ abstract class BaseMainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         if (intent.getBooleanExtra(Constants.INTENT_KEY_NICKNAME_REQUIRE, false)) {
-            nickNameRequire()
+            nicknameRequired()
         }
         init()
         initFragment()
     }
 
-    private fun init() {
+    protected open fun init() {
         binding.toolbar.title = getAppName()
         setSupportActionBar(binding.toolbar)
     }
 
-    private fun initFragment() {
+    protected open fun initFragment() {
         if (getFragmentItems().isNotEmpty()) {
             fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_view, getFragmentItems()[0], null)
@@ -44,12 +43,7 @@ abstract class BaseMainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
-    private fun nickNameRequire() {
+    protected open fun nicknameRequired() {
         showLongToast(R.string.enter_nickname_msg)
         val intent = Intent(this, BaseUserInfoActivity::class.java)
         startActivity(intent)
@@ -64,5 +58,10 @@ abstract class BaseMainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
     }
 }

@@ -7,17 +7,16 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import com.sendbird.android.User
+import com.sendbird.android.user.User
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ListItemSelectUserBinding
 
 class SelectUserAdapter(
     private val listener: OnItemClickListener?,
     private val selectMode: Boolean,
-    selectedUserIds: MutableSet<String>?,
-    private val baseUserIdSet: MutableSet<String>?,
-) :
-    ListAdapter<User, SelectUserAdapter.SelectUserListViewHolder>(diffCallback) {
+    selectedUserList: ArrayList<String>?,
+    baseUserIdList: ArrayList<String>?,
+) : ListAdapter<User, SelectUserAdapter.SelectUserListViewHolder>(diffCallback) {
     fun interface OnItemClickListener {
         fun onItemClick(user: User, position: Int)
     }
@@ -34,12 +33,13 @@ class SelectUserAdapter(
         }
     }
 
-    private var selectUserIdSet: MutableSet<String> = mutableSetOf()
+    val selectUserIdSet: MutableSet<String> = mutableSetOf()
+    private val baseUserIdSet: MutableSet<String> = mutableSetOf()
 
     init {
-        selectedUserIds?.let { selectUserIdSet.addAll(it.toMutableSet()) }
+        selectedUserList?.let { selectUserIdSet.addAll(it) }
+        baseUserIdList?.let { baseUserIdSet.addAll(it) }
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = SelectUserListViewHolder(
         ListItemSelectUserBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -47,17 +47,9 @@ class SelectUserAdapter(
 
     override fun onBindViewHolder(holder: SelectUserListViewHolder, position: Int) {
         holder.bind(getItem(position))
-        if (selectMode) {
-            holder.itemView.setOnClickListener {
-                listener?.onItemClick(
-                    getItem(position),
-                    position
-                )
-            }
-        }
     }
 
-    fun addItems(users: List<User>) {
+    fun addUsers(users: List<User>) {
         val baseUserList = mutableListOf<User>().apply {
             addAll(currentList)
             addAll(users)
@@ -65,41 +57,7 @@ class SelectUserAdapter(
         submitList(baseUserList)
     }
 
-    inner class SelectUserListViewHolder(private val binding: ListItemSelectUserBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun bind(user: User) {
-            binding.imageviewProfile.clipToOutline = true
-            if (user.profileUrl.isNullOrEmpty()) {
-                binding.imageviewProfile.load(R.drawable.ic_baseline_person_24) {
-                    crossfade(true)
-                }
-            } else {
-                binding.imageviewProfile.load(user.profileUrl) {
-                    crossfade(true)
-                    memoryCacheKey(user.plainProfileImageUrl)
-                }
-            }
-
-            binding.textviewName.text =
-                if (user.nickname.isNullOrBlank()) user.userId else user.nickname
-
-
-            if (selectMode) {
-                binding.checkboxUserSelect.visibility = View.VISIBLE
-                binding.checkboxUserSelect.isChecked = isUserChecked(user.userId)
-                if (isBaseUserChecked(user.userId)) {
-                    binding.checkboxUserSelect.isChecked = true
-                    binding.checkboxUserSelect.isEnabled = false
-                } else {
-                    binding.checkboxUserSelect.isEnabled = true
-                }
-            } else {
-                binding.checkboxUserSelect.visibility = View.GONE
-            }
-        }
-    }
-
-    fun userSelect(userId: String) {
+    fun toggleUser(userId: String) {
         if (isUserChecked(userId)) {
             selectUserIdSet.remove(userId)
         } else {
@@ -111,7 +69,51 @@ class SelectUserAdapter(
         return selectUserIdSet.contains(userId)
     }
 
-    private fun isBaseUserChecked(userId: String): Boolean {
-        return baseUserIdSet?.contains(userId) ?: false
+    private fun isBaseUser(userId: String): Boolean {
+        return baseUserIdSet.contains(userId)
+    }
+
+    inner class SelectUserListViewHolder(private val binding: ListItemSelectUserBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        init {
+            if (selectMode) {
+                itemView.setOnClickListener {
+                    listener?.onItemClick(
+                        getItem(adapterPosition),
+                        adapterPosition
+                    )
+                    toggleUser(getItem(adapterPosition).userId)
+                    notifyItemChanged(adapterPosition)
+
+                }
+            }
+        }
+
+        fun bind(user: User) {
+            binding.imageviewProfile.clipToOutline = true
+            if (user.profileUrl.isEmpty()) {
+                binding.imageviewProfile.load(R.drawable.ic_baseline_person_24) {
+                    crossfade(true)
+                }
+            } else {
+                binding.imageviewProfile.load(user.profileUrl) {
+                    crossfade(true)
+                    memoryCacheKey(user.plainProfileImageUrl)
+                }
+            }
+            binding.textviewName.text = user.nickname.ifBlank { user.userId }
+            if (selectMode) {
+                binding.checkboxUserSelect.visibility = View.VISIBLE
+                binding.checkboxUserSelect.isChecked = isUserChecked(user.userId)
+                if (isBaseUser(user.userId)) {
+                    binding.checkboxUserSelect.isChecked = true
+                    binding.checkboxUserSelect.isEnabled = false
+                } else {
+                    binding.checkboxUserSelect.isEnabled = true
+                }
+            } else {
+                binding.checkboxUserSelect.visibility = View.GONE
+            }
+        }
     }
 }

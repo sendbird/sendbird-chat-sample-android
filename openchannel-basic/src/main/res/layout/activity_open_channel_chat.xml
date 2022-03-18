@@ -29,4 +29,5 @@
         android:layout_height="wrap_content"
         app:button_text="@string/send"
         app:layout_constraintBottom_toBottomOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

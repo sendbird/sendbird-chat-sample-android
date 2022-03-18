@@ -36,7 +36,8 @@ class ChatBubbleReceiveView : FrameLayout {
     }
 
     private fun getAttrs(attrs: AttributeSet, defStyle: Int) {
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ChatBubbleSendView, defStyle, 0)
+        val typedArray =
+            context.obtainStyledAttributes(attrs, R.styleable.ChatBubbleSendView, defStyle, 0)
         setTypedArray(typedArray)
     }
 

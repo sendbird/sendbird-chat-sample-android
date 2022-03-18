@@ -1,74 +1,36 @@
 <resources>
     <string name="app_name">Sendbird Group Chat</string>
 
-    <string name="signup_title">Sendbird Chat Sample</string>
-    <string name="user_id">User Id</string>
-    <string name="nickname">Nickname</string>
-    <string name="sign_in">Sign In</string>
-    <string name="sign_out">Sign Out</string>
-    <string name="user">User</string>
-    <string name="save">Save</string>
-    <string name="edit">Edit</string>
     <string name="more">More</string>
-    <string name="search">Search</string>
     <string name="delete_channel">Delete Channel</string>
     <string name="leave_channel">Leave Channel</string>
     <string name="members_list">Members list</string>
     <string name="invite_members">Invite Members</string>
-    <string name="group_channel_create">Group Channel Create</string>
-    <string name="group_channel_name">Group Channel Name</string>
     <string name="select_user">Select User</string>
     <string name="create">Create</string>
     <string name="select">Select</string>
-    <string name="group">Group</string>
     <string name="send">Send</string>
     <string name="delete">Delete</string>
     <string name="copy">Copy</string>
     <string name="leave">Leave</string>
     <string name="cancel">Cancel</string>
     <string name="update">Update</string>
-    <string name="share">Share</string>
-    <string name="member">Member</string>
-    <string name="channel_type">Channel type</string>
-    <string name="channel_type_private">Private</string>
-    <string name="channel_type_public">Public</string>
-    <string name="online">Online</string>
-    <string name="banned">Banned</string>
-    <string name="muted">Muted</string>
     <string name="retry">Retry</string>
 
-    <string name="open_channel">Open Channel</string>
-    <string name="group_channel">Group Channel</string>
-    <string name="select_channel">Select Channel</string>
-    <string name="search_channel">Channel Search</string>
-    <string name="add_member">Add Member</string>
     <string name="update_channel_name">Update Channel Name</string>
 
     <!--  msg  -->
-    <string name="user_id_empty_msg">Please enter your ID</string>
-    <string name="nickname_empty_msg">Please enter your Nickname</string>
-    <string name="new_user_nickname_msg">New user. Please enter your nickname</string>
     <string name="enter_message_msg">Please enter your message</string>
     <string name="select_user_msg">Please select user</string>
-    <string name="enter_nickname_msg">Please enter your nickname</string>
-    <string name="change_success">Changed successfully</string>
-    <string name="channel_name_enter_msg">Please enter a channel name</string>
     <string name="channel_delete_msg">Cannot be recovered</string>
     <string name="channel_leave_msg">You need an invitation to re-enter</string>
-    <string name="message_delete_fail_msg">Failed to delete message</string>
-    <string name="message_copy_fail_msg">Failed to copy message</string>
-    <string name="message_copy_success_msg">Copied successfully</string>
     <string name="channel_deleted_event_msg">This channel has been deleted.</string>
-    <string name="channel_search_keyword_enter_msg">Please enter your keyword(s) to search</string>
-    <string name="channel_search_empty_msg">There are no matching data</string>
+    <string name="message_collection_init_msg">Message Collection is initializing.</string>
     <string name="permission_granted">Permission granted</string>
     <string name="permission_denied">Permission Denied</string>
 
     <!--  error  -->
-    <string name="user_id_info_error">error: User info</string>
     <string name="file_transfer_error">error: File transfer failure</string>
     <string name="channel_url_error">error: Channel url null</string>
-    <string name="channel_list_error">error: Channel list null</string>
-    <string name="error">error:</string>
     <string name="channel_error">error: Channel null</string>
 </resources>

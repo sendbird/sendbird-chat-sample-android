@@ -3,30 +3,29 @@ package com.sendbird.chat.module.ui.base
 import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.sendbird.android.SendBird
-import com.sendbird.android.SendBirdException
-import com.sendbird.android.handlers.InitResultHandler
-import com.sendbird.android.log.Logger
+import com.sendbird.android.LogLevel
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.exception.SendbirdException
+import com.sendbird.android.handler.InitResultHandler
 import com.sendbird.chat.module.utils.SharedPreferenceUtils
 import com.sendbird.chat.module.utils.changeValue
 
-const val SENDBIRD_APP_ID = "B745E68D-A949-4CE5-9ADE-0013ABE31685"
+const val SENDBIRD_APP_ID = "9DA1B1F4-0BE6-4DA8-82C5-2E81DAB56F23" // US-1 Demo
 
 class BaseApplication : Application() {
-
-    companion object {
-        private val initMutableLiveData: MutableLiveData<Boolean> =
-            MutableLiveData<Boolean>().apply { changeValue(false) }
-    }
+    private val initMutableLiveData: MutableLiveData<Boolean> =
+        MutableLiveData<Boolean>().apply { changeValue(false) }
+    val initLiveData: LiveData<Boolean>
+        get() = initMutableLiveData
 
     override fun onCreate() {
         super.onCreate()
-        SendBird.init(
+        SendbirdChat.init(
             SENDBIRD_APP_ID,
             applicationContext,
             false,
             object : InitResultHandler {
-                override fun onInitFailed(e: SendBirdException) {
+                override fun onInitFailed(e: SendbirdException) {
                     initMutableLiveData.changeValue(true)
                     // If useLocalCaching is true and init fails, the SDK will turn off the useLocalCaching flag so that you can still proceed with your app
                 }
@@ -36,13 +35,11 @@ class BaseApplication : Application() {
                 }
 
                 override fun onInitSucceed() {
-                    Logger.d("onInitSucceed")
+                    SendbirdChat.setLoggerLevel(LogLevel.ERROR)
                     initMutableLiveData.changeValue(true)
                 }
             })
-
         SharedPreferenceUtils.init(applicationContext)
     }
 
-    fun getInitListData(): LiveData<Boolean> = initMutableLiveData
 }

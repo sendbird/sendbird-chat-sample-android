@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import com.sendbird.android.BaseMessage
-import com.sendbird.android.FileMessage
-import com.sendbird.android.SendBird
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.message.BaseMessage
+import com.sendbird.android.message.FileMessage
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.toTime
 import com.sendbird.chat.sample.openchannel.databinding.ListItemChatImageReceiveBinding
@@ -20,8 +20,8 @@ import com.sendbird.chat.sample.openchannel.databinding.ListItemChatSendBinding
 class OpenChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
     private val failedItemClickListener: OnFailedItemClickListener
-) :
-    ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
+) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
+
     fun interface OnItemLongClickListener {
         fun onItemLongClick(baseMessage: BaseMessage, view: View, position: Int)
     }
@@ -33,11 +33,18 @@ class OpenChannelChatAdapter(
     companion object {
         val diffCallback = object : DiffUtil.ItemCallback<BaseMessage>() {
             override fun areItemsTheSame(oldItem: BaseMessage, newItem: BaseMessage): Boolean {
-                return oldItem.messageId == newItem.messageId
+                return if (oldItem.messageId > 0 && newItem.messageId > 0) {
+                    oldItem.messageId == newItem.messageId
+                } else {
+                    oldItem.requestId == newItem.requestId
+                }
             }
 
             override fun areContentsTheSame(oldItem: BaseMessage, newItem: BaseMessage): Boolean {
                 return oldItem.message == newItem.message
+                        && oldItem.sender?.nickname == newItem.sender?.nickname
+                        && oldItem.sendingStatus == newItem.sendingStatus
+                        && oldItem.updatedAt == newItem.updatedAt
             }
         }
         const val VIEW_TYPE_SEND = 0
@@ -90,94 +97,6 @@ class OpenChannelChatAdapter(
         }
     }
 
-
-    fun addPendingItem(message: BaseMessage) {
-        pendingMessageList.add(message)
-        mergeItems()
-    }
-
-    fun updateSucceedItem(message: BaseMessage) {
-        pendingMessageList.removeIf { it.requestId == message.requestId }
-        baseMessageList.add(message)
-        mergeItems()
-    }
-
-    fun updatePendingItem(message: BaseMessage) {
-        pendingMessageList.forEachIndexed { index, baseMessage ->
-            if (baseMessage.requestId == message.requestId) {
-                pendingMessageList[index] = message
-                return@forEachIndexed
-            }
-        }
-        mergeItems()
-    }
-
-    fun deletePendingItem(message: BaseMessage) {
-        pendingMessageList.removeIf { it.requestId == message.requestId }
-        mergeItems()
-    }
-
-    fun addItem(message: BaseMessage) {
-        baseMessageList.add(message)
-        mergeItems()
-    }
-
-    fun deleteItem(messageId: Long) {
-        baseMessageList.removeIf { it.messageId == messageId }
-        mergeItems()
-    }
-
-    fun updateItem(message: BaseMessage) {
-        baseMessageList.forEachIndexed { index, baseMessage ->
-            if (baseMessage.messageId == message.messageId) {
-                baseMessageList[index] = message
-                return@forEachIndexed
-            }
-        }
-        mergeItems()
-    }
-
-    fun addNextItems(messages: List<BaseMessage>) {
-        messages.forEach {
-            ListUtils.findAddMessageIndex(baseMessageList, it).apply {
-                if (this > -1) {
-                    baseMessageList.add(this, it)
-                }
-            }
-        }
-        mergeItems()
-    }
-
-    fun addPreviousItems(messages: List<BaseMessage>) {
-        baseMessageList.addAll(0, messages)
-        mergeItems()
-    }
-
-    fun updateItems(messages: List<BaseMessage>) {
-        val idIndexMap =
-            baseMessageList.mapIndexed { index, baseMessage ->
-                baseMessage.messageId to index
-            }.toMap()
-        messages.forEach {
-            idIndexMap[it.messageId]?.let { index ->
-                baseMessageList[index] = it
-            }
-        }
-        mergeItems()
-    }
-
-    fun deleteItems(messageIds: List<Long>) {
-        baseMessageList.removeAll { it.messageId in messageIds }
-        mergeItems()
-    }
-
-    private fun mergeItems() {
-        submitList(mutableListOf<BaseMessage>().apply {
-            addAll(baseMessageList)
-            addAll(pendingMessageList)
-        })
-    }
-
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is GroupChatSendViewHolder -> holder.bind(getItem(position))
@@ -191,7 +110,7 @@ class OpenChannelChatAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (SendBird.getCurrentUser() != null && getItem(position).sender.userId == SendBird.getCurrentUser().userId) {
+        return if (SendbirdChat.currentUser != null && getItem(position).sender?.userId == SendbirdChat.currentUser?.userId) {
             if (getItem(position) is FileMessage) {
                 VIEW_TYPE_SEND_IMAGE
             } else {
@@ -206,6 +125,90 @@ class OpenChannelChatAdapter(
         }
     }
 
+    fun addPendingMessage(message: BaseMessage?) {
+        if (message != null) {
+            pendingMessageList.add(message)
+            mergeList()
+        }
+    }
+
+    fun updateSucceedMessage(message: BaseMessage?) {
+        if (message != null) {
+            pendingMessageList.removeIf { it.requestId == message.requestId }
+            baseMessageList.add(message)
+            mergeList()
+        }
+    }
+
+    fun updatePendingMessage(message: BaseMessage?) {
+        if (message != null) {
+            pendingMessageList.forEachIndexed { index, baseMessage ->
+                if (baseMessage.requestId == message.requestId) {
+                    pendingMessageList[index] = message
+                    return@forEachIndexed
+                }
+            }
+            mergeList()
+        }
+    }
+
+    fun deletePendingMessage(message: BaseMessage?) {
+        if (message != null) {
+            pendingMessageList.removeIf { it.requestId == message.requestId }
+            mergeList()
+        }
+    }
+
+    fun addMessage(message: BaseMessage?) {
+        if (message != null) {
+            baseMessageList.add(message)
+            mergeList()
+        }
+    }
+
+    fun addNextMessages(messages: List<BaseMessage>?) {
+        if (!messages.isNullOrEmpty()) {
+            messages.forEach {
+                ListUtils.findAddMessageIndex(baseMessageList, it).apply {
+                    if (this > -1) {
+                        baseMessageList.add(this, it)
+                    }
+                }
+            }
+            mergeList()
+        }
+    }
+
+    fun addPreviousMessages(messages: List<BaseMessage>?) {
+        if (!messages.isNullOrEmpty()) {
+            baseMessageList.addAll(0, messages)
+            mergeList()
+        }
+    }
+
+    fun updateMessages(messages: List<BaseMessage>?) {
+        if (!messages.isNullOrEmpty()) {
+            val idIndexMap =
+                baseMessageList.mapIndexed { index, baseMessage ->
+                    baseMessage.messageId to index
+                }.toMap()
+            messages.forEach {
+                idIndexMap[it.messageId]?.let { index ->
+                    baseMessageList[index] = it
+                }
+            }
+            mergeList()
+        }
+    }
+
+    fun deleteMessages(messageIds: List<Long>?) {
+        if (!messageIds.isNullOrEmpty()) {
+            baseMessageList.removeAll { it.messageId in messageIds }
+            mergeList()
+        }
+    }
+
+    private fun mergeList() = submitList(baseMessageList + pendingMessageList)
 
     open inner class BaseViewHolder(binding: ViewBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
@@ -246,7 +249,7 @@ class OpenChannelChatAdapter(
         fun bind(message: BaseMessage) {
             binding.chatBubbleReceive.setText(message.message)
             binding.textviewTime.text = message.createdAt.toTime()
-            binding.textviewNickname.text = message.sender.nickname ?: message.sender.userId
+            binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
         }
     }
 
@@ -281,7 +284,7 @@ class OpenChannelChatAdapter(
         fun bind(message: FileMessage) {
             binding.chatBubbleImageReceive.setImageUrl(message.url, message.plainUrl)
             binding.textviewTime.text = message.createdAt.toTime()
-            binding.textviewNickname.text = message.sender.nickname ?: message.sender.userId
+            binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
         }
     }
 }

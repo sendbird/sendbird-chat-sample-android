@@ -26,8 +26,13 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".ui.main.MainActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="${packageName}.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name="com.sendbird.chat.module.ui.base.BaseUserInfoActivity"
             android:exported="false"

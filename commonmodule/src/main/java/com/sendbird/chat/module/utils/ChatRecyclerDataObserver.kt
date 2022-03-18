@@ -3,7 +3,7 @@ package com.sendbird.chat.module.utils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.sendbird.android.BaseMessage
+import com.sendbird.android.message.BaseMessage
 
 const val MESSAGE_REFRESH_RANGE = 3
 
@@ -13,9 +13,14 @@ class ChatRecyclerDataObserver(
 ) : RecyclerView.AdapterDataObserver() {
     private var scrollToBottom: Boolean = false
     private var isUpdate: Boolean = false
+    private var layoutManager: LinearLayoutManager? = null
+
+    init {
+        layoutManager = recyclerView.layoutManager as LinearLayoutManager
+    }
 
     override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-        if ((recyclerView.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition() == adapter.itemCount - 2) {
+        if (layoutManager?.findLastCompletelyVisibleItemPosition() == adapter.itemCount - 2) {
             notifyUpdate()
             isUpdate = true
         } else {
@@ -23,8 +28,8 @@ class ChatRecyclerDataObserver(
                 notifyUpdate()
             }
         }
-        if ((recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() == 0) {
-            recyclerView.adapter?.notifyItemChanged(0)
+        if (layoutManager?.findFirstVisibleItemPosition() == 0) {
+            adapter.notifyItemChanged(0)
         }
         scrollToBottom = false
         super.onItemRangeInserted(positionStart, itemCount)

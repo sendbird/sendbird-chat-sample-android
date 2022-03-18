@@ -105,10 +105,23 @@ object FileUtils {
 
     private fun extractExtension(context: Context, uri: Uri): String {
         return if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
-            extractExtension(context.contentResolver.getType(uri)!!)
-                ?: MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(uri.path)).toString())
+            val type = context.contentResolver.getType(uri)
+            if (type != null) {
+                extractExtension(type) ?: ""
+            } else {
+                return fileExtension(uri)
+            }
         } else {
-            MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(uri.path)).toString())
+            fileExtension(uri)
+        }
+    }
+
+    private fun fileExtension(uri: Uri): String {
+        val path = uri.path
+        return if (path != null) {
+            MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(path)).toString()) ?: ""
+        } else {
+            ""
         }
     }
 

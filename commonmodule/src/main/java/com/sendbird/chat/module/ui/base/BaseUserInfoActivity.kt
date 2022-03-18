@@ -8,27 +8,25 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.sendbird.android.SendBird
-import com.sendbird.android.User
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.params.UserUpdateParams
 import com.sendbird.chat.module.R
 import com.sendbird.chat.module.databinding.ActivityUserInfoBinding
 import com.sendbird.chat.module.utils.*
-import com.sendbird.chat.module.utils.Constants.DATA_TYPE_ONLY_IMAGE
 
 class BaseUserInfoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityUserInfoBinding
-    private var currentUser: User? = null
-    private var profileUrl: String? = null
+    private var userProfileUrl: String? = null
+    private var userNickname: String? = null
     private var profileUri: Uri? = null
 
     private val startForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
-            SendBird.setAutoBackgroundDetection(true)
+            SendbirdChat.autoBackgroundDetection = true
             if (data.resultCode == RESULT_OK) {
-                data.data?.data?.let {
-                    profileUri = it
-                    binding.circularImageviewProfile.setImageUri(it)
-                }
+                val uri = data.data?.data
+                profileUri = uri
+                binding.circularImageviewProfile.setImageUri(uri)
             }
         }
 
@@ -37,8 +35,8 @@ class BaseUserInfoActivity : AppCompatActivity() {
         binding = ActivityUserInfoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        currentUser = SendBird.getCurrentUser()
         init()
+        initUserProfile()
     }
 
     private fun init() {
@@ -46,37 +44,13 @@ class BaseUserInfoActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
-        val user = currentUser
-        if (user == null) {
-            showToast(R.string.user_id_info_error)
-            finish()
-            return
-        }
-        initUserProfile(user)
-        initOnClick()
-    }
 
-    private fun initUserProfile(user: User) {
-        if (!user.profileUrl.isNullOrBlank()) {
-            profileUrl = user.profileUrl
-            binding.circularImageviewProfile.setImageUrl(user.profileUrl)
-        }
-        if (!user.nickname.isNullOrBlank()) {
-            binding.tagEdittextNickname.setText(user.nickname)
-        }
-    }
-
-    private fun initOnClick() {
         binding.circularImageviewEditProfile.setOnClickListener {
-            SendBird.setAutoBackgroundDetection(false)
-            FileUtils.selectFile(DATA_TYPE_ONLY_IMAGE, startForResult, this)
+            SendbirdChat.autoBackgroundDetection = false
+            FileUtils.selectFile(Constants.DATA_TYPE_ONLY_IMAGE, startForResult, this)
         }
         binding.purpleButtonSave.setOnClickListener {
             val nickname = binding.tagEdittextNickname.getText()
-            if (nickname.isBlank()) {
-                showToast(R.string.enter_nickname_msg)
-                return@setOnClickListener
-            }
             saveUserInfo(profileUri, nickname)
         }
         binding.textviewSignOut.setOnClickListener {
@@ -84,7 +58,28 @@ class BaseUserInfoActivity : AppCompatActivity() {
         }
     }
 
+    private fun initUserProfile() {
+        val user = SendbirdChat.currentUser
+        if (user == null) {
+            showToast(R.string.user_id_info_error)
+            finish()
+            return
+        }
+        if (user.profileUrl.isNotBlank()) {
+            userProfileUrl = user.profileUrl
+            userNickname = user.nickname
+            binding.circularImageviewProfile.setImageUrl(user.profileUrl)
+        }
+        if (user.nickname.isNotBlank()) {
+            binding.tagEdittextNickname.setText(user.nickname)
+        }
+    }
+
     private fun saveUserInfo(profileUri: Uri?, nickname: String) {
+        if (nickname.isBlank()) {
+            showToast(R.string.enter_nickname_msg)
+            return
+        }
         if (profileUri != null) {
             val progressId = showProgress()
             val fileInfo = FileUtils.getFileInfo(profileUri, applicationContext)
@@ -92,8 +87,11 @@ class BaseUserInfoActivity : AppCompatActivity() {
                 showToast(R.string.file_transfer_error)
                 return
             }
+            val params = UserUpdateParams()
+                .setNickname(nickname)
+                .setProfileImageFile(fileInfo.file)
 
-            SendBird.updateCurrentUserInfoWithProfileImage(nickname, fileInfo.file) {
+            SendbirdChat.updateCurrentUserInfo(params) {
                 if (it != null) {
                     showToast("${it.message}")
                 }
@@ -101,17 +99,23 @@ class BaseUserInfoActivity : AppCompatActivity() {
                 finish()
             }
         } else {
-            SendBird.updateCurrentUserInfo(nickname, profileUrl) {
-                if (it != null) {
-                    showToast("${it.message}")
+            if (userNickname != nickname) {
+                val params = UserUpdateParams()
+                    .setNickname(nickname)
+                SendbirdChat.updateCurrentUserInfo(params) {
+                    if (it != null) {
+                        showToast("${it.message}")
+                    }
+                    finish()
                 }
+            } else {
                 finish()
             }
         }
     }
 
-    private fun signOut() {
-        SendBird.disconnect {}
+    protected fun signOut() {
+        SendbirdChat.disconnect {}
         val intent = Intent(this, BaseSignUpActivity::class.java)
         startActivity(intent)
         SharedPreferenceUtils.clear()
@@ -136,8 +140,8 @@ class BaseUserInfoActivity : AppCompatActivity() {
             Constants.PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     showToast(getString(R.string.permission_granted))
-                    SendBird.setAutoBackgroundDetection(false)
-                    FileUtils.selectFile(DATA_TYPE_ONLY_IMAGE, startForResult, this)
+                    SendbirdChat.autoBackgroundDetection = false
+                    FileUtils.selectFile(Constants.DATA_TYPE_ONLY_IMAGE, startForResult, this)
                 } else {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                         requestPermissions(

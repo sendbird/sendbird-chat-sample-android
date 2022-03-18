@@ -6,15 +6,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import com.sendbird.android.Member
-import com.sendbird.android.User
+import com.sendbird.android.user.Member
+import com.sendbird.android.user.User
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ListItemMemberBinding
 
 class ChatMemberListAdapter(
     private val listener: OnItemClickListener?
-) :
-    ListAdapter<Member, ChatMemberListAdapter.ChatMembersListViewHolder>(diffCallback) {
+) : ListAdapter<Member, ChatMemberListAdapter.ChatMembersListViewHolder>(diffCallback) {
     fun interface OnItemClickListener {
         fun onItemClick(member: Member, position: Int)
     }
@@ -37,19 +36,22 @@ class ChatMemberListAdapter(
 
     override fun onBindViewHolder(holder: ChatMembersListViewHolder, position: Int) {
         holder.bind(getItem(position))
-        holder.itemView.setOnClickListener {
-            listener?.onItemClick(
-                getItem(position),
-                position
-            )
-        }
     }
 
     inner class ChatMembersListViewHolder(private val binding: ListItemMemberBinding) :
         RecyclerView.ViewHolder(binding.root) {
+        init {
+            itemView.setOnClickListener {
+                listener?.onItemClick(
+                    getItem(adapterPosition),
+                    adapterPosition
+                )
+            }
+        }
+
         fun bind(member: Member) {
             binding.imageviewProfile.clipToOutline = true
-            if (member.profileUrl.isNullOrEmpty()) {
+            if (member.profileUrl.isEmpty()) {
                 binding.imageviewProfile.load(R.drawable.ic_baseline_person_24) {
                     crossfade(true)
                 }
@@ -59,8 +61,7 @@ class ChatMemberListAdapter(
                     memoryCacheKey(member.plainProfileImageUrl)
                 }
             }
-            binding.textviewName.text =
-                if (member.nickname.isNullOrBlank()) member.userId else member.nickname
+            binding.textviewName.text = member.nickname.ifBlank { member.userId }
             if (member.connectionStatus == User.ConnectionStatus.ONLINE) {
                 binding.textviewName.append(" (Online)")
             }

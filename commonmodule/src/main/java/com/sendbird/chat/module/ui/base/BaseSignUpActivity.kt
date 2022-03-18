@@ -3,7 +3,7 @@ package com.sendbird.chat.module.ui.base
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.sendbird.android.SendBird
+import com.sendbird.android.SendbirdChat
 import com.sendbird.chat.module.R
 import com.sendbird.chat.module.databinding.ActivitySignUpBinding
 import com.sendbird.chat.module.utils.Constants
@@ -20,22 +20,24 @@ class BaseSignUpActivity : AppCompatActivity() {
 
         binding.buttonSignin.setOnClickListener {
             val userId = binding.tagEdittextUserId.getText()
-            if (userId.isBlank()) {
-                showToast(R.string.user_id_empty_msg)
-                return@setOnClickListener
+            signIn(userId)
+        }
+    }
+
+    private fun signIn(userId: String) {
+        if (userId.isBlank()) {
+            showToast(R.string.user_id_empty_msg)
+            return
+        }
+        SendbirdChat.connect(userId) { user, e ->
+            if (e != null) {
+                showToast("$e")
+                return@connect
             }
-            SendBird.connect(userId) { user, e ->
-                if (e != null) {
-                    showToast("$e")
-                    return@connect
-                }
-                SharedPreferenceUtils.setUserId(user.userId)
-                val intent = Intent()
-                intent.setClassName(
-                    packageName,
-                    "${packageName.replace("/", "")}.ui.main.MainActivity"
-                )
-                if (user.nickname.isNullOrBlank()) {
+            if (user != null) {
+                SharedPreferenceUtils.userId = user.userId
+                val intent = Intent("$packageName.MAIN")
+                if (user.nickname.isBlank()) {
                     intent.putExtra(Constants.INTENT_KEY_NICKNAME_REQUIRE, true)
                 } else {
                     intent.putExtra(Constants.INTENT_KEY_NICKNAME_REQUIRE, false)

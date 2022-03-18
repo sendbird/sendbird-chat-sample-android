@@ -62,7 +62,7 @@ class CircularImageView : FrameLayout {
         }
     }
 
-    fun setImageUri(imageUri: Uri) {
+    fun setImageUri(imageUri: Uri?) {
         binding.imageview.load(imageUri) {
             crossfade(true)
         }

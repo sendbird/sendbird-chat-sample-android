@@ -44,7 +44,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
 
     //sendbird
-    implementation "com.sendbird.sdk:sendbird-android-sdk:$sendbirdVersion"
+    implementation files('./libs/sendbird-android-v4-debug.aar')
     //
 
     //Coil

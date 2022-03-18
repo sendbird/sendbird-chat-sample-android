@@ -4,15 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import com.sendbird.android.OpenChannel
-import com.sendbird.android.OpenChannelParams
-import com.sendbird.android.SendBird
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.OpenChannel
+import com.sendbird.android.params.OpenChannelCreateParams
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_TITLE
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_URL
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.openchannel.R
 import com.sendbird.chat.sample.openchannel.databinding.ActivityOpenChannelCreateBinding
-
 
 class OpenChannelCreateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOpenChannelCreateBinding
@@ -21,6 +20,7 @@ class OpenChannelCreateActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityOpenChannelCreateBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         init()
     }
 
@@ -32,22 +32,28 @@ class OpenChannelCreateActivity : AppCompatActivity() {
 
         binding.buttonCreate.setOnClickListener {
             val channelName = binding.tagEdittextChannelName.getText()
-            if (channelName.isBlank()) {
-                showToast(R.string.channel_name_enter_msg)
-                return@setOnClickListener
+            createOpenChannel(channelName)
+        }
+    }
+
+    private fun createOpenChannel(channelName: String) {
+        if (channelName.isBlank()) {
+            showToast(R.string.channel_name_enter_msg)
+            return
+        }
+        val params = OpenChannelCreateParams()
+            .setName(channelName)
+        val currentUser = SendbirdChat.currentUser
+        if (currentUser != null) {
+            params.setOperators(listOf(currentUser))
+        }
+
+        OpenChannel.createChannel(params) { openChannel, e ->
+            if (e != null) {
+                showToast("${e.message}")
+                return@createChannel
             }
-            val params = OpenChannelParams().apply {
-                setName(channelName)
-                if (SendBird.getCurrentUser() != null) {
-                    setOperators(listOf(SendBird.getCurrentUser()))
-                }
-            }
-            OpenChannel.createChannel(params) { openChannel, e ->
-                if (e != null || openChannel == null) {
-                    showToast("${e.message}")
-                    finish()
-                    return@createChannel
-                }
+            if (openChannel != null) {
                 val intent = Intent(
                     this@OpenChannelCreateActivity,
                     OpenChannelChatActivity::class.java

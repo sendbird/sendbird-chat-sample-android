@@ -7,10 +7,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import com.sendbird.android.AdminMessage
-import com.sendbird.android.BaseMessage
-import com.sendbird.android.FileMessage
-import com.sendbird.android.SendBird
+import com.sendbird.android.SendbirdChat
+import com.sendbird.android.message.AdminMessage
+import com.sendbird.android.message.BaseMessage
+import com.sendbird.android.message.FileMessage
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.equalDate
 import com.sendbird.chat.module.utils.equalTime
@@ -20,8 +20,7 @@ import com.sendbird.chat.sample.groupchannel.databinding.*
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
     private val failedItemClickListener: OnFailedItemClickListener
-) :
-    ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
+) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
 
     fun interface OnItemLongClickListener {
         fun onItemLongClick(baseMessage: BaseMessage, view: View)
@@ -42,7 +41,10 @@ class GroupChannelChatAdapter(
             }
 
             override fun areContentsTheSame(oldItem: BaseMessage, newItem: BaseMessage): Boolean {
-                return oldItem.message == newItem.message && oldItem.sendingStatus == newItem.sendingStatus && oldItem.updatedAt == newItem.updatedAt
+                return oldItem.message == newItem.message
+                        && oldItem.sender?.nickname == newItem.sender?.nickname
+                        && oldItem.sendingStatus == newItem.sendingStatus
+                        && oldItem.updatedAt == newItem.updatedAt
             }
         }
         const val VIEW_TYPE_SEND = 0
@@ -115,19 +117,17 @@ class GroupChannelChatAdapter(
             if (position > 0) {
                 showDate =
                     !currentList[position].createdAt.equalDate(currentList[position - 1].createdAt)
-
                 if (currentList[position].sender != null && currentList[position - 1].sender != null) {
                     showName =
-                        currentList[position].sender.userId != currentList[position - 1].sender.userId
+                        currentList[position].sender?.userId != currentList[position - 1].sender?.userId
                 }
-
                 if (position < currentList.size - 1) {
                     showTime =
                         !(currentList[position].createdAt.equalTime(currentList[position + 1].createdAt))
                     if (!showTime) {
                         if (currentList[position].sender != null && currentList[position + 1].sender != null) {
                             showTime =
-                                currentList[position].sender.userId != currentList[position + 1].sender.userId
+                                currentList[position].sender?.userId != currentList[position + 1].sender?.userId
                         }
                     }
                 }
@@ -162,7 +162,7 @@ class GroupChannelChatAdapter(
         return if (getItem(position) is AdminMessage) {
             VIEW_TYPE_ADMIN
         } else {
-            if (SendBird.getCurrentUser() != null && getItem(position).sender.userId == SendBird.getCurrentUser().userId) {
+            if (SendbirdChat.currentUser != null && getItem(position).sender?.userId == SendbirdChat.currentUser?.userId) {
                 if (getItem(position) is FileMessage) {
                     VIEW_TYPE_SEND_IMAGE
                 } else {
@@ -178,31 +178,37 @@ class GroupChannelChatAdapter(
         }
     }
 
-    fun changeItems(messages: List<BaseMessage>, isPendingClear: Boolean = false) {
+    fun changeMessages(messages: List<BaseMessage>?, isPendingClear: Boolean = true) {
         baseMessageList.clear()
         if (isPendingClear) {
             pendingMessageList.clear()
         }
-        baseMessageList.addAll(messages)
-        mergeItems()
+        if (messages != null) {
+            baseMessageList.addAll(messages)
+        }
+        mergeList()
     }
 
-    fun addNextItems(messages: List<BaseMessage>) {
-        baseMessageList.addAll(messages)
-        mergeItems()
+    fun addNextMessages(messages: List<BaseMessage>?) {
+        if (messages != null) {
+            baseMessageList.addAll(messages)
+            mergeList()
+        }
     }
 
-    fun addPreviousItems(messages: List<BaseMessage>) {
-        baseMessageList.addAll(0, messages)
-        mergeItems()
+    fun addPreviousMessages(messages: List<BaseMessage>?) {
+        if (messages != null) {
+            baseMessageList.addAll(0, messages)
+            mergeList()
+        }
     }
 
-    fun addPendingItems(messages: List<BaseMessage>) {
+    fun addPendingMessages(messages: List<BaseMessage>) {
         pendingMessageList.addAll(messages)
-        mergeItems()
+        mergeList()
     }
 
-    fun updateSucceedItems(messages: List<BaseMessage>) {
+    fun updateSucceedMessages(messages: List<BaseMessage>) {
         val requestIdIndexMap =
             pendingMessageList.mapIndexed { index, pendingMessage ->
                 pendingMessage.requestId to index
@@ -226,10 +232,10 @@ class GroupChannelChatAdapter(
         }
         pendingMessageList.clear()
         pendingMessageList.addAll(resultMessageList)
-        mergeItems()
+        mergeList()
     }
 
-    fun updatePendingItems(messages: List<BaseMessage>) {
+    fun updatePendingMessages(messages: List<BaseMessage>) {
         val requestIdIndexMap =
             pendingMessageList.mapIndexed { index, pendingMessage ->
                 pendingMessage.requestId to index
@@ -240,10 +246,10 @@ class GroupChannelChatAdapter(
                 pendingMessageList[index] = it
             }
         }
-        mergeItems()
+        mergeList()
     }
 
-    fun deletePendingItems(messages: List<BaseMessage>) {
+    fun deletePendingMessages(messages: List<BaseMessage>) {
         val requestIdIndexMap =
             pendingMessageList.mapIndexed { index, pendingMessage ->
                 pendingMessage.requestId to index
@@ -257,10 +263,10 @@ class GroupChannelChatAdapter(
         }
         pendingMessageList.clear()
         pendingMessageList.addAll(resultMessageList)
-        mergeItems()
+        mergeList()
     }
 
-    fun deleteItems(messages: List<BaseMessage>) {
+    fun deleteMessages(messages: List<BaseMessage>) {
         val messageIdIndexMap =
             baseMessageList.mapIndexed { index, message ->
                 message.messageId to index
@@ -274,10 +280,10 @@ class GroupChannelChatAdapter(
         }
         baseMessageList.clear()
         baseMessageList.addAll(resultMessageList)
-        mergeItems()
+        mergeList()
     }
 
-    fun addItems(messages: List<BaseMessage>) {
+    fun addMessages(messages: List<BaseMessage>) {
         messages.forEach {
             ListUtils.findAddMessageIndex(baseMessageList, it).apply {
                 if (this > -1) {
@@ -285,15 +291,10 @@ class GroupChannelChatAdapter(
                 }
             }
         }
-        mergeItems()
+        mergeList()
     }
 
-    private fun mergeItems() {
-        submitList(mutableListOf<BaseMessage>().apply {
-            addAll(baseMessageList)
-            addAll(pendingMessageList)
-        })
-    }
+    private fun mergeList() = submitList(baseMessageList + pendingMessageList)
 
     open inner class BaseViewHolder(binding: ViewBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
@@ -356,7 +357,7 @@ class GroupChannelChatAdapter(
         ) {
             binding.chatBubbleReceive.setText(message.message)
             if (showName) {
-                binding.textviewNickname.text = message.sender.nickname
+                binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
                 binding.textviewNickname.visibility = View.VISIBLE
             } else {
                 binding.textviewNickname.visibility = View.GONE
@@ -427,7 +428,7 @@ class GroupChannelChatAdapter(
         ) {
             binding.chatBubbleImageReceive.setImageUrl(message.url, message.plainUrl)
             if (showName) {
-                binding.textviewNickname.text = message.sender.nickname
+                binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
                 binding.textviewNickname.visibility = View.VISIBLE
             } else {
                 binding.textviewNickname.visibility = View.GONE

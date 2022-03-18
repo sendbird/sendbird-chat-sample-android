@@ -5,8 +5,8 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import com.sendbird.android.GroupChannel
-import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_URL
+import com.sendbird.android.channel.GroupChannel
+import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityChatMemberListBinding
@@ -14,16 +14,18 @@ import com.sendbird.chat.sample.groupchannel.databinding.ActivityChatMemberListB
 class ChatMemberListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatMemberListBinding
     private lateinit var adapter: ChatMemberListAdapter
-
     private var currentChannel: GroupChannel? = null
     private var channelUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatMemberListBinding.inflate(layoutInflater)
-        channelUrl = intent.getStringExtra(INTENT_KEY_CHANNEL_URL)
         setContentView(binding.root)
+
+        channelUrl = intent.getStringExtra(Constants.INTENT_KEY_CHANNEL_URL)
         init()
+        initRecyclerView()
+        getGroupChannel()
     }
 
     private fun init() {
@@ -31,37 +33,35 @@ class ChatMemberListActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
-        initRecyclerView()
     }
 
     private fun initRecyclerView() {
-        val url = channelUrl
-        if (url.isNullOrBlank()) {
-            showToast(getString(R.string.channel_url_error))
-            finish()
-            return
-        }
-
         adapter = ChatMemberListAdapter { _, _ -> }
-        binding.recyclerviewMembers.adapter = adapter
-        binding.recyclerviewMembers.addItemDecoration(
+        binding.recyclerviewMember.adapter = adapter
+        binding.recyclerviewMember.addItemDecoration(
             DividerItemDecoration(
                 this,
                 RecyclerView.VERTICAL
             )
         )
-        getGroupChannel(url)
     }
 
-    private fun getGroupChannel(channelUrl: String) {
-        GroupChannel.getChannel(channelUrl) { groupChannel, e ->
-            if (e != null || groupChannel == null) {
+    private fun getGroupChannel() {
+        val url = channelUrl
+        if (url.isNullOrBlank()) {
+            showToast(getString(R.string.channel_url_error))
+            return
+        }
+        GroupChannel.getChannel(url) { groupChannel, e ->
+            if (e != null) {
                 showToast("${e.message}")
                 finish()
                 return@getChannel
             }
-            currentChannel = groupChannel
-            adapter.submitList(groupChannel.members)
+            if (groupChannel != null) {
+                currentChannel = groupChannel
+                adapter.submitList(groupChannel.members)
+            }
         }
     }
 
@@ -74,5 +74,4 @@ class ChatMemberListActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
 }

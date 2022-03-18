@@ -1,6 +1,6 @@
 package com.sendbird.chat.module.utils
 
-import com.sendbird.android.BaseMessage
+import com.sendbird.android.message.BaseMessage
 
 object ListUtils {
 
@@ -23,4 +23,5 @@ object ListUtils {
         }
         return originMessages.size
     }
+
 }
