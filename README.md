@@ -56,3 +56,13 @@ This repository provides feature-level Chat samples with Kotlin
 + Gradle Version
 	+ gradle: 7.2
 	+ android gradle plugin: 4.2.0
+
+
+## How to add new feature sample
+1. Copy openchannel-basic or groupchannel-basic
+2. Paste on the same layer
+3. Change the name of project
+4. Include copied module to setting.gradle
+5. Rename package
+6. Change the applicationId in the build.gradle of the created project.
++ When the main activity needs to be updated to another activity, the <intent-filter> of MainActivity must be moved as well the corresponding activity.
