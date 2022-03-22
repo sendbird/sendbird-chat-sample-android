@@ -197,43 +197,45 @@ class GroupChannelChatActivity : AppCompatActivity() {
             return
         }
 
-        val params = MessageListParams().apply {
+        val messageListParams = MessageListParams().apply {
             reverse = false
             previousResultSize = 20
             nextResultSize = 20
         }
-        val builder = MessageCollection.Builder(channel, params)
-            .setStartingPoint(timeStamp)
-            .setMessageCollectionHandler(collectionHandler)
-        messageCollection = SendbirdChat.createMessageCollection(builder).apply {
-            initialize(
-                MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API,
-                object : MessageCollectionInitHandler {
-                    override fun onCacheResult(
-                        cachedList: List<BaseMessage>?,
-                        e: SendbirdException?
-                    ) {
-                        if (e != null) {
-                            showToast("${e.message}")
+        val messageCollectionCreateParams =
+            MessageCollectionCreateParams(channel, messageListParams)
+                .setStartingPoint(timeStamp)
+                .setMessageCollectionHandler(collectionHandler)
+        messageCollection =
+            SendbirdChat.createMessageCollection(messageCollectionCreateParams).apply {
+                initialize(
+                    MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API,
+                    object : MessageCollectionInitHandler {
+                        override fun onCacheResult(
+                            cachedList: List<BaseMessage>?,
+                            e: SendbirdException?
+                        ) {
+                            if (e != null) {
+                                showToast("${e.message}")
+                            }
+                            adapter.changeMessages(cachedList)
+                            adapter.addPendingMessages(this@apply.pendingMessages)
                         }
-                        adapter.changeMessages(cachedList)
-                        adapter.addPendingMessages(this@apply.pendingMessages)
-                    }
 
-                    override fun onApiResult(
-                        apiResultList: List<BaseMessage>?,
-                        e: SendbirdException?
-                    ) {
-                        if (e != null) {
-                            showToast("${e.message}")
+                        override fun onApiResult(
+                            apiResultList: List<BaseMessage>?,
+                            e: SendbirdException?
+                        ) {
+                            if (e != null) {
+                                showToast("${e.message}")
+                            }
+                            adapter.changeMessages(apiResultList, false)
+                            markAsRead()
+                            isCollectionInitialized = true
                         }
-                        adapter.changeMessages(apiResultList, false)
-                        markAsRead()
-                        isCollectionInitialized = true
                     }
-                }
-            )
-        }
+                )
+            }
     }
 
     private fun loadPreviousMessageItems() {

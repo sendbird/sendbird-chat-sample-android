@@ -7,12 +7,13 @@ import com.sendbird.android.LogLevel
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.exception.SendbirdException
 import com.sendbird.android.handler.InitResultHandler
+import com.sendbird.android.params.InitParams
 import com.sendbird.chat.module.utils.SharedPreferenceUtils
 import com.sendbird.chat.module.utils.changeValue
 
-const val SENDBIRD_APP_ID = "9DA1B1F4-0BE6-4DA8-82C5-2E81DAB56F23" // US-1 Demo
+const val SENDBIRD_APP_ID = "B745E68D-A949-4CE5-9ADE-0013ABE31685"
 
-class BaseApplication : Application() {
+open class BaseApplication : Application() {
     private val initMutableLiveData: MutableLiveData<Boolean> =
         MutableLiveData<Boolean>().apply { changeValue(false) }
     val initLiveData: LiveData<Boolean>
@@ -20,10 +21,14 @@ class BaseApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        sendbirdChatInit()
+        SharedPreferenceUtils.init(applicationContext)
+    }
+
+    open fun sendbirdChatInit(){
+        val initParams = InitParams(SENDBIRD_APP_ID, applicationContext, false)
         SendbirdChat.init(
-            SENDBIRD_APP_ID,
-            applicationContext,
-            false,
+            initParams,
             object : InitResultHandler {
                 override fun onInitFailed(e: SendbirdException) {
                     initMutableLiveData.changeValue(true)
@@ -39,7 +44,6 @@ class BaseApplication : Application() {
                     initMutableLiveData.changeValue(true)
                 }
             })
-        SharedPreferenceUtils.init(applicationContext)
     }
 
 }

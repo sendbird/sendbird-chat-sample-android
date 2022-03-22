@@ -41,7 +41,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
 
     //sendbird
-    implementation files('./libs/sendbird-android-v4-debug.aar')
+    implementation files('../libs/sendbird-android-4.0.1.aar')
     //
 
     //fragment

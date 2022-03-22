@@ -110,11 +110,20 @@ class OpenChannelChatAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (SendbirdChat.currentUser != null && getItem(position).sender?.userId == SendbirdChat.currentUser?.userId) {
-            if (getItem(position) is FileMessage) {
-                VIEW_TYPE_SEND_IMAGE
+        val currentUser = SendbirdChat.currentUser
+        return if (currentUser != null) {
+            if (getItem(position).sender?.userId == currentUser.userId) {
+                if (getItem(position) is FileMessage) {
+                    VIEW_TYPE_SEND_IMAGE
+                } else {
+                    VIEW_TYPE_SEND
+                }
             } else {
-                VIEW_TYPE_SEND
+                if (getItem(position) is FileMessage) {
+                    VIEW_TYPE_RECEIVE_IMAGE
+                } else {
+                    VIEW_TYPE_RECEIVE
+                }
             }
         } else {
             if (getItem(position) is FileMessage) {

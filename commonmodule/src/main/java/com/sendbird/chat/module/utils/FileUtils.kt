@@ -107,7 +107,7 @@ object FileUtils {
         return if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
             val type = context.contentResolver.getType(uri)
             if (type != null) {
-                extractExtension(type) ?: ""
+                extractExtension(type) ?: fileExtension(uri)
             } else {
                 return fileExtension(uri)
             }

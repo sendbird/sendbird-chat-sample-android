@@ -12,6 +12,7 @@ import com.sendbird.android.channel.query.GroupChannelListQuery
 import com.sendbird.android.collection.GroupChannelCollection
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.handler.GroupChannelCollectionHandler
+import com.sendbird.android.params.GroupChannelCollectionCreateParams
 import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
@@ -85,9 +86,8 @@ class GroupChannelListFragment :
             memberStateFilter = GroupChannelListQuery.MemberStateFilter.ALL
             order = GroupChannelListQuery.Order.LATEST_LAST_MESSAGE
         }
-
-        val builder = GroupChannelCollection.Builder(listQuery)
-        groupChannelCollection = SendbirdChat.createGroupChannelCollection(builder).apply {
+        val params = GroupChannelCollectionCreateParams(listQuery)
+        groupChannelCollection = SendbirdChat.createGroupChannelCollection(params).apply {
             setGroupChannelCollectionHandler(object : GroupChannelCollectionHandler {
                 override fun onChannelsAdded(
                     context: GroupChannelContext,
