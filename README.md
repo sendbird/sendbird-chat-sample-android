@@ -1,4 +1,4 @@
-# SendBird Chat sample for Android
+# Sendbird Chat sample for Android
 
 This repository provides feature-level Chat samples with Kotlin
 
