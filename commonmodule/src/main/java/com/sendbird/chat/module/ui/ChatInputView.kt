@@ -5,11 +5,13 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.widget.doAfterTextChanged
 import com.sendbird.chat.module.R
 import com.sendbird.chat.module.databinding.ViewChatInputBinding
 
 class ChatInputView : FrameLayout {
     private var listener: OnSendMessageClickListener? = null
+    private var onMessageChanged: ((String) -> Unit)? = null
 
     interface OnSendMessageClickListener {
         fun onUserMessageSend()
@@ -25,7 +27,11 @@ class ChatInputView : FrameLayout {
         getAttrs(attrs)
     }
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
+    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
+        context,
+        attrs,
+        defStyle
+    ) {
         initView()
         getAttrs(attrs, defStyle)
     }
@@ -48,10 +54,13 @@ class ChatInputView : FrameLayout {
     }
 
     private fun setTypedArray(typedArray: TypedArray) {
-        binding.edittextMsg.hint = typedArray.getString(R.styleable.ChatInputView_hint)
-        binding.textviewSend.text = typedArray.getString(R.styleable.ChatInputView_button_text)
-        binding.textviewSend.setOnClickListener { listener?.onUserMessageSend() }
-        binding.imageviewSendFile.setOnClickListener { listener?.onFileMessageSend() }
+        with(binding) {
+            edittextMsg.hint = typedArray.getString(R.styleable.ChatInputView_hint)
+            textviewSend.text = typedArray.getString(R.styleable.ChatInputView_button_text)
+            textviewSend.setOnClickListener { listener?.onUserMessageSend() }
+            edittextMsg.doAfterTextChanged { onMessageChanged?.invoke(it?.toString() ?: "") }
+            imageviewSendFile.setOnClickListener { listener?.onFileMessageSend() }
+        }
         typedArray.recycle()
     }
 
@@ -70,5 +79,10 @@ class ChatInputView : FrameLayout {
     fun setOnSendMessageClickListener(listener: OnSendMessageClickListener?) {
         this.listener = listener
     }
+
+    fun setOnMessageChangedListener(listener: (String) -> Unit) {
+        this.onMessageChanged = listener
+    }
+
 
 }

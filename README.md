@@ -23,6 +23,10 @@ This repository provides feature-level Chat samples with Kotlin
 ├── openchannel-basic
 │   ├── openchannel
 │   └── main
+├── openchannel-typingindicator
+│   ├── groupchannel
+│   ├── main
+│   └── user
 └── openchannel-feature-a
 ...
 
@@ -42,7 +46,7 @@ This repository provides feature-level Chat samples with Kotlin
 - openchannel-basic
 
 ### FeatureSample
-
+- groupchannel-typingindicator
 ...
 
 ### Language
