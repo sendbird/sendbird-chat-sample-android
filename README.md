@@ -27,6 +27,10 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── openchannel-readnessage
+│   ├── groupchannel
+│   ├── main
+│   └── user
 └── openchannel-feature-a
 ...
 
@@ -47,6 +51,7 @@ This repository provides feature-level Chat samples with Kotlin
 
 ### FeatureSample
 - groupchannel-typingindicator
+- groupchannel-readmessage
 ...
 
 ### Language
