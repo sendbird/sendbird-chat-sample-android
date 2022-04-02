@@ -6,7 +6,7 @@ import com.sendbird.android.handler.GroupChannelHandler
 import com.sendbird.android.message.BaseMessage
 
 class UnreadMessageCountHandler(
-    private val onDeliverStatusUpdated: (GroupChannel) -> Unit
+    private val onReadStatusUpdated: (GroupChannel) -> Unit
 ) : GroupChannelHandler() {
 
     override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {
@@ -14,6 +14,6 @@ class UnreadMessageCountHandler(
 
     override fun onReadStatusUpdated(channel: GroupChannel) {
         super.onReadStatusUpdated(channel)
-        onDeliverStatusUpdated.invoke(channel)
+        onReadStatusUpdated.invoke(channel)
     }
 }

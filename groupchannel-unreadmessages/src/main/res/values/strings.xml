@@ -33,5 +33,5 @@
     <string name="file_transfer_error">error: File transfer failure</string>
     <string name="channel_url_error">error: Channel url null</string>
     <string name="channel_error">error: Channel null</string>
-    <string name="delivery_status">Delivery status</string>
+    <string name="read_status">Read Status</string>
 </resources>

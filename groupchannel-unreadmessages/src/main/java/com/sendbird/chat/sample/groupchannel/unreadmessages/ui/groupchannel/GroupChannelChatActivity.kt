@@ -23,15 +23,29 @@ import com.sendbird.android.handler.MessageCollectionInitHandler
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.android.message.UserMessage
-import com.sendbird.android.params.*
+import com.sendbird.android.params.FileMessageCreateParams
+import com.sendbird.android.params.GroupChannelUpdateParams
+import com.sendbird.android.params.MessageCollectionCreateParams
+import com.sendbird.android.params.MessageListParams
+import com.sendbird.android.params.UserMessageCreateParams
+import com.sendbird.android.params.UserMessageUpdateParams
 import com.sendbird.chat.module.ui.ChatInputView
-import com.sendbird.chat.module.utils.*
+import com.sendbird.chat.module.utils.ChatRecyclerDataObserver
+import com.sendbird.chat.module.utils.Constants
+import com.sendbird.chat.module.utils.FileUtils
+import com.sendbird.chat.module.utils.SharedPreferenceUtils
+import com.sendbird.chat.module.utils.TextUtils
+import com.sendbird.chat.module.utils.copy
+import com.sendbird.chat.module.utils.showAlertDialog
+import com.sendbird.chat.module.utils.showInputDialog
+import com.sendbird.chat.module.utils.showListDialog
+import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.unreadmessages.R
 import com.sendbird.chat.sample.groupchannel.unreadmessages.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.unreadmessages.ui.UnreadMessageCountHandler
 import com.sendbird.chat.sample.groupchannel.unreadmessages.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.unreadmessages.ui.user.SelectUserActivity
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
@@ -132,13 +146,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
                         return@setOnMenuItemClickListener true
                     }
                 }
-                if (baseMessage.sender?.userId == SendbirdChat.currentUser?.userId) {
-                    val deliveryStatus =
-                        contextMenu.add(Menu.NONE, 3, 4, getString(R.string.delivery_status))
-                    deliveryStatus.setOnMenuItemClickListener {
-                        checkMessageDeliveryStatus(baseMessage)
-                        return@setOnMenuItemClickListener true
-                    }
+                val readStatusMenu =
+                    contextMenu.add(Menu.NONE, 3, 4, getString(R.string.read_status))
+                readStatusMenu.setOnMenuItemClickListener {
+                    checkMessageReadStatus(baseMessage)
+                    return@setOnMenuItemClickListener true
                 }
             }
         }, {
@@ -170,10 +182,10 @@ class GroupChannelChatActivity : AppCompatActivity() {
         })
     }
 
-    private fun checkMessageDeliveryStatus(message: BaseMessage) {
-        val deliveryCount = currentGroupChannel?.getUnreadMemberCount(message)
+    private fun checkMessageReadStatus(message: BaseMessage) {
+        val unreadCount = currentGroupChannel?.getUnreadMemberCount(message)
         val textToShow =
-            if (deliveryCount == 0) "Your message was seen by all member" else "Your message was not readed by $deliveryCount members"
+            if (unreadCount == 0) "Message was read by all member" else "Message was not read by $unreadCount members"
         showToast(textToShow)
     }
 
