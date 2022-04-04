@@ -27,6 +27,10 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── openchannel-banned-and-muted-users
+│   ├── groupchannel
+│   ├── main
+│   └── user
 └── openchannel-feature-a
 ...
 
