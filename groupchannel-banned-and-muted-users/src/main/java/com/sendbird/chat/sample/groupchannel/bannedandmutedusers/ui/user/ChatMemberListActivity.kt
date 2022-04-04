@@ -1,11 +1,15 @@
 package com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.user
 
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.user.Member
+import com.sendbird.android.user.query.GroupChannelMemberListQuery
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.R
@@ -60,9 +64,14 @@ class ChatMemberListActivity : AppCompatActivity() {
             }
             if (groupChannel != null) {
                 currentChannel = groupChannel
-                adapter.submitList(groupChannel.members)
+                retrieveAndDisplayActiveUsers()
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.group_channel_member_menu, menu)
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -71,7 +80,69 @@ class ChatMemberListActivity : AppCompatActivity() {
                 finish()
                 true
             }
+            R.id.active_users -> {
+                retrieveAndDisplayActiveUsers()
+                true
+            }
+            R.id.banned -> {
+                retrieveAndDisplayBannedUsers()
+                true
+            }
+            R.id.muted -> {
+                retrieveAndDisplayMutedUsers()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun retrieveAndDisplayActiveUsers() {
+        val groupChannel = currentChannel ?: return
+        adapter.submitList(groupChannel.members)
+    }
+
+    private fun retrieveAndDisplayBannedUsers() {
+        if (!isUserOperator()) {
+            showToast("You are not an Operator")
+            return
+        }
+        val groupChannel = currentChannel ?: return
+        val listQuery = groupChannel.createMemberListQuery()
+        listQuery.mutedMemberFilter = GroupChannelMemberListQuery.MutedMemberFilter.MUTED
+        listQuery.next { result, exception ->
+            if (exception != null) {
+                exception.printStackTrace()
+                return@next
+            }
+            result ?: return@next
+            binding.toolbar.title = getString(R.string.banned_users)
+            adapter.submitList(result)
+        }
+    }
+
+    private fun retrieveAndDisplayMutedUsers() {
+        if (!isUserOperator()) {
+            showToast("You are not an Operator")
+            return
+        }
+        val groupChannel = currentChannel ?: return
+        val listQuery = groupChannel.createBannedUserListQuery()
+        listQuery.next { result, exception ->
+            if (exception != null) {
+                exception.printStackTrace()
+                return@next
+            }
+            result ?: return@next
+            binding.toolbar.title = getString(R.string.muted_users)
+            adapter.submitList(result)
+        }
+    }
+
+    private fun isUserOperator(): Boolean {
+        val currentChannel = currentChannel ?: return false
+        val currentUser = SendbirdChat.currentUser ?: return false
+        val member =
+            currentChannel.members.firstOrNull { it.userId == currentUser.userId } ?: return false
+        return member.role == Member.Role.OPERATOR
     }
 }

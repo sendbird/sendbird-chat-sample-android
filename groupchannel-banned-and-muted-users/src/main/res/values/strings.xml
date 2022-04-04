@@ -33,4 +33,7 @@
     <string name="file_transfer_error">error: File transfer failure</string>
     <string name="channel_url_error">error: Channel url null</string>
     <string name="channel_error">error: Channel null</string>
+    <string name="banned_users">Banned users</string>
+    <string name="muted_users">Muted Users</string>
+    <string name="active_users">Active Users</string>
 </resources>
