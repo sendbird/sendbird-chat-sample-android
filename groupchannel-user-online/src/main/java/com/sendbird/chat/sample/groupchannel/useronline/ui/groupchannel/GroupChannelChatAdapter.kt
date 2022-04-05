@@ -15,7 +15,7 @@ import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.equalDate
 import com.sendbird.chat.module.utils.equalTime
 import com.sendbird.chat.module.utils.toTime
-import com.sendbird.chat.sample.groupchannel.databinding.*
+import com.sendbird.chat.sample.groupchannel.useronline.databinding.*
 
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,

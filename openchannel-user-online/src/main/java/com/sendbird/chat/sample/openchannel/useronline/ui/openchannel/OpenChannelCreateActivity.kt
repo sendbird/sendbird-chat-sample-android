@@ -10,8 +10,8 @@ import com.sendbird.android.params.OpenChannelCreateParams
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_TITLE
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_URL
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.openchannel.R
-import com.sendbird.chat.sample.openchannel.databinding.ActivityOpenChannelCreateBinding
+import com.sendbird.chat.sample.openchannel.useronline.R
+import com.sendbird.chat.sample.openchannel.useronline.databinding.ActivityOpenChannelCreateBinding
 
 class OpenChannelCreateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOpenChannelCreateBinding

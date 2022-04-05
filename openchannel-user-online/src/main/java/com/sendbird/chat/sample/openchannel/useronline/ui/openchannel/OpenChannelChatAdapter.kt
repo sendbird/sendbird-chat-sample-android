@@ -12,10 +12,10 @@ import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.toTime
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChatImageReceiveBinding
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChatImageSendBinding
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChatReceiveBinding
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChatSendBinding
+import com.sendbird.chat.sample.openchannel.useronline.databinding.ListItemChatImageReceiveBinding
+import com.sendbird.chat.sample.openchannel.useronline.databinding.ListItemChatImageSendBinding
+import com.sendbird.chat.sample.openchannel.useronline.databinding.ListItemChatReceiveBinding
+import com.sendbird.chat.sample.openchannel.useronline.databinding.ListItemChatSendBinding
 
 class OpenChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
