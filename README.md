@@ -36,6 +36,10 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── groupchannel-membersandoperators
+│   ├── groupchannel
+│   ├── main
+│   └── user
 ├── openchannel-basic
 │   ├── openchannel
 │   └── main
@@ -63,6 +67,7 @@ This repository provides feature-level Chat samples with Kotlin
 - groupchannel-unreadmessages
 - groupchannel-readmessage
 - groupchannel-onlinemembers
+- groupchannel-membersandoperators
 ...
 
 ### Language
