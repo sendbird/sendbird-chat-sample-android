@@ -20,7 +20,14 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── groupchannel-user-online
+│   ├── groupchannel
+│   ├── main
+│   └── user
 ├── openchannel-basic
+│   ├── openchannel
+│   └── main
+├── openchannel-user-online
 │   ├── openchannel
 │   └── main
 ├── openchannel-typingindicator
