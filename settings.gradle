@@ -19,6 +19,7 @@ rootProject.name = "Sendbird Chat"
 include ':openchannel-basic'
 include ':groupchannel-basic'
 include ':groupchannel-typingindicator'
+include ':groupchannel-readmessage'
 include ':groupchannel-unreceivedmessage'
 include ':groupchannel-unreadmessages'
 include ':commonmodule'
