@@ -116,7 +116,7 @@ class GroupChannelListFragment :
 
     private fun loadMore() {
         val collection = groupChannelCollection ?: return
-        if (collection.hasMore()) {
+        if (collection.hasMore) {
             collection.loadMore loadMoreLabel@{ channelList, e ->
                 if (e != null || channelList == null) {
                     showToast("${e?.message}")

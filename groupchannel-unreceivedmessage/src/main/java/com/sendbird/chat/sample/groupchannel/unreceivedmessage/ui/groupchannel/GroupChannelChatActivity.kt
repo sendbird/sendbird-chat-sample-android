@@ -282,7 +282,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun loadPreviousMessageItems() {
         val collection = messageCollection ?: return
-        if (collection.hasPrevious()) {
+        if (collection.hasPrevious) {
             collection.loadPrevious { messages, e ->
                 if (e != null) {
                     showToast("${e.message}")
@@ -295,7 +295,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun loadNextMessageItems() {
         val collection = messageCollection ?: return
-        if (collection.hasNext()) {
+        if (collection.hasNext) {
             collection.loadNext { messages, e ->
                 if (e != null) {
                     showToast("${e.message}")
@@ -462,7 +462,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
         channel.sendUserMessage(params, null)
-        if (collection.hasNext()) {
+        if (collection.hasNext) {
             createMessageCollection(Long.MAX_VALUE)
         }
     }
@@ -495,7 +495,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
             channel.sendFileMessage(
                 params,
             ) { _, _ -> }
-            if (collection.hasNext()) {
+            if (collection.hasNext) {
                 createMessageCollection(Long.MAX_VALUE)
             }
         } else {
