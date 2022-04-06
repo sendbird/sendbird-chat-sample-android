@@ -43,6 +43,9 @@ This repository provides feature-level Chat samples with Kotlin
 ├── openchannel-basic
 │   ├── openchannel
 │   └── main
+├── openchannel-copy-message
+│   ├── openchannel
+│   └── main
 └── openchannel-feature-a
 ...
 
@@ -68,6 +71,7 @@ This repository provides feature-level Chat samples with Kotlin
 - groupchannel-readmessage
 - groupchannel-onlinemembers
 - groupchannel-membersandoperators
+- openchannel-copy-message
 ...
 
 ### Language
