@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
@@ -109,12 +110,10 @@ class OpenChannelChatActivity : AppCompatActivity() {
                         }
                     }
                 }
-                if (baseMessage is UserMessage) {
-                    val copyMenu = contextMenu.add(Menu.NONE, 2, 2, getString(R.string.copy))
-                    copyMenu.setOnMenuItemClickListener {
-                        copy(baseMessage.message)
-                        return@setOnMenuItemClickListener true
-                    }
+                val copyMenu = contextMenu.add(Menu.NONE, 2, 2, getString(R.string.copy))
+                copyMenu.setOnMenuItemClickListener {
+                    copyMessage(baseMessage)
+                    return@setOnMenuItemClickListener true
                 }
             }
         }, {
@@ -142,6 +141,36 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    //copy the message to same channel
+    //if we want to copy the message to a different channel, pass a different channel object
+    private fun copyMessage(message: BaseMessage) {
+        val channel = currentOpenChannel ?: return
+        when (message) {
+            is FileMessage -> {
+                channel.copyFileMessage(channel, message) { result, error ->
+                    if (error != null) {
+                        error.printStackTrace()
+                        return@copyFileMessage
+                    }
+                    //if the copy is with success we retrieve the whole list again to have the updated version
+                    Log.d("File copy", "${result?.name} copied")
+                    loadToLatestMessages(adapter.currentList.lastOrNull()?.createdAt ?: 0)
+                }
+            }
+            is UserMessage -> {
+                channel.copyUserMessage(channel, message) { result, error ->
+                    if (error != null) {
+                        error.printStackTrace()
+                        return@copyUserMessage
+                    }
+                    Log.d("Message copy", "${result?.data} copied")
+                    //if the copy is with success we add the message in our current list
+                    adapter.addMessage(result)
+                }
+            }
+        }
     }
 
     private fun enterChannel(channelUrl: String) {
