@@ -93,22 +93,23 @@ class OpenChannelChatActivity : AppCompatActivity() {
                         deleteMessage(baseMessage)
                         return@setOnMenuItemClickListener false
                     }
-                    if (baseMessage is UserMessage) {
-                        val updateMenu =
-                            contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
-                        updateMenu.setOnMenuItemClickListener {
-                            showInputDialog(
-                                getString(R.string.update),
-                                null,
-                                baseMessage.message,
-                                getString(R.string.update),
-                                getString(R.string.cancel),
-                                { updateMessage(it, baseMessage) },
-                            )
-                            return@setOnMenuItemClickListener false
-                        }
+                }
+                if (baseMessage is UserMessage) {
+                    val updateMenu =
+                        contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
+                    updateMenu.setOnMenuItemClickListener {
+                        showInputDialog(
+                            getString(R.string.update),
+                            null,
+                            baseMessage.message,
+                            getString(R.string.update),
+                            getString(R.string.cancel),
+                            { updateMessage(it, baseMessage) },
+                        )
+                        return@setOnMenuItemClickListener false
                     }
                 }
+
                 if (baseMessage is UserMessage) {
                     val copyMenu = contextMenu.add(Menu.NONE, 2, 2, getString(R.string.copy))
                     copyMenu.setOnMenuItemClickListener {
@@ -236,6 +237,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
 
     private fun updateMessage(msg: String, baseMessage: BaseMessage) {
         if (msg.isBlank()) {
+            //if you are not the owner of the message you can't update it
             showToast(R.string.enter_message_msg)
             return
         }
