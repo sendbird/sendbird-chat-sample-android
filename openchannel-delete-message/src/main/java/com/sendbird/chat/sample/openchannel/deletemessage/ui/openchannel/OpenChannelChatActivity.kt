@@ -85,28 +85,25 @@ class OpenChannelChatActivity : AppCompatActivity() {
     private fun initRecyclerView() {
         adapter = OpenChannelChatAdapter({ baseMessage, view, _ ->
             view.setOnCreateContextMenuListener { contextMenu, _, _ ->
-                val currentUser = SendbirdChat.currentUser
-                if (currentUser != null && baseMessage.sender?.userId == currentUser.userId) {
-                    val deleteMenu =
-                        contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
-                    deleteMenu.setOnMenuItemClickListener {
-                        deleteMessage(baseMessage)
+                val deleteMenu =
+                    contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
+                deleteMenu.setOnMenuItemClickListener {
+                    deleteMessage(baseMessage)
+                    return@setOnMenuItemClickListener false
+                }
+                if (baseMessage is UserMessage) {
+                    val updateMenu =
+                        contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
+                    updateMenu.setOnMenuItemClickListener {
+                        showInputDialog(
+                            getString(R.string.update),
+                            null,
+                            baseMessage.message,
+                            getString(R.string.update),
+                            getString(R.string.cancel),
+                            { updateMessage(it, baseMessage) },
+                        )
                         return@setOnMenuItemClickListener false
-                    }
-                    if (baseMessage is UserMessage) {
-                        val updateMenu =
-                            contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
-                        updateMenu.setOnMenuItemClickListener {
-                            showInputDialog(
-                                getString(R.string.update),
-                                null,
-                                baseMessage.message,
-                                getString(R.string.update),
-                                getString(R.string.cancel),
-                                { updateMessage(it, baseMessage) },
-                            )
-                            return@setOnMenuItemClickListener false
-                        }
                     }
                 }
                 if (baseMessage is UserMessage) {
@@ -229,6 +226,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
     private fun deleteMessage(baseMessage: BaseMessage) {
         currentOpenChannel?.deleteMessage(baseMessage) {
             if (it != null) {
+                //you can't delete a message if you are not the owner of the message or an operator
                 showToast("${it.message}")
             }
         }
@@ -246,6 +244,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
             params
         ) { message, e ->
             if (e != null) {
+                //you can't update a message if you are not the owner of the message
                 showToast("${e.message}")
                 return@updateUserMessage
             }
