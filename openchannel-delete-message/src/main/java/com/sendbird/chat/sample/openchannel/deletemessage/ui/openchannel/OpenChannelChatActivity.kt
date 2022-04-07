@@ -91,19 +91,22 @@ class OpenChannelChatActivity : AppCompatActivity() {
                     deleteMessage(baseMessage)
                     return@setOnMenuItemClickListener false
                 }
-                if (baseMessage is UserMessage) {
-                    val updateMenu =
-                        contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
-                    updateMenu.setOnMenuItemClickListener {
-                        showInputDialog(
-                            getString(R.string.update),
-                            null,
-                            baseMessage.message,
-                            getString(R.string.update),
-                            getString(R.string.cancel),
-                            { updateMessage(it, baseMessage) },
-                        )
-                        return@setOnMenuItemClickListener false
+                val currentUser = SendbirdChat.currentUser
+                if (currentUser != null && baseMessage.sender?.userId == currentUser.userId) {
+                    if (baseMessage is UserMessage) {
+                        val updateMenu =
+                            contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
+                        updateMenu.setOnMenuItemClickListener {
+                            showInputDialog(
+                                getString(R.string.update),
+                                null,
+                                baseMessage.message,
+                                getString(R.string.update),
+                                getString(R.string.cancel),
+                                { updateMessage(it, baseMessage) },
+                            )
+                            return@setOnMenuItemClickListener false
+                        }
                     }
                 }
                 if (baseMessage is UserMessage) {
@@ -244,7 +247,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
             params
         ) { message, e ->
             if (e != null) {
-                //you can't update a message if you are not the owner of the message
                 showToast("${e.message}")
                 return@updateUserMessage
             }
