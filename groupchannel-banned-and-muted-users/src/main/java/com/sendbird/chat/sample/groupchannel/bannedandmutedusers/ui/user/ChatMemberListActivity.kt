@@ -20,6 +20,7 @@ class ChatMemberListActivity : AppCompatActivity() {
     private lateinit var adapter: ChatMemberListAdapter
     private var currentChannel: GroupChannel? = null
     private var channelUrl: String? = null
+    private var loadNextUsers: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,13 +42,24 @@ class ChatMemberListActivity : AppCompatActivity() {
 
     private fun initRecyclerView() {
         adapter = ChatMemberListAdapter { _, _ -> }
-        binding.recyclerviewMember.adapter = adapter
-        binding.recyclerviewMember.addItemDecoration(
-            DividerItemDecoration(
-                this,
-                RecyclerView.VERTICAL
+        binding.recyclerviewMember.apply {
+            adapter = this@ChatMemberListActivity.adapter
+            addItemDecoration(
+                DividerItemDecoration(
+                    this@ChatMemberListActivity,
+                    RecyclerView.VERTICAL
+                )
             )
-        )
+            addOnScrollListener(object :
+                RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (!recyclerView.canScrollVertically(1)) {
+                        loadNextUsers?.invoke()
+                    }
+                }
+            })
+        }
     }
 
     private fun getGroupChannel() {
@@ -68,6 +80,7 @@ class ChatMemberListActivity : AppCompatActivity() {
             }
         }
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.group_channel_member_menu, menu)
@@ -98,7 +111,23 @@ class ChatMemberListActivity : AppCompatActivity() {
 
     private fun retrieveAndDisplayActiveUsers() {
         val groupChannel = currentChannel ?: return
-        adapter.submitList(groupChannel.members)
+        val userQuery = groupChannel.createMemberListQuery()
+        adapter.submitList(emptyList())
+        loadNextUsers = {
+            if (userQuery.hasNext) {
+                userQuery.next { users, e ->
+                    if (e != null) {
+                        showToast("${e.message}")
+                        return@next
+                    }
+                    if (!users.isNullOrEmpty()) {
+                        val newList = adapter.currentList + users
+                        adapter.submitList(newList)
+                    }
+                }
+            }
+        }
+        loadNextUsers?.invoke()
     }
 
     private fun retrieveAndDisplayBannedUsers() {
@@ -109,15 +138,21 @@ class ChatMemberListActivity : AppCompatActivity() {
         val groupChannel = currentChannel ?: return
         val listQuery = groupChannel.createMemberListQuery()
         listQuery.mutedMemberFilter = GroupChannelMemberListQuery.MutedMemberFilter.MUTED
-        listQuery.next { result, exception ->
-            if (exception != null) {
-                exception.printStackTrace()
-                return@next
+        adapter.submitList(emptyList())
+        loadNextUsers = {
+            if (listQuery.hasNext) {
+                listQuery.next { result, exception ->
+                    if (exception != null) {
+                        exception.printStackTrace()
+                        return@next
+                    }
+                    result ?: return@next
+                    binding.toolbar.title = getString(R.string.banned_users)
+                    adapter.submitList(result)
+                }
             }
-            result ?: return@next
-            binding.toolbar.title = getString(R.string.banned_users)
-            adapter.submitList(result)
         }
+        loadNextUsers?.invoke()
     }
 
     private fun retrieveAndDisplayMutedUsers() {
@@ -127,15 +162,22 @@ class ChatMemberListActivity : AppCompatActivity() {
         }
         val groupChannel = currentChannel ?: return
         val listQuery = groupChannel.createBannedUserListQuery()
-        listQuery.next { result, exception ->
-            if (exception != null) {
-                exception.printStackTrace()
-                return@next
+        adapter.submitList(emptyList())
+        loadNextUsers = {
+            if (listQuery.hasNext) {
+                listQuery.next { result, exception ->
+                    if (exception != null) {
+                        exception.printStackTrace()
+                        return@next
+                    }
+                    result ?: return@next
+                    binding.toolbar.title = getString(R.string.muted_users)
+                    val newList = adapter.currentList + result
+                    adapter.submitList(newList)
+                }
             }
-            result ?: return@next
-            binding.toolbar.title = getString(R.string.muted_users)
-            adapter.submitList(result)
         }
+        loadNextUsers?.invoke()
     }
 
     private fun isUserOperator(): Boolean {
