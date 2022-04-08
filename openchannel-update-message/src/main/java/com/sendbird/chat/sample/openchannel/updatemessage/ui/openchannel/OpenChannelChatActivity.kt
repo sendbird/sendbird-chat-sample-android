@@ -237,7 +237,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
 
     private fun updateMessage(msg: String, baseMessage: BaseMessage) {
         if (msg.isBlank()) {
-            //if you are not the owner of the message you can't update it
             showToast(R.string.enter_message_msg)
             return
         }
@@ -248,6 +247,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
             params
         ) { message, e ->
             if (e != null) {
+                //if you are not the owner of the message you can't update it
                 showToast("${e.message}")
                 return@updateUserMessage
             }
