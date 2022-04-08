@@ -1,14 +1,15 @@
 package com.sendbird.chat.sample.openchannel.copymessage.ui.openchannel
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.BaseChannel
@@ -23,6 +24,11 @@ import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.openchannel.copymessage.R
 import com.sendbird.chat.sample.openchannel.copymessage.databinding.ActivityOpenChannelChatBinding
+import com.sendbird.chat.sample.openchannel.copymessage.ui.main.MainActivity
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class OpenChannelChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOpenChannelChatBinding
@@ -41,6 +47,17 @@ class OpenChannelChatActivity : AppCompatActivity() {
             if (data.resultCode == RESULT_OK) {
                 val uri = data.data?.data
                 sendFileMessage(uri)
+            }
+        }
+
+    private val startChannelForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
+            SendbirdChat.autoBackgroundDetection = true
+            if (data.resultCode == RESULT_OK) {
+                val extras = data.data?.extras ?: return@registerForActivityResult
+                val channelUri = extras.getString("channel_url") ?: return@registerForActivityResult
+                val messageId = extras.getLong("message_id")
+                copyMessage(channelUri, messageId)
             }
         }
 
@@ -146,30 +163,113 @@ class OpenChannelChatActivity : AppCompatActivity() {
     //copy the message to same channel
     //if we want to copy the message to a different channel, pass a different channel object
     private fun copyMessage(message: BaseMessage) {
-        val channel = currentOpenChannel ?: return
-        when (message) {
-            is FileMessage -> {
-                channel.copyFileMessage(channel, message) { result, error ->
-                    if (error != null) {
-                        error.printStackTrace()
-                        return@copyFileMessage
-                    }
-                    //if the copy is with success we retrieve the whole list again to have the updated version
-                    Log.d("File copy", "${result?.name} copied")
-                    loadToLatestMessages(adapter.currentList.lastOrNull()?.createdAt ?: 0)
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("message_id", message.messageId)
+        }
+        startChannelForResult.launch(intent)
+
+    }
+
+    private fun copyMessage(channelUrl: String, messageId: Long) = lifecycleScope.launch {
+        val message = adapter.currentList.find { it.messageId == messageId } ?: return@launch
+        val currentChannel = currentOpenChannel ?: return@launch
+        val channelToCopy = getChannelSuspending(channelUrl)
+        if (channelToCopy != currentChannel) {
+            channelToCopy.enterSuspending()
+        }
+        try {
+            val copiedMessage = when (message) {
+                is FileMessage -> {
+                    currentChannel.copyFileMessageSuspending(channelToCopy, message)
                 }
-            }
-            is UserMessage -> {
-                channel.copyUserMessage(channel, message) { result, error ->
-                    if (error != null) {
-                        error.printStackTrace()
-                        return@copyUserMessage
-                    }
-                    Log.d("Message copy", "${result?.data} copied")
-                    //if the copy is with success we add the message in our current list
-                    adapter.addMessage(result)
+                is UserMessage -> {
+                    currentChannel.copyUserMessageSuspending(channelToCopy, message)
                 }
+                else -> null
             }
+            //if we are in the same channel we can just add the message to the current list,
+            //or retrieve the whole list again
+            if (currentChannel == channelToCopy) {
+                adapter.addMessage(copiedMessage)
+            }
+            showToast("Message copied")
+        } catch (exception: Exception) {
+            showToast("Message failed to copy")
+        } finally {
+            if (channelToCopy != currentChannel) {
+                channelToCopy.exitSuspending()
+            }
+        }
+    }
+
+    private suspend fun getChannelSuspending(channelUrl: String) =
+        suspendCancellableCoroutine<OpenChannel> { continuation ->
+            OpenChannel.getChannel(channelUrl) { channel, e ->
+                if (e != null) {
+                    continuation.resumeWithException(e)
+                    return@getChannel
+                }
+                if (channel != null) {
+                    continuation.resumeWith(Result.success(channel))
+                    return@getChannel
+                }
+                continuation.resumeWithException(IllegalArgumentException())
+            }
+        }
+
+    private suspend fun OpenChannel.enterSuspending() =
+        suspendCancellableCoroutine<Unit> { cancellableContinuation ->
+            this.enter {
+                if (it != null) {
+                    cancellableContinuation.resumeWithException(it)
+                    return@enter
+                }
+                cancellableContinuation.resume(Unit)
+            }
+        }
+
+    private suspend fun OpenChannel.exitSuspending() =
+        suspendCancellableCoroutine<Unit> { cancellableContinuation ->
+            this.exit {
+                if (it != null) {
+                    cancellableContinuation.resumeWithException(it)
+                    return@exit
+                }
+                cancellableContinuation.resume(Unit)
+            }
+        }
+
+    private suspend fun OpenChannel.copyFileMessageSuspending(
+        targetChannel: OpenChannel,
+        fileMessage: FileMessage
+    ) = suspendCancellableCoroutine<FileMessage> { cancellableContinuation ->
+        copyFileMessage(targetChannel, fileMessage) { result, exception ->
+            if (exception != null) {
+                cancellableContinuation.resumeWithException(exception)
+                return@copyFileMessage
+            }
+            if (result == null) {
+                cancellableContinuation.resumeWithException(IllegalStateException("Couldn't copy the file"))
+                return@copyFileMessage
+            }
+            cancellableContinuation.resume(result)
+        }
+    }
+
+    private suspend fun OpenChannel.copyUserMessageSuspending(
+        targetChannel: OpenChannel,
+        userMessage: UserMessage
+    ) = suspendCancellableCoroutine<UserMessage> { cancellableContinuation ->
+        copyUserMessage(targetChannel, userMessage) { result, exception ->
+            if (exception != null) {
+                cancellableContinuation.resumeWithException(exception)
+                return@copyUserMessage
+            }
+            if (result == null) {
+                cancellableContinuation.resumeWithException(IllegalStateException("Couldn't copy the file"))
+                return@copyUserMessage
+            }
+            cancellableContinuation.resume(result)
         }
     }
 

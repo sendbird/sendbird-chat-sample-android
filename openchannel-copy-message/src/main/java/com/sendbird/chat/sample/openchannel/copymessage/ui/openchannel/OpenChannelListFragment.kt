@@ -1,5 +1,6 @@
 package com.sendbird.chat.sample.openchannel.copymessage.ui.openchannel
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -8,8 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.OpenChannel
 import com.sendbird.android.channel.query.OpenChannelListQuery
 import com.sendbird.chat.module.ui.base.BaseFragment
-import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_TITLE
-import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_URL
+import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.openchannel.copymessage.databinding.FragmentOpenChannelListBinding
 
@@ -34,12 +34,7 @@ class OpenChannelListFragment :
     }
 
     private fun initRecyclerView() {
-        adapter = OpenChannelListAdapter { openChannel ->
-            val intent = Intent(context, OpenChannelChatActivity::class.java)
-            intent.putExtra(INTENT_KEY_CHANNEL_URL, openChannel.url)
-            intent.putExtra(INTENT_KEY_CHANNEL_TITLE, openChannel.name)
-            startActivity(intent)
-        }
+        adapter = OpenChannelListAdapter(this::onChannelClicked)
 
         binding.recyclerviewOpenChannel.adapter = adapter
         binding.recyclerviewOpenChannel.itemAnimator = null
@@ -65,6 +60,25 @@ class OpenChannelListFragment :
         binding.swipeRefreshLayout.setOnRefreshListener {
             createOpenChannelListQuery()
         }
+    }
+
+    private fun onChannelClicked(openChannel: OpenChannel) {
+        val messageId = this.activity?.intent?.getLongExtra("message_id", -1L)
+        if (messageId != null && messageId != -1L) {
+            val intentToLaunch = Intent().apply {
+                putExtra("message_id", messageId)
+                putExtra("channel_url", openChannel.url)
+            }
+            this.activity?.setResult(Activity.RESULT_OK, intentToLaunch)
+            this.activity?.finish()
+            return
+        }
+        val intentToLaunch =
+            Intent(requireContext(), OpenChannelChatActivity::class.java).apply {
+                putExtra(Constants.INTENT_KEY_CHANNEL_URL, openChannel.url)
+                putExtra(Constants.INTENT_KEY_CHANNEL_TITLE, openChannel.name)
+            }
+        startActivity(intentToLaunch)
     }
 
     private fun createOpenChannelListQuery() {
