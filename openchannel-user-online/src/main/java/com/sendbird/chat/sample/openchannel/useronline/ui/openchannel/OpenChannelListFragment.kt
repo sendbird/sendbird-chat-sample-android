@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.openchannel.updatemessage.ui.openchannel
+package com.sendbird.chat.sample.openchannel.useronline.ui.openchannel
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,7 +11,7 @@ import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_TITLE
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_URL
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.openchannel.updatemessage.databinding.FragmentOpenChannelListBinding
+import com.sendbird.chat.sample.openchannel.useronline.databinding.FragmentOpenChannelListBinding
 
 class OpenChannelListFragment :
     BaseFragment<FragmentOpenChannelListBinding>(FragmentOpenChannelListBinding::inflate) {
