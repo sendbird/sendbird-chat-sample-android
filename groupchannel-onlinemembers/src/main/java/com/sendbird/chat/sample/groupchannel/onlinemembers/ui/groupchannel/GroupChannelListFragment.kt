@@ -28,9 +28,12 @@ class GroupChannelListFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         init()
         initRecyclerView()
+    }
+
+    override fun onResume() {
+        super.onResume()
         createCollection()
     }
 
@@ -111,10 +114,10 @@ class GroupChannelListFragment :
                 }
             })
         }
-        loadMore()
+        loadMore(true)
     }
 
-    private fun loadMore() {
+    private fun loadMore(isRefreshing: Boolean = false) {
         val collection = groupChannelCollection ?: return
         if (collection.hasMore()) {
             collection.loadMore loadMoreLabel@{ channelList, e ->
@@ -122,7 +125,13 @@ class GroupChannelListFragment :
                     showToast("${e?.message}")
                     return@loadMoreLabel
                 }
-                adapter.addChannels(channelList)
+                if (channelList.isNotEmpty()) {
+                    if (isRefreshing) {
+                        adapter.addChannels(emptyList())
+                    }
+                    adapter.addChannels(channelList)
+                }
+
             }
         }
     }
