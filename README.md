@@ -68,6 +68,7 @@ This repository provides feature-level Chat samples with Kotlin
 - groupchannel-readmessage
 - groupchannel-onlinemembers
 - groupchannel-membersandoperators
+- openchannel-update-message
 ...
 
 ### Language
