@@ -23,6 +23,10 @@ class OpenChannelListFragment :
 
         init()
         initRecyclerView()
+    }
+
+    override fun onResume() {
+        super.onResume()
         createOpenChannelListQuery()
     }
 
