@@ -32,6 +32,11 @@ android {
     viewBinding {
         enabled = true
     }
+    packagingOptions {
+        exclude 'META-INF/kotlin-stdlib.kotlin_module'
+        exclude 'META-INF/okio.kotlin_module'
+        exclude 'META-INF/kotlin-stdlib-common.kotlin_module'
+    }
 }
 
 dependencies {
@@ -41,7 +46,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
 
     //sendbird
-    implementation files('../libs/sendbird-android-4.0.1.aar')
+    implementation files('../libs/sendbird-sdk.aar')
     //
 
     //fragment

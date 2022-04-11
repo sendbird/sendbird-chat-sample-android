@@ -17,6 +17,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "Sendbird Chat"
 include ':openchannel-basic'
+include ':openchannel-delete-message'
+include ':openchannel-user-online'
+include ':openchannel-update-message'
 include ':openchannel-copy-message'
 include ':groupchannel-basic'
 include ':groupchannel-typingindicator'
@@ -25,4 +28,5 @@ include ':groupchannel-unreceivedmessage'
 include ':groupchannel-unreadmessages'
 include ':groupchannel-onlinemembers'
 include ':groupchannel-membersandoperators'
+include ':groupchannel-user-online'
 include ':commonmodule'

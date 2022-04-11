@@ -32,6 +32,10 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── groupchannel-user-online
+│   ├── groupchannel
+│   ├── main
+│   └── user
 ├── groupchannel-onlinemembers
 │   ├── groupchannel
 │   ├── main
@@ -41,6 +45,15 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── main
 │   └── user
 ├── openchannel-basic
+│   ├── openchannel
+│   └── main
+├── openchannel-user-online
+│   ├── openchannel
+│   └── main
+├── openchannel-update-message
+│   ├── openchannel
+│   └── main
+├── openchannel-delete-message
 │   ├── openchannel
 │   └── main
 ├── openchannel-copy-message
@@ -71,6 +84,10 @@ This repository provides feature-level Chat samples with Kotlin
 - groupchannel-readmessage
 - groupchannel-onlinemembers
 - groupchannel-membersandoperators
+- groupchannel-user-online
+- openchannel-user-online
+- openchannel-delete-message
+- openchannel-update-message
 - openchannel-copy-message
 ...
 
