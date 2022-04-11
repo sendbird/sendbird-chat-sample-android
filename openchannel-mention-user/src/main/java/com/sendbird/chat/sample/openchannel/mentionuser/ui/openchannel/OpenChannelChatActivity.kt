@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.BaseChannel
@@ -18,10 +19,16 @@ import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
+import com.sendbird.android.user.User
+import com.sendbird.android.user.query.ParticipantListQuery
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.openchannel.mentionuser.R
 import com.sendbird.chat.sample.openchannel.mentionuser.databinding.ActivityOpenChannelChatBinding
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class OpenChannelChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOpenChannelChatBinding
@@ -211,6 +218,14 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
 
+            //We receive the mentions here
+            override fun onMentionReceived(channel: BaseChannel, message: BaseMessage) {
+                super.onMentionReceived(channel, message)
+                if (channel != currentOpenChannel) return
+                //show the mention
+                showToast("You were mentioned in chat")
+            }
+
             override fun onChannelDeleted(
                 channelUrl: String,
                 channelType: BaseChannel.ChannelType
@@ -364,14 +379,18 @@ class OpenChannelChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendMessage(msg: String) {
+    private fun sendMessage(msg: String) = lifecycleScope.launch {
         if (msg.isBlank()) {
             showToast(R.string.enter_message_msg)
-            return
+            return@launch
         }
-        val channel = currentOpenChannel ?: return
+        val channel = currentOpenChannel ?: return@launch
+        val mentionedUserIds = getMentionedUsersIds(msg)
         val params = UserMessageCreateParams()
             .setMessage(msg.trim())
+        if (mentionedUserIds.isNotEmpty()) {
+            params.setMentionedUserIds(mentionedUserIds)
+        }
         binding.chatInputView.clearText()
         val pendingMessage = channel.sendUserMessage(params) { message, e ->
             if (e != null) {
@@ -386,6 +405,43 @@ class OpenChannelChatActivity : AppCompatActivity() {
         //pending
         adapter.addPendingMessage(pendingMessage)
         recyclerObserver.scrollToBottom(true)
+    }
+
+    private suspend fun getMentionedUsersIds(message: String): List<String> {
+        val channel = currentOpenChannel ?: return emptyList()
+        return channel
+            .getAllParticipants()
+            .map { user -> user.userId }
+            .filter { userId -> message.contains(userId) }
+    }
+
+    private suspend fun OpenChannel.getAllParticipants(): List<User> {
+        val query = createParticipantListQuery()
+        val members = mutableListOf<User>()
+
+        do {
+            val participants = query.getParticipants()
+            members.addAll(participants)
+        } while (participants.isNotEmpty())
+        return members
+    }
+
+    private suspend fun ParticipantListQuery.getParticipants(): List<User> = suspendCancellableCoroutine { cancellableContinuation ->
+        if (hasNext) {
+            next { result, exception ->
+                if (exception != null) {
+                    cancellableContinuation.resumeWithException(exception)
+                    return@next
+                }
+                if (result == null) {
+                    cancellableContinuation.resume(emptyList())
+                    return@next
+                }
+                cancellableContinuation.resume(result)
+            }
+        } else {
+            cancellableContinuation.resume(emptyList())
+        }
     }
 
     private fun sendFileMessage(imgUri: Uri?) {
@@ -536,5 +592,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val MentionHandlerId = "MentionHandlerId"
     }
 }
