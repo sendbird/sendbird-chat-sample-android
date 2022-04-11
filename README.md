@@ -56,6 +56,9 @@ This repository provides feature-level Chat samples with Kotlin
 ├── openchannel-delete-message
 │   ├── openchannel
 │   └── main
+├── openchannel-mention-user
+│   ├── openchannel
+│   └── main
 └── openchannel-feature-a
 ...
 
@@ -85,7 +88,7 @@ This repository provides feature-level Chat samples with Kotlin
 - openchannel-user-online
 - openchannel-delete-message
 - openchannel-update-message
-...
+- openchannel-mention-user ...
 
 ### Language
 
