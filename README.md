@@ -20,10 +20,6 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── groupchannel
 │   ├── main
 │   └── user
-├── groupchannel-update-message
-│   ├── groupchannel
-│   ├── main
-│   └── user
 ├── groupchannel-typingindicator
 │   ├── groupchannel
 │   ├── main
@@ -54,6 +50,12 @@ This repository provides feature-level Chat samples with Kotlin
 ├── openchannel-user-online
 │   ├── openchannel
 │   └── main
+├── openchannel-update-message
+│   ├── openchannel
+│   └── main
+├── openchannel-delete-message
+│   ├── openchannel
+│   └── main
 └── openchannel-feature-a
 ...
 
@@ -79,9 +81,10 @@ This repository provides feature-level Chat samples with Kotlin
 - groupchannel-readmessage
 - groupchannel-onlinemembers
 - groupchannel-membersandoperators
-- groupchannel-update-message
 - groupchannel-user-online
 - openchannel-user-online
+- openchannel-delete-message
+- openchannel-update-message
 ...
 
 ### Language
@@ -106,4 +109,6 @@ This repository provides feature-level Chat samples with Kotlin
 4. Include copied module to setting.gradle
 5. Rename package
 6. Change the applicationId in the build.gradle of the created project.
-+ When the main activity needs to be updated to another activity, the <intent-filter> of MainActivity must be moved as well the corresponding activity.
+
++ When the main activity needs to be updated to another activity, the <intent-filter> of
+  MainActivity must be moved as well the corresponding activity.
