@@ -70,6 +70,10 @@ Once a sample is chosen, create a device and run the app on an Android device or
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── groupchannel-groupchannel-add-remove-operators
+│   ├── groupchannel
+│   ├── main
+│   └── user
 ├── openchannel-basic
 │   ├── openchannel
 │   └── main

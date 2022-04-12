@@ -1,13 +1,13 @@
 plugins {
     id 'com.android.application'
-    id 'kotlin-android'
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.sendbird.chat.sample.openchannel.updatemessage"
+        applicationId "com.sendbird.chat.sample.groupchannel.addremoveoperators"
         minSdk 26
         targetSdk 32
         versionCode 1
@@ -32,6 +32,11 @@ android {
     viewBinding {
         enabled = true
     }
+    packagingOptions {
+        exclude 'META-INF/kotlin-stdlib.kotlin_module'
+        exclude 'META-INF/okio.kotlin_module'
+        exclude 'META-INF/kotlin-stdlib-common.kotlin_module'
+    }
 }
 
 dependencies {
@@ -48,9 +53,12 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     //
 
+    //Coil
+    implementation "io.coil-kt:coil:$coilVersion"
+    //
+
     implementation "androidx.legacy:legacy-support-v4:$legacySupportVersion"
     implementation project(path: ':commonmodule')
-
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
