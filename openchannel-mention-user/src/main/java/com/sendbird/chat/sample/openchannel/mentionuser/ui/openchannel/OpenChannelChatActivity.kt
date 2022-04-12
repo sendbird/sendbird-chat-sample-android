@@ -26,9 +26,6 @@ import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.openchannel.mentionuser.R
 import com.sendbird.chat.sample.openchannel.mentionuser.databinding.ActivityOpenChannelChatBinding
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class OpenChannelChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOpenChannelChatBinding
@@ -385,62 +382,66 @@ class OpenChannelChatActivity : AppCompatActivity() {
             return@launch
         }
         val channel = currentOpenChannel ?: return@launch
-        val mentionedUserIds = getMentionedUsersIds(msg)
-        val params = UserMessageCreateParams()
-            .setMessage(msg.trim())
-        if (mentionedUserIds.isNotEmpty()) {
-            params.setMentionedUserIds(mentionedUserIds)
-        }
-        binding.chatInputView.clearText()
-        val pendingMessage = channel.sendUserMessage(params) { message, e ->
-            if (e != null) {
-                //failed
-                showToast("${e.message}")
-                adapter.updatePendingMessage(message)
-                return@sendUserMessage
+        getMentionedUsersIds(msg) { mentionedUserIds ->
+            val params = UserMessageCreateParams()
+                .setMessage(msg.trim())
+            if (mentionedUserIds.isNotEmpty()) {
+                params.setMentionedUserIds(mentionedUserIds)
             }
-            //succeeded
-            adapter.updateSucceedMessage(message)
+            binding.chatInputView.clearText()
+            val pendingMessage = channel.sendUserMessage(params) { message, e ->
+                if (e != null) {
+                    //failed
+                    showToast("${e.message}")
+                    adapter.updatePendingMessage(message)
+                    return@sendUserMessage
+                }
+                //succeeded
+                adapter.updateSucceedMessage(message)
+            }
+            //pending
+            adapter.addPendingMessage(pendingMessage)
+            recyclerObserver.scrollToBottom(true)
         }
-        //pending
-        adapter.addPendingMessage(pendingMessage)
-        recyclerObserver.scrollToBottom(true)
     }
 
-    private suspend fun getMentionedUsersIds(message: String): List<String> {
-        val channel = currentOpenChannel ?: return emptyList()
-        return channel
-            .getAllParticipants()
-            .map { user -> user.userId }
-            .filter { userId -> message.contains(userId) }
+    private fun getMentionedUsersIds(message: String, onMentionedUsersReceived: (List<String>) -> Unit) {
+        val channel = currentOpenChannel ?: return
+        val query = channel.createParticipantListQuery()
+        val user = mutableListOf<User>()
+        channel.getAllParticipants(query, user) {
+            onMentionedUsersReceived.invoke(user.asSequence().map { it.userId }.filter { message.contains(it) }.toList())
+        }
     }
 
-    private suspend fun OpenChannel.getAllParticipants(): List<User> {
-        val query = createParticipantListQuery()
-        val members = mutableListOf<User>()
-
-        do {
-            val participants = query.getParticipants()
-            members.addAll(participants)
-        } while (participants.isNotEmpty())
-        return members
+    private fun OpenChannel.getAllParticipants(query: ParticipantListQuery, participantsList: MutableList<User>, onQueryFinished: () -> Unit) {
+        query.getParticipants {
+            if (it.isEmpty()) {
+                onQueryFinished.invoke()
+                return@getParticipants
+            }
+            participantsList.addAll(it)
+            getAllParticipants(query, participantsList, onQueryFinished)
+        }
     }
 
-    private suspend fun ParticipantListQuery.getParticipants(): List<User> = suspendCancellableCoroutine { cancellableContinuation ->
+
+    private fun ParticipantListQuery.getParticipants(onParticipantsReceived: (List<User>) -> Unit) {
         if (hasNext) {
             next { result, exception ->
                 if (exception != null) {
-                    cancellableContinuation.resumeWithException(exception)
+                    exception.printStackTrace()
+                    onParticipantsReceived(emptyList())
                     return@next
                 }
                 if (result == null) {
-                    cancellableContinuation.resume(emptyList())
+                    onParticipantsReceived(emptyList())
                     return@next
                 }
-                cancellableContinuation.resume(result)
+                onParticipantsReceived(result)
             }
         } else {
-            cancellableContinuation.resume(emptyList())
+            onParticipantsReceived(emptyList())
         }
     }
 
