@@ -9,7 +9,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.BaseChannel
@@ -25,10 +24,6 @@ import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.openchannel.copymessage.R
 import com.sendbird.chat.sample.openchannel.copymessage.databinding.ActivityOpenChannelChatBinding
 import com.sendbird.chat.sample.openchannel.copymessage.ui.main.MainActivity
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class OpenChannelChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOpenChannelChatBinding
@@ -170,106 +165,60 @@ class OpenChannelChatActivity : AppCompatActivity() {
 
     }
 
-    private fun copyMessage(channelUrl: String, messageId: Long) = lifecycleScope.launch {
-        val message = adapter.currentList.find { it.messageId == messageId } ?: return@launch
-        val currentChannel = currentOpenChannel ?: return@launch
-        val channelToCopy = getChannelSuspending(channelUrl)
-        if (channelToCopy != currentChannel) {
-            channelToCopy.enterSuspending()
-        }
-        try {
-            val copiedMessage = when (message) {
-                is FileMessage -> {
-                    currentChannel.copyFileMessageSuspending(channelToCopy, message)
-                }
-                is UserMessage -> {
-                    currentChannel.copyUserMessageSuspending(channelToCopy, message)
-                }
-                else -> null
+    private fun copyMessage(channelUrl: String, messageId: Long) {
+        val message = adapter.currentList.find { it.messageId == messageId } ?: return
+        val currentChannel = currentOpenChannel ?: return
+        //get the channel in which we want to copy
+        OpenChannel.getChannel(channelUrl) { channelToCopy, e ->
+            if (e != null) {
+                showToast(e.message ?: "error")
+                return@getChannel
             }
-            //if we are in the same channel we can just add the message to the current list,
-            //or retrieve the whole list again
-            if (currentChannel == channelToCopy) {
-                adapter.addMessage(copiedMessage)
+            if (channelToCopy == null) {
+                showToast("Error Null channel")
+                return@getChannel
             }
-            showToast("Message copied")
-        } catch (exception: Exception) {
-            showToast("Message failed to copy")
-        } finally {
-            if (channelToCopy != currentChannel) {
-                channelToCopy.exitSuspending()
-            }
-        }
-    }
-
-    private suspend fun getChannelSuspending(channelUrl: String) =
-        suspendCancellableCoroutine<OpenChannel> { continuation ->
-            OpenChannel.getChannel(channelUrl) { channel, e ->
-                if (e != null) {
-                    continuation.resumeWithException(e)
-                    return@getChannel
-                }
-                if (channel != null) {
-                    continuation.resumeWith(Result.success(channel))
-                    return@getChannel
-                }
-                continuation.resumeWithException(IllegalArgumentException())
-            }
-        }
-
-    private suspend fun OpenChannel.enterSuspending() =
-        suspendCancellableCoroutine<Unit> { cancellableContinuation ->
-            this.enter {
+            //we must enter the channel to be able to copy a message into it
+            channelToCopy.enter {
                 if (it != null) {
-                    cancellableContinuation.resumeWithException(it)
+                    showToast("Error entering channel")
                     return@enter
                 }
-                cancellableContinuation.resume(Unit)
-            }
-        }
-
-    private suspend fun OpenChannel.exitSuspending() =
-        suspendCancellableCoroutine<Unit> { cancellableContinuation ->
-            this.exit {
-                if (it != null) {
-                    cancellableContinuation.resumeWithException(it)
-                    return@exit
+                //copy the message into channel
+                when (message) {
+                    is FileMessage -> {
+                        currentChannel.copyFileMessage(channelToCopy, message) { copiedMessage, copyException ->
+                            if (copyException != null) {
+                                showToast("Error copying message")
+                                return@copyFileMessage
+                            } else if (currentChannel == channelToCopy) {
+                                adapter.addMessage(copiedMessage)
+                            }
+                            channelToCopy.exit { exitException ->
+                                if (exitException != null) {
+                                    showToast("Error exiting channel")
+                                }
+                            }
+                        }
+                    }
+                    is UserMessage -> {
+                        currentChannel.copyUserMessage(channelToCopy, message) { copiedMessage, copyException ->
+                            if (copyException != null) {
+                                showToast("Error copying message")
+                            } else if (currentChannel == channelToCopy) {
+                                adapter.addMessage(copiedMessage)
+                            }
+                            //after copying the message exit the channel
+                            channelToCopy.exit { exitException ->
+                                if (exitException != null) {
+                                    showToast("Error exiting channel")
+                                }
+                            }
+                        }
+                    }
+                    else -> null
                 }
-                cancellableContinuation.resume(Unit)
             }
-        }
-
-    private suspend fun OpenChannel.copyFileMessageSuspending(
-        targetChannel: OpenChannel,
-        fileMessage: FileMessage
-    ) = suspendCancellableCoroutine<FileMessage> { cancellableContinuation ->
-        copyFileMessage(targetChannel, fileMessage) { result, exception ->
-            if (exception != null) {
-                cancellableContinuation.resumeWithException(exception)
-                return@copyFileMessage
-            }
-            if (result == null) {
-                cancellableContinuation.resumeWithException(IllegalStateException("Couldn't copy the file"))
-                return@copyFileMessage
-            }
-            cancellableContinuation.resume(result)
-        }
-    }
-
-    private suspend fun OpenChannel.copyUserMessageSuspending(
-        targetChannel: OpenChannel,
-        userMessage: UserMessage
-    ) = suspendCancellableCoroutine<UserMessage> { cancellableContinuation ->
-        copyUserMessage(targetChannel, userMessage) { result, exception ->
-            if (exception != null) {
-                cancellableContinuation.resumeWithException(exception)
-                return@copyUserMessage
-            }
-            if (result == null) {
-                cancellableContinuation.resumeWithException(IllegalStateException("Couldn't copy the file"))
-                return@copyUserMessage
-            }
-            cancellableContinuation.resume(result)
         }
     }
 
