@@ -12,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.BaseChannel
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.collection.MessageCollection
 import com.sendbird.android.collection.MessageCollectionInitPolicy
 import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.exception.SendbirdException
+import com.sendbird.android.handler.GroupChannelHandler
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.handler.MessageCollectionInitHandler
 import com.sendbird.android.message.BaseMessage
@@ -174,6 +176,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 currentGroupChannel = groupChannel
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
+                setUserMentionHandler()
             }
         }
     }
@@ -238,6 +241,19 @@ class GroupChannelChatActivity : AppCompatActivity() {
             }
     }
 
+    private fun setUserMentionHandler() {
+        SendbirdChat.addChannelHandler(MentionHandlerId, object : GroupChannelHandler() {
+            override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {
+            }
+
+            override fun onMentionReceived(channel: BaseChannel, message: BaseMessage) {
+                super.onMentionReceived(channel, message)
+                if (channel != currentGroupChannel) return
+                showToast("You were mentioned in this chat")
+            }
+        })
+    }
+
     private fun loadPreviousMessageItems() {
         val collection = messageCollection ?: return
         if (collection.hasPrevious) {
@@ -278,7 +294,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
             showToast(R.string.enter_message_msg)
             return
         }
+        val mentionedUsersIds = getMentionedUsersIdsFromMessage(msg)
         val params = UserMessageUpdateParams().setMessage(msg)
+        if (mentionedUsersIds.isNotEmpty()) {
+            params.setMentionedUserIds(mentionedUsersIds)
+        }
         currentGroupChannel?.updateUserMessage(
             baseMessage.messageId, params
         ) { _, e ->
@@ -415,13 +435,26 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
         val collection = messageCollection ?: return
         val channel = currentGroupChannel ?: return
+
         val params = UserMessageCreateParams().setMessage(message.trim())
+        val mentionedUsersIds = getMentionedUsersIdsFromMessage(message)
+        if (mentionedUsersIds.isNotEmpty()) {
+            params.setMentionedUserIds(mentionedUsersIds)
+        }
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
         channel.sendUserMessage(params, null)
         if (collection.hasNext) {
             createMessageCollection(Long.MAX_VALUE)
         }
+    }
+
+    private fun getMentionedUsersIdsFromMessage(message: String): List<String> {
+        val channel = currentGroupChannel ?: return emptyList()
+        return channel
+            .members
+            .map { member -> member.userId }
+            .filter { userId -> message.contains(userId) }
     }
 
     private fun sendFileMessage(imgUri: Uri?) {
@@ -508,6 +541,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
         super.onDestroy()
         messageCollection?.dispose()
         SendbirdChat.autoBackgroundDetection = true
+        SendbirdChat.removeChannelHandler(MentionHandlerId)
     }
 
     private val collectionHandler = object : MessageCollectionHandler {
@@ -620,5 +654,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val MentionHandlerId = "MentionHandlerId"
     }
 }
