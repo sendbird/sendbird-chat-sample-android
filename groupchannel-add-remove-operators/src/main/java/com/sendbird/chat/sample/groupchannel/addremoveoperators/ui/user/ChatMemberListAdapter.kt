@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.sendbird.android.user.Member
-import com.sendbird.android.user.User
 import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
 import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ListItemMemberBinding
 
@@ -62,8 +61,8 @@ class ChatMemberListAdapter(
                 }
             }
             binding.textviewName.text = member.nickname.ifBlank { member.userId }
-            if (member.connectionStatus == User.ConnectionStatus.ONLINE) {
-                binding.textviewName.append(" (Online)")
+            if (member.role == Member.Role.OPERATOR) {
+                binding.textviewName.append(" (Operator)")
             }
         }
     }

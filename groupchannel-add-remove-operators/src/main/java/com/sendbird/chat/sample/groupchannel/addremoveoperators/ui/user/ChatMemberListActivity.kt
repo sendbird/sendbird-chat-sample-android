@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.user.Member
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
@@ -36,7 +37,7 @@ class ChatMemberListActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        adapter = ChatMemberListAdapter { _, _ -> }
+        adapter = ChatMemberListAdapter { member, _ -> changeMemberOperatorStatus(member) }
         binding.recyclerviewMember.adapter = adapter
         binding.recyclerviewMember.addItemDecoration(
             DividerItemDecoration(
@@ -44,6 +45,34 @@ class ChatMemberListActivity : AppCompatActivity() {
                 RecyclerView.VERTICAL
             )
         )
+    }
+
+    private fun changeMemberOperatorStatus(member: Member) {
+        if (member.role == Member.Role.OPERATOR) {
+            removeOperatorRole(member)
+            return
+        }
+        addOperatorRole(member)
+    }
+
+    private fun addOperatorRole(member: Member) {
+        currentChannel?.addOperators(listOf(member.userId)) { exception ->
+            if (exception != null) {
+                showToast("${exception.message}")
+                return@addOperators
+            }
+            showToast("User made operator")
+        }
+    }
+
+    private fun removeOperatorRole(member: Member) {
+        currentChannel?.removeOperators(listOf(member.userId)) { exception ->
+            if (exception != null) {
+                showToast("${exception.message}")
+                return@removeOperators
+            }
+            showToast("User back to basic")
+        }
     }
 
     private fun getGroupChannel() {
