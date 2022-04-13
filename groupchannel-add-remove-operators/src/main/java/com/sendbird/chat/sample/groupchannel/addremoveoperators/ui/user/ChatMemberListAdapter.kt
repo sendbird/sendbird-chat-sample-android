@@ -24,7 +24,7 @@ class ChatMemberListAdapter(
             }
 
             override fun areContentsTheSame(oldItem: Member, newItem: Member): Boolean {
-                return oldItem.nickname == oldItem.nickname && oldItem.plainProfileImageUrl == newItem.plainProfileImageUrl
+                return oldItem.nickname == oldItem.nickname && oldItem.plainProfileImageUrl == newItem.plainProfileImageUrl && oldItem.role == newItem.role
             }
         }
     }

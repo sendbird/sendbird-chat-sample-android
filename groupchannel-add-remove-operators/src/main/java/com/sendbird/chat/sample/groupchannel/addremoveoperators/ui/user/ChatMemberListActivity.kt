@@ -62,6 +62,7 @@ class ChatMemberListActivity : AppCompatActivity() {
                 return@addOperators
             }
             showToast("User made operator")
+            refreshMembers()
         }
     }
 
@@ -72,7 +73,18 @@ class ChatMemberListActivity : AppCompatActivity() {
                 return@removeOperators
             }
             showToast("User back to basic")
+            refreshMembers()
         }
+    }
+
+    private fun refreshMembers() {
+        val query = currentChannel?.createMemberListQuery() ?: return
+        query.next { members, exception ->
+            if (exception == null && !members.isNullOrEmpty()) {
+                adapter.submitList(members)
+            }
+        }
+
     }
 
     private fun getGroupChannel() {
