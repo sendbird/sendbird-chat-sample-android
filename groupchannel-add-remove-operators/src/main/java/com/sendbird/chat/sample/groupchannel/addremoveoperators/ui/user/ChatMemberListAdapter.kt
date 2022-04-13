@@ -5,10 +5,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.sendbird.android.user.Member
 import com.sendbird.android.user.User
-import com.sendbird.chat.sample.groupchannel.R
-import com.sendbird.chat.sample.groupchannel.databinding.ListItemMemberBinding
+import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
+import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ListItemMemberBinding
 
 class ChatMemberListAdapter(
     private val listener: OnItemClickListener?

@@ -12,9 +12,9 @@ import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.params.GroupChannelCreateParams
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.groupchannel.R
+import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
+import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ActivitySelectUserBinding
 import com.sendbird.chat.sample.groupchannel.addremoveoperators.ui.groupchannel.GroupChannelChatActivity
-import com.sendbird.chat.sample.groupchannel.databinding.ActivitySelectUserBinding
 
 
 class SelectUserActivity : AppCompatActivity() {

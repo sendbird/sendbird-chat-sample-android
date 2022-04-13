@@ -26,10 +26,10 @@ import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
-import com.sendbird.chat.sample.groupchannel.R
+import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
+import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.addremoveoperators.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.addremoveoperators.ui.user.SelectUserActivity
-import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
