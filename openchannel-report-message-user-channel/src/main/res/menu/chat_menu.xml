@@ -13,6 +13,9 @@
             <item
                 android:id="@+id/update_channel_name"
                 android:title="@string/update_channel_name" />
+            <item
+                android:id="@+id/report_channel"
+                android:title="@string/report" />
         </menu>
     </item>
 </menu>

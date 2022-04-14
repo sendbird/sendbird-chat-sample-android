@@ -18,6 +18,7 @@ import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
+import com.sendbird.android.user.User
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.openchannel.report.R
@@ -116,6 +117,17 @@ class OpenChannelChatActivity : AppCompatActivity() {
                         return@setOnMenuItemClickListener true
                     }
                 }
+                val reportMessageOption = contextMenu.add(Menu.NONE, 3, 3, getString(R.string.report_message))
+                reportMessageOption.setOnMenuItemClickListener {
+                    reportUserMessage(baseMessage)
+                    return@setOnMenuItemClickListener true
+                }
+                val reportUserOption = contextMenu.add(Menu.NONE, 3, 3, getString(R.string.report_user))
+                reportUserOption.setOnMenuItemClickListener {
+                    val userToReport = baseMessage.sender ?: return@setOnMenuItemClickListener true
+                    reportUser(userToReport)
+                    return@setOnMenuItemClickListener true
+                }
             }
         }, {
             showListDialog(
@@ -142,6 +154,26 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun reportUserMessage(baseMessage: BaseMessage) {
+        currentOpenChannel?.reportMessage(baseMessage, BaseChannel.ReportCategory.SUSPICIOUS, "Reason to report") {
+            if (it != null) {
+                showToast("Report failed ${it.message}")
+                return@reportMessage
+            }
+            showToast("Report success")
+        }
+    }
+
+    private fun reportUser(userToReport: User) {
+        currentOpenChannel?.reportUser(userToReport, BaseChannel.ReportCategory.SUSPICIOUS, "Reason to report") callback@{
+            if (it != null) {
+                showToast("Report failed ${it.message}")
+                return@callback
+            }
+            showToast("Report success")
+        }
     }
 
     private fun enterChannel(channelUrl: String) {
@@ -283,11 +315,26 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 true
             }
 
+            R.id.report_channel -> {
+                reportChannel()
+                true
+            }
+
             android.R.id.home -> {
                 finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun reportChannel() {
+        currentOpenChannel?.report(BaseChannel.ReportCategory.SUSPICIOUS, "Reason for reporting") {
+            if (it != null) {
+                showToast("Report failed ${it.message}")
+                return@report
+            }
+            showToast("Report success")
         }
     }
 

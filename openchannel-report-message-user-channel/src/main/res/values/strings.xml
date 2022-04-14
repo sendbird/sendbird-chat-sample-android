@@ -30,4 +30,5 @@
     <string name="channel_error">error: Channel null</string>
     <string name="report">Report</string>
     <string name="report_message">Report message</string>
+    <string name="report_user">Report user</string>
 </resources>
