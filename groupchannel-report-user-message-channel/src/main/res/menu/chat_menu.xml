@@ -22,6 +22,9 @@
             <item
                 android:id="@+id/invite"
                 android:title="@string/invite_members" />
+            <item
+                android:id="@+id/report_channel"
+                android:title="@string/report_channel" />
         </menu>
     </item>
 </menu>

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.BaseChannel
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.collection.MessageCollection
@@ -24,6 +25,7 @@ import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
+import com.sendbird.android.user.User
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.report.R
@@ -130,6 +132,18 @@ class GroupChannelChatActivity : AppCompatActivity() {
                         return@setOnMenuItemClickListener true
                     }
                 }
+                val reportMessageMenu = contextMenu.add(Menu.NONE, 3, 3, "Report Message")
+                reportMessageMenu.setOnMenuItemClickListener {
+                    reportMessage(baseMessage)
+                    return@setOnMenuItemClickListener true
+                }
+                val reportUserMenu = contextMenu.add(Menu.NONE, 4, 4, "Report User")
+                reportUserMenu.setOnMenuItemClickListener {
+                    val user = baseMessage.sender ?: return@setOnMenuItemClickListener true
+                    reportUser(user)
+                    return@setOnMenuItemClickListener true
+                }
+
             }
         }, {
             showListDialog(
@@ -156,6 +170,36 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun reportMessage(baseMessage: BaseMessage) {
+        currentGroupChannel?.reportMessage(baseMessage, BaseChannel.ReportCategory.SUSPICIOUS, "Report description") handler@{
+            if (it != null) {
+                showToast("Failed")
+                return@handler
+            }
+            showToast("Report sent")
+        }
+    }
+
+    private fun reportUser(user: User) {
+        currentGroupChannel?.reportUser(user, BaseChannel.ReportCategory.SUSPICIOUS, "report description") handler@{
+            if (it != null) {
+                showToast("Failed")
+                return@handler
+            }
+            showToast("Report sent")
+        }
+    }
+
+    private fun reportChannel() {
+        currentGroupChannel?.report(BaseChannel.ReportCategory.SUSPICIOUS, "Report description") handler@{
+            if (it != null) {
+                showToast("Failed")
+                return@handler
+            }
+            showToast("Report sent")
+        }
     }
 
     private fun getChannel(channelUrl: String?) {
@@ -332,6 +376,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     getString(R.string.cancel),
                     { updateChannelView(it, channel) },
                 )
+                true
+            }
+
+            R.id.report_channel -> {
+                reportChannel()
                 true
             }
 
