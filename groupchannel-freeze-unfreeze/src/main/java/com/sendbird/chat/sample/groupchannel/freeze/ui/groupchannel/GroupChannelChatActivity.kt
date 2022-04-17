@@ -12,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.BaseChannel
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.collection.MessageCollection
 import com.sendbird.android.collection.MessageCollectionInitPolicy
 import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.exception.SendbirdException
+import com.sendbird.android.handler.GroupChannelHandler
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.handler.MessageCollectionInitHandler
 import com.sendbird.android.message.BaseMessage
@@ -174,17 +176,35 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 currentGroupChannel = groupChannel
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
+                addFrozenStatusChannelHandler()
             }
         }
     }
 
+    private fun addFrozenStatusChannelHandler() {
+        SendbirdChat.addChannelHandler(FrozenChannelHandlerIdentifier, object : GroupChannelHandler() {
+            override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {
+            }
+
+            override fun onChannelFrozen(channel: BaseChannel) {
+                super.onChannelFrozen(channel)
+                setChannelTitle()
+                invalidateOptionsMenu()
+            }
+        })
+    }
+
     private fun setChannelTitle() {
         val currentChannel = currentGroupChannel
-        if (channelTitle == TextUtils.CHANNEL_DEFAULT_NAME && currentChannel != null) {
-            binding.toolbar.title = TextUtils.getGroupChannelTitle(currentChannel)
+        var title = if (channelTitle == TextUtils.CHANNEL_DEFAULT_NAME && currentChannel != null) {
+            TextUtils.getGroupChannelTitle(currentChannel)
         } else {
-            binding.toolbar.title = channelTitle
+            channelTitle
         }
+        if (currentChannel?.isFrozen == true) {
+            title += " Frozen"
+        }
+        binding.toolbar.title = title
     }
 
     private fun createMessageCollection(timeStamp: Long) {
@@ -285,6 +305,49 @@ class GroupChannelChatActivity : AppCompatActivity() {
             if (e != null) {
                 showToast("${e.message}")
             }
+        }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val channel = currentGroupChannel ?: return super.onPrepareOptionsMenu(menu)
+        menu.clear()
+        if (channel.isFrozen) {
+            val option = menu.add(Menu.NONE, 0, 0, "Unfreeze")
+            option.setOnMenuItemClickListener {
+                unfreezeChannel()
+                return@setOnMenuItemClickListener true
+            }
+        } else {
+            val option = menu.add(Menu.NONE, 0, 0, "Freeze")
+            option.setOnMenuItemClickListener {
+                freezeChannel()
+                return@setOnMenuItemClickListener true
+            }
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    private fun unfreezeChannel() {
+        currentGroupChannel?.unfreeze {
+            if (it != null) {
+                showToast("Unfreeze failed: ${it.message}")
+                return@unfreeze
+            }
+            showToast("Channel unfrozen")
+            setChannelTitle()
+            invalidateOptionsMenu()
+        }
+    }
+
+    private fun freezeChannel() {
+        currentGroupChannel?.freeze {
+            if (it != null) {
+                showToast("Freeze failed: ${it.message}")
+                return@freeze
+            }
+            showToast("Channel frozen")
+            setChannelTitle()
+            invalidateOptionsMenu()
         }
     }
 
@@ -508,6 +571,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         messageCollection?.dispose()
+        SendbirdChat.removeChannelHandler(FrozenChannelHandlerIdentifier)
         SendbirdChat.autoBackgroundDetection = true
     }
 
@@ -620,5 +684,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val FrozenChannelHandlerIdentifier = "FreezeStatusHandler"
     }
 }
