@@ -116,6 +116,7 @@ class SelectUserActivity : AppCompatActivity() {
         }
         val params = GroupChannelCreateParams()
             .addUserIds(adapter.selectUserIdSet.toList())
+            .setOperators(SendbirdChat.currentUser?.let { listOf(it) } ?: emptyList())
         GroupChannel.createChannel(params) createChannelLabel@{ groupChannel, e ->
             if (e != null) {
                 showToast("${e.message}")

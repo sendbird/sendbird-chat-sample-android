@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.user.Member
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.mute.R
@@ -36,7 +37,9 @@ class ChatMemberListActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        adapter = ChatMemberListAdapter { _, _ -> }
+        adapter = ChatMemberListAdapter { member, _ ->
+            muteUnMuteMember(member)
+        }
         binding.recyclerviewMember.adapter = adapter
         binding.recyclerviewMember.addItemDecoration(
             DividerItemDecoration(
@@ -44,6 +47,27 @@ class ChatMemberListActivity : AppCompatActivity() {
                 RecyclerView.VERTICAL
             )
         )
+    }
+
+    private fun muteUnMuteMember(member: Member) {
+        val channel = currentChannel ?: return
+        if (member.isMuted) {
+            channel.unmuteUser(member) {
+                if (it != null) {
+                    showToast("Can't unmute member: ${it.message}")
+                    return@unmuteUser
+                }
+                showToast("Member unmuted")
+            }
+            return
+        }
+        channel.muteUser(member) {
+            if (it != null) {
+                showToast("Can't mute member: ${it.message}")
+                return@muteUser
+            }
+            showToast("Member muted")
+        }
     }
 
     private fun getGroupChannel() {
