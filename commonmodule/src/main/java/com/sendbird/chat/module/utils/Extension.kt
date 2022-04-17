@@ -31,11 +31,11 @@ fun Context.showToast(msgId: Int) {
 }
 
 fun Fragment.showToast(msg: String) {
-    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
 }
 
 fun Fragment.showToast(msgId: Int) {
-    Toast.makeText(context, getString(msgId), Toast.LENGTH_SHORT).show()
+    Toast.makeText(requireContext(), getString(msgId), Toast.LENGTH_SHORT).show()
 }
 
 fun Context.showLongToast(msgId: Int) {
