@@ -1,6 +1,32 @@
 # Sendbird Chat sample for Android
 
-This repository provides feature-level Chat samples with Kotlin
+## Overview
+
+This repository provides feature-level Chat samples with Kotlin to demonstrate how to use the [Sendbird Chat SDK](https://sendbird.com/docs/chat).
+
+## Requirements
+
+Android Studio 2.0+
+
+## Running the app
+
+Open this project in Android Studio and select 'run configurations' to view a dropdown of feature-level Chat samples to choose from.
+
+Once a sample is chosen, create a device and run the app on an Android device or Android emulator.
+
+### Language
+
++ Kotlin
+
+### Version
+
++ Android SDK
+    + compileSdk: 32
+    + minSdk: 26
+    + targetSdk: 32
++ Gradle Version
+    + gradle: 7.2
+    + android gradle plugin: 4.2.0
 
 ## Project structure
 
@@ -32,15 +58,15 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── groupchannel
 │   ├── main
 │   └── user
-├── groupchannel-user-online
-│   ├── groupchannel
-│   ├── main
-│   └── user
 ├── groupchannel-onlinemembers
 │   ├── groupchannel
 │   ├── main
 │   └── user
 ├── groupchannel-membersandoperators
+│   ├── groupchannel
+│   ├── main
+│   └── user
+├── groupchannel-banned-and-muted-users
 │   ├── groupchannel
 │   ├── main
 │   └── user
@@ -54,6 +80,9 @@ This repository provides feature-level Chat samples with Kotlin
 │   ├── openchannel
 │   └── main
 ├── openchannel-delete-message
+│   ├── openchannel
+│   └── main
+├── openchannel-copy-message
 │   ├── openchannel
 │   └── main
 ├── openchannel-mention-user
@@ -84,34 +113,10 @@ This repository provides feature-level Chat samples with Kotlin
 - groupchannel-readmessage
 - groupchannel-onlinemembers
 - groupchannel-membersandoperators
+- groupchannel-banned-and-muted-users
 - groupchannel-user-online
 - openchannel-user-online
 - openchannel-delete-message
 - openchannel-update-message
-- openchannel-mention-user ...
-
-### Language
-
-+ Kotlin
-
-### Version
-
-+ Android SDK
-    + compileSdk: 32
-    + minSdk: 26
-    + targetSdk: 32
-+ Gradle Version
-    + gradle: 7.2
-    + android gradle plugin: 4.2.0
-
-## How to add new feature sample
-
-1. Copy openchannel-basic or groupchannel-basic
-2. Paste on the same layer
-3. Change the name of project
-4. Include copied module to setting.gradle
-5. Rename package
-6. Change the applicationId in the build.gradle of the created project.
-
-+ When the main activity needs to be updated to another activity, the <intent-filter> of
-  MainActivity must be moved as well the corresponding activity.
+- openchannel-copy-message
+...

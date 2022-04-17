@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.useronline.ui.groupchannel
+package com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.groupchannel
 
 import android.Manifest
 import android.content.Intent
@@ -26,10 +26,10 @@ import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
-import com.sendbird.chat.sample.groupchannel.useronline.R
-import com.sendbird.chat.sample.groupchannel.useronline.databinding.ActivityGroupChannelChatBinding
-import com.sendbird.chat.sample.groupchannel.useronline.ui.user.ChatMemberListActivity
-import com.sendbird.chat.sample.groupchannel.useronline.ui.user.SelectUserActivity
+import com.sendbird.chat.sample.groupchannel.R
+import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.user.ChatMemberListActivity
+import com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.user.SelectUserActivity
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
@@ -240,7 +240,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun loadPreviousMessageItems() {
         val collection = messageCollection ?: return
-        if (collection.hasPrevious) {
+        if (collection.hasPrevious()) {
             collection.loadPrevious { messages, e ->
                 if (e != null) {
                     showToast("${e.message}")
@@ -253,7 +253,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun loadNextMessageItems() {
         val collection = messageCollection ?: return
-        if (collection.hasNext) {
+        if (collection.hasNext()) {
             collection.loadNext { messages, e ->
                 if (e != null) {
                     showToast("${e.message}")
@@ -420,7 +420,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
         channel.sendUserMessage(params, null)
-        if (collection.hasNext) {
+        if (collection.hasNext()) {
             createMessageCollection(Long.MAX_VALUE)
         }
     }
@@ -453,7 +453,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
             channel.sendFileMessage(
                 params,
             ) { _, _ -> }
-            if (collection.hasNext) {
+            if (collection.hasNext()) {
                 createMessageCollection(Long.MAX_VALUE)
             }
         } else {

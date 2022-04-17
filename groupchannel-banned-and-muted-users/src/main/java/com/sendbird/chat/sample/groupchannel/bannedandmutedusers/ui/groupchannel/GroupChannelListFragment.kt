@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.useronline.ui.groupchannel
+package com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.groupchannel
 
 import android.content.Intent
 import android.os.Bundle
@@ -16,8 +16,8 @@ import com.sendbird.android.params.GroupChannelCollectionCreateParams
 import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.groupchannel.useronline.databinding.FragmentGroupChannelListBinding
-import com.sendbird.chat.sample.groupchannel.useronline.ui.user.SelectUserActivity
+import com.sendbird.chat.sample.groupchannel.databinding.FragmentGroupChannelListBinding
+import com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.user.SelectUserActivity
 
 class GroupChannelListFragment :
     BaseFragment<FragmentGroupChannelListBinding>(FragmentGroupChannelListBinding::inflate) {
@@ -28,12 +28,9 @@ class GroupChannelListFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         init()
         initRecyclerView()
-    }
-
-    override fun onResume() {
-        super.onResume()
         createCollection()
     }
 
@@ -114,24 +111,18 @@ class GroupChannelListFragment :
                 }
             })
         }
-        loadMore(true)
+        loadMore()
     }
 
-    private fun loadMore(isRefreshing: Boolean = false) {
+    private fun loadMore() {
         val collection = groupChannelCollection ?: return
-        if (collection.hasMore) {
+        if (collection.hasMore()) {
             collection.loadMore loadMoreLabel@{ channelList, e ->
                 if (e != null || channelList == null) {
                     showToast("${e?.message}")
                     return@loadMoreLabel
                 }
-                if (channelList.isNotEmpty()) {
-                    if (isRefreshing) {
-                        adapter.addChannels(emptyList())
-                    }
-                    adapter.addChannels(channelList)
-                }
-
+                adapter.addChannels(channelList)
             }
         }
     }
