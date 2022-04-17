@@ -85,6 +85,9 @@ Once a sample is chosen, create a device and run the app on an Android device or
 ├── openchannel-copy-message
 │   ├── openchannel
 │   └── main
+├── openchannel-mention-user
+│   ├── openchannel
+│   └── main
 └── openchannel-feature-a
 ...
 
