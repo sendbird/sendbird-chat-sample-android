@@ -2,7 +2,8 @@
 
 ## Overview
 
-This repository provides feature-level Chat samples with Kotlin to demonstrate how to use the [Sendbird Chat SDK](https://sendbird.com/docs/chat).
+This repository provides feature-level Chat samples with Kotlin to demonstrate how to use
+the [Sendbird Chat SDK](https://sendbird.com/docs/chat).
 
 ## Requirements
 
@@ -10,7 +11,8 @@ Android Studio 2.0+
 
 ## Running the app
 
-Open this project in Android Studio and select 'run configurations' to view a dropdown of feature-level Chat samples to choose from.
+Open this project in Android Studio and select 'run configurations' to view a dropdown of
+feature-level Chat samples to choose from.
 
 Once a sample is chosen, create a device and run the app on an Android device or Android emulator.
 
@@ -74,6 +76,10 @@ Once a sample is chosen, create a device and run the app on an Android device or
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── groupchannel-freeze-unfreeze
+│   ├── groupchannel
+│   ├── main
+│   └── user
 ├── openchannel-basic
 │   ├── openchannel
 │   └── main
@@ -123,5 +129,4 @@ Once a sample is chosen, create a device and run the app on an Android device or
 - openchannel-user-online
 - openchannel-delete-message
 - openchannel-update-message
-- openchannel-copy-message
-...
+- openchannel-copy-message ...
