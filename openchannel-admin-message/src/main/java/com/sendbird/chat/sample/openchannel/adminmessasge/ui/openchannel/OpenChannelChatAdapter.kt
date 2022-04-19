@@ -8,14 +8,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.message.AdminMessage
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.toTime
-import com.sendbird.chat.sample.openchannel.adminmessasge.databinding.ListItemChatImageReceiveBinding
-import com.sendbird.chat.sample.openchannel.adminmessasge.databinding.ListItemChatImageSendBinding
-import com.sendbird.chat.sample.openchannel.adminmessasge.databinding.ListItemChatReceiveBinding
-import com.sendbird.chat.sample.openchannel.adminmessasge.databinding.ListItemChatSendBinding
+import com.sendbird.chat.sample.openchannel.adminmessasge.databinding.*
 
 class OpenChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
@@ -51,6 +49,7 @@ class OpenChannelChatAdapter(
         const val VIEW_TYPE_RECEIVE = 1
         const val VIEW_TYPE_SEND_IMAGE = 2
         const val VIEW_TYPE_RECEIVE_IMAGE = 3
+        const val VIEW_TYPE_ADMIN = 4
     }
 
     private val baseMessageList = mutableListOf<BaseMessage>()
@@ -87,6 +86,14 @@ class OpenChannelChatAdapter(
                 )
             )
 
+            VIEW_TYPE_ADMIN -> return GroupChatAdminViewHolder(
+                ListItemChatAdminBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+
             else -> return GroupChatSendViewHolder(
                 ListItemChatSendBinding.inflate(
                     LayoutInflater.from(parent.context),
@@ -106,12 +113,16 @@ class OpenChannelChatAdapter(
             is GroupChatImageSendViewHolder -> holder.bind(getItem(position) as FileMessage)
 
             is GroupChatImageReceiveViewHolder -> holder.bind(getItem(position) as FileMessage)
+
+            is GroupChatAdminViewHolder -> holder.bind(getItem(position))
         }
     }
 
     override fun getItemViewType(position: Int): Int {
         val currentUser = SendbirdChat.currentUser
-        return if (currentUser != null) {
+        return if (getItem(position) is AdminMessage) {
+            VIEW_TYPE_ADMIN
+        } else if (currentUser != null) {
             if (getItem(position).sender?.userId == currentUser.userId) {
                 if (getItem(position) is FileMessage) {
                     VIEW_TYPE_SEND_IMAGE
@@ -294,6 +305,14 @@ class OpenChannelChatAdapter(
             binding.chatBubbleImageReceive.setImageUrl(message.url, message.plainUrl)
             binding.textviewTime.text = message.createdAt.toTime()
             binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
+        }
+    }
+
+    inner class GroupChatAdminViewHolder(private val binding: ListItemChatAdminBinding) :
+        BaseViewHolder(binding) {
+        fun bind(message: BaseMessage) {
+            binding.chatBubbleAdminView.setText(message.message)
+            binding.dateTagView.setMillisecond(message.createdAt)
         }
     }
 }
