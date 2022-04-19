@@ -136,8 +136,7 @@ class ChatMemberListActivity : AppCompatActivity() {
             return
         }
         val groupChannel = currentChannel ?: return
-        val listQuery = groupChannel.createMemberListQuery()
-        listQuery.mutedMemberFilter = GroupChannelMemberListQuery.MutedMemberFilter.MUTED
+        val listQuery = groupChannel.createBannedUserListQuery()
         adapter.submitList(emptyList())
         loadNextUsers = {
             if (listQuery.hasNext) {
@@ -161,7 +160,8 @@ class ChatMemberListActivity : AppCompatActivity() {
             return
         }
         val groupChannel = currentChannel ?: return
-        val listQuery = groupChannel.createBannedUserListQuery()
+        val listQuery = groupChannel.createMemberListQuery()
+        listQuery.mutedMemberFilter = GroupChannelMemberListQuery.MutedMemberFilter.MUTED
         adapter.submitList(emptyList())
         loadNextUsers = {
             if (listQuery.hasNext) {

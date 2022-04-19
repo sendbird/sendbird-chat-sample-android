@@ -1,11 +1,17 @@
 package com.sendbird.chat.sample.groupchannel.ban.ui.user
 
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.user.Member
+import com.sendbird.android.user.User
+import com.sendbird.android.user.query.GroupChannelMemberListQuery
+import com.sendbird.android.user.query.UserListQuery
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.ban.R
@@ -16,6 +22,7 @@ class ChatMemberListActivity : AppCompatActivity() {
     private lateinit var adapter: ChatMemberListAdapter
     private var currentChannel: GroupChannel? = null
     private var channelUrl: String? = null
+    private var areBannedUsersDisplayed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +43,9 @@ class ChatMemberListActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        adapter = ChatMemberListAdapter { _, _ -> }
+        adapter = ChatMemberListAdapter { member, view, _ ->
+            createMenuForMember(member, view)
+        }
         binding.recyclerviewMember.adapter = adapter
         binding.recyclerviewMember.addItemDecoration(
             DividerItemDecoration(
@@ -65,13 +74,152 @@ class ChatMemberListActivity : AppCompatActivity() {
         }
     }
 
+    private fun createMenuForMember(member: User, view: View) {
+        view.setOnCreateContextMenuListener { contextMenu, _, _ ->
+            if (areBannedUsersDisplayed) {
+                val menu = contextMenu.add(Menu.NONE, 0, 0, "UnBan")
+                menu.setOnMenuItemClickListener {
+                    unbanUser(member)
+                    return@setOnMenuItemClickListener true
+                }
+            } else {
+                val menu = contextMenu.add(Menu.NONE, 0, 0, "Ban")
+                menu.setOnMenuItemClickListener {
+                    banUser(member)
+                    return@setOnMenuItemClickListener true
+                }
+            }
+        }
+
+    }
+
+    private fun unbanUser(member: User) {
+        val groupChannel = currentChannel ?: return
+        //we ban the user for an indefinitely period of time
+        groupChannel.unbanUser(member) handler@{
+            if (it != null) {
+                showToast("Cannot unban user: ${it.message}")
+                return@handler
+            }
+            retrieveAndDisplayActiveUsers()
+            showToast("User unbanned")
+        }
+    }
+
+    private fun banUser(member: User) {
+        val groupChannel = currentChannel ?: return
+        //we ban the user for an indefinitely period of time
+        groupChannel.banUser(member, "ban reason", -1) handler@{
+            if (it != null) {
+                showToast("Cannot ban user: ${it.message}")
+                return@handler
+            }
+            retrieveAndDisplayBannedUsers()
+            showToast("User banned")
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.group_channel_member_menu, menu)
+        return true
+    }
+
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 finish()
                 true
             }
+            R.id.active_users -> {
+                retrieveAndDisplayActiveUsers()
+                true
+            }
+            R.id.banned -> {
+                retrieveAndDisplayBannedUsers()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun retrieveAndDisplayActiveUsers() {
+        val groupChannel = currentChannel ?: return
+        areBannedUsersDisplayed = false
+        val query = groupChannel.createMemberListQuery()
+        val members = mutableListOf<Member>()
+        groupChannel.getMembers(query, members) {
+            adapter.submitList(members as List<User>?)
+        }
+    }
+
+    private fun retrieveAndDisplayBannedUsers() {
+        val groupChannel = currentChannel ?: return
+        areBannedUsersDisplayed = true
+        val query = groupChannel.createBannedUserListQuery()
+        val bannedUsers = mutableListOf<User>()
+        groupChannel.getUsers(query, bannedUsers) {
+            adapter.submitList(bannedUsers)
+        }
+    }
+
+    private fun GroupChannel.getMembers(query: GroupChannelMemberListQuery, allUsers: MutableList<Member>, onQueryFinished: () -> Unit) {
+        query.getMembers internal@{ users ->
+            if (users.isEmpty()) {
+                onQueryFinished.invoke()
+                return@internal
+            }
+            allUsers.addAll(users)
+            getMembers(query, allUsers, onQueryFinished)
+        }
+    }
+
+    private fun GroupChannelMemberListQuery.getMembers(onUsersReceived: (List<Member>) -> Unit) {
+        if (hasNext) {
+            next { result, exception ->
+                if (exception != null) {
+                    exception.printStackTrace()
+                    onUsersReceived(emptyList())
+                    return@next
+                }
+                if (result == null) {
+                    onUsersReceived(emptyList())
+                    return@next
+                }
+                onUsersReceived(result)
+            }
+            return
+        }
+        onUsersReceived(emptyList())
+    }
+
+    private fun GroupChannel.getUsers(query: UserListQuery, allUsers: MutableList<User>, onQueryFinished: () -> Unit) {
+        query.getUsers internal@{ users ->
+            if (users.isEmpty()) {
+                onQueryFinished.invoke()
+                return@internal
+            }
+            allUsers.addAll(users)
+            getUsers(query, allUsers, onQueryFinished)
+        }
+    }
+
+    private fun UserListQuery.getUsers(onUsersReceived: (List<User>) -> Unit) {
+        if (hasNext) {
+            next { result, exception ->
+                if (exception != null) {
+                    exception.printStackTrace()
+                    onUsersReceived(emptyList())
+                    return@next
+                }
+                if (result == null) {
+                    onUsersReceived(emptyList())
+                    return@next
+                }
+                onUsersReceived(result)
+            }
+            return
+        }
+        onUsersReceived(emptyList())
     }
 }
