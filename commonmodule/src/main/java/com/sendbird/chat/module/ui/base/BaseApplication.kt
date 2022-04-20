@@ -11,7 +11,7 @@ import com.sendbird.android.params.InitParams
 import com.sendbird.chat.module.utils.SharedPreferenceUtils
 import com.sendbird.chat.module.utils.changeValue
 
-const val SENDBIRD_APP_ID = "B745E68D-A949-4CE5-9ADE-0013ABE31685"
+const val SENDBIRD_APP_ID = "0506686A-9918-4F70-A91F-ADCD1691705E"
 
 open class BaseApplication : Application() {
     private val initMutableLiveData: MutableLiveData<Boolean> =
