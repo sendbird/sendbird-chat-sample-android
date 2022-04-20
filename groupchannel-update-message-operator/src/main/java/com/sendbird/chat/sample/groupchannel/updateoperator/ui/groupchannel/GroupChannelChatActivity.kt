@@ -24,6 +24,8 @@ import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
+import com.sendbird.android.user.User
+import com.sendbird.android.user.query.OperatorListQuery
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.updateoperator.R
@@ -42,6 +44,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private var messageCollection: MessageCollection? = null
     private var channelTSHashMap = ConcurrentHashMap<String, Long>()
     private var isCollectionInitialized = false
+
+    private val operators = mutableListOf<String>()
 
     private val startForResultFile =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
@@ -101,7 +105,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
         adapter = GroupChannelChatAdapter({ baseMessage, view ->
             view.setOnCreateContextMenuListener { contextMenu, _, _ ->
                 val currentUser = SendbirdChat.currentUser
-                if (currentUser != null && baseMessage.sender?.userId == currentUser.userId) {
+                if (currentUser != null && baseMessage.sender?.userId == currentUser.userId || currentUser != null && operators.contains(currentUser.userId)) {
                     val deleteMenu =
                         contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
                     deleteMenu.setOnMenuItemClickListener {
@@ -175,7 +179,48 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 currentGroupChannel = groupChannel
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
+                getOperators { users ->
+                    operators.apply {
+                        clear()
+                        addAll(users.map { it.userId })
+                    }
+                }
             }
+        }
+    }
+
+    private fun getOperators(onOperatorsReceived: (List<User>) -> Unit) {
+        val channel = currentGroupChannel ?: run {
+            onOperatorsReceived(emptyList())
+            return
+        }
+        val query = channel.createOperatorListQuery()
+        val finalList = mutableListOf<User>()
+        getAllOperators(query, finalList) { onOperatorsReceived(finalList) }
+    }
+
+    private fun getAllOperators(query: OperatorListQuery, finalList: MutableList<User>, onQueryFinished: () -> Unit) {
+        query.getOperators {
+            finalList.addAll(it)
+            if (it.isEmpty()) {
+                onQueryFinished()
+            } else {
+                getAllOperators(query, finalList, onQueryFinished)
+            }
+        }
+    }
+
+    private fun OperatorListQuery.getOperators(onQueryFinished: (List<User>) -> Unit) {
+        if (hasNext) {
+            next { result, exception ->
+                if (exception != null) {
+                    onQueryFinished(emptyList())
+                    return@next
+                }
+                onQueryFinished(result ?: emptyList())
+            }
+        } else {
+            onQueryFinished(emptyList())
         }
     }
 
