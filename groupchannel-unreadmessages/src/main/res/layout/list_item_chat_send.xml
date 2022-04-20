@@ -55,14 +55,6 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageView
-        android:id="@+id/read_display"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:src="@drawable/ic_double_thick"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/textview_time" />
-
     <com.sendbird.chat.module.ui.ChatBubbleSendView
         android:id="@+id/chat_bubble_send"
         android:layout_width="wrap_content"

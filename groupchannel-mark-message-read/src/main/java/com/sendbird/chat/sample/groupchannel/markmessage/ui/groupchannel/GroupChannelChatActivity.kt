@@ -12,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.BaseChannel
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.collection.MessageCollection
 import com.sendbird.android.collection.MessageCollectionInitPolicy
 import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.exception.SendbirdException
+import com.sendbird.android.handler.GroupChannelHandler
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.handler.MessageCollectionInitHandler
 import com.sendbird.android.message.BaseMessage
@@ -140,7 +142,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     1 -> adapter.deletePendingMessages(mutableListOf(it))
                 }
             }
-        })
+        }) { message ->
+            currentGroupChannel?.getUnreadMemberCount(message) == 0
+        }
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
         recyclerObserver = ChatRecyclerDataObserver(binding.recyclerviewChat, adapter)
@@ -174,6 +178,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 currentGroupChannel = groupChannel
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
+                addReadHandler()
             }
         }
     }
@@ -236,6 +241,20 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     }
                 )
             }
+    }
+
+    private fun addReadHandler() {
+        SendbirdChat.addChannelHandler(ChatReadHandler, object : GroupChannelHandler() {
+            override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {
+            }
+
+            override fun onReadStatusUpdated(channel: GroupChannel) {
+                if (channel.url == currentGroupChannel?.url) {
+                    if (channel.url != currentGroupChannel?.url) return
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        })
     }
 
     private fun loadPreviousMessageItems() {
@@ -620,5 +639,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val ChatReadHandler = "chat_read_handler"
     }
 }

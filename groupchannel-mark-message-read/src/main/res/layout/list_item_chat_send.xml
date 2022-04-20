@@ -41,6 +41,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/chat_bubble_send" />
 
+    <ImageView
+        android:id="@+id/read_display"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:src="@drawable/ic_double_thick"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/textview_time" />
+
     <TextView
         android:id="@+id/textview_time"
         android:layout_width="wrap_content"

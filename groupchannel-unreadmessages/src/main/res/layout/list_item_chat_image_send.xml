@@ -35,14 +35,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/chat_bubble_image_send"
         app:layout_constraintEnd_toStartOf="@+id/chat_bubble_image_send" />
 
-    <ImageView
-        android:id="@+id/read_display"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:src="@drawable/ic_double_thick"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/textview_time" />
-
     <com.sendbird.chat.module.ui.ChatErrorButton
         android:id="@+id/chat_image_error_button"
         android:layout_width="wrap_content"

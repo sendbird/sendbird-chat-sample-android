@@ -23,29 +23,14 @@ import com.sendbird.android.handler.MessageCollectionInitHandler
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.android.message.UserMessage
-import com.sendbird.android.params.FileMessageCreateParams
-import com.sendbird.android.params.GroupChannelUpdateParams
-import com.sendbird.android.params.MessageCollectionCreateParams
-import com.sendbird.android.params.MessageListParams
-import com.sendbird.android.params.UserMessageCreateParams
-import com.sendbird.android.params.UserMessageUpdateParams
+import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
-import com.sendbird.chat.module.utils.ChatRecyclerDataObserver
-import com.sendbird.chat.module.utils.Constants
-import com.sendbird.chat.module.utils.FileUtils
-import com.sendbird.chat.module.utils.SharedPreferenceUtils
-import com.sendbird.chat.module.utils.TextUtils
-import com.sendbird.chat.module.utils.copy
-import com.sendbird.chat.module.utils.showAlertDialog
-import com.sendbird.chat.module.utils.showInputDialog
-import com.sendbird.chat.module.utils.showListDialog
-import com.sendbird.chat.module.utils.showToast
+import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
-import com.sendbird.chat.sample.groupchannel.readmessage.ui.ReadMessageHandler
 import com.sendbird.chat.sample.groupchannel.readmessage.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.readmessage.ui.user.SelectUserActivity
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
@@ -205,16 +190,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 currentGroupChannel = groupChannel
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
-                addChannelReadStatusHandler()
             }
         }
-    }
-
-    private fun addChannelReadStatusHandler() {
-        SendbirdChat.addChannelHandler(ReadStatusChannelHandlerId, ReadMessageHandler {
-            //callback called when the read status of the channel changed
-            //used this to update the message list
-        })
     }
 
     private fun setChannelTitle() {
