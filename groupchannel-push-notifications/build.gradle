@@ -57,6 +57,9 @@ dependencies {
     implementation "io.coil-kt:coil:$coilVersion"
     //
 
+    //FCM
+    implementation 'com.google.firebase:firebase-messaging:23.0.3'
+
     implementation "androidx.legacy:legacy-support-v4:$legacySupportVersion"
     implementation project(path: ':commonmodule')
 
