@@ -122,7 +122,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
                     reportUserMessage(baseMessage)
                     return@setOnMenuItemClickListener true
                 }
-                val reportUserOption = contextMenu.add(Menu.NONE, 3, 3, getString(R.string.report_user))
+                val reportUserOption = contextMenu.add(Menu.NONE, 4, 4, getString(R.string.report_user))
                 reportUserOption.setOnMenuItemClickListener {
                     val userToReport = baseMessage.sender ?: return@setOnMenuItemClickListener true
                     reportUser(userToReport)
