@@ -106,10 +106,15 @@ class ChatMemberListActivity : AppCompatActivity() {
         }
     }
 
-    private fun banUser(member: User) {
+    /**
+     * Ban an user from channel
+     *
+     * @param member member of channel which is banned
+     * @param periodToBan duration of banning in second, default value -1 which represent an undefined period of time
+     */
+    private fun banUser(member: User, periodToBan: Int = -1) {
         val groupChannel = currentChannel ?: return
-        //we ban the user for an indefinitely period of time
-        groupChannel.banUser(member, "ban reason", -1) handler@{
+        groupChannel.banUser(member, "ban reason", periodToBan) handler@{
             if (it != null) {
                 showToast("Cannot ban user: ${it.message}")
                 return@handler
