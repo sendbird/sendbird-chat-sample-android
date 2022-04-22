@@ -111,6 +111,9 @@ Once a sample is chosen, create a device and run the app on an Android device or
 ├── openchannel-report-message-user-channel
 │   ├── openchannel
 │   └── main
+├── openchannel-admin-message
+│   ├── openchannel
+│   └── main
 └── openchannel-feature-a
 ...
 
