@@ -70,7 +70,31 @@ Once a sample is chosen, create a device and run the app on an Android device or
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── groupchannel-groupchannel-add-remove-operators
+│   ├── groupchannel
+│   ├── main
+│   └── user
 ├── groupchannel-mention-members
+│   ├── groupchannel
+│   ├── main
+│   └── user
+├── groupchannel-report-user-message-channel
+│   ├── groupchannel
+│   ├── main
+│   └── user
+├── groupchannel-freeze-unfreeze
+│   ├── groupchannel
+│   ├── main
+│   └── user
+├── groupchannel-mute-user
+│   ├── groupchannel
+│   ├── main
+│   └── user
+├── groupchannel-admin-message
+│   ├── groupchannel
+│   ├── main
+│   └── user
+├── groupchannel-ban-unban-user
 │   ├── groupchannel
 │   ├── main
 │   └── user
@@ -94,6 +118,12 @@ Once a sample is chosen, create a device and run the app on an Android device or
 │   ├── openchannel
 │   └── main
 ├── openchannel-mention-user
+│   ├── openchannel
+│   └── main
+├── openchannel-report-message-user-channel
+│   ├── openchannel
+│   └── main
+├── openchannel-admin-message
 │   ├── openchannel
 │   └── main
 └── openchannel-feature-a
