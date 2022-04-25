@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.unreadmessages.ui.groupchannel
+package com.sendbird.chat.sample.groupchannel.markmessage.ui.groupchannel
 
 import android.Manifest
 import android.content.Intent
@@ -12,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.BaseChannel
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.collection.MessageCollection
 import com.sendbird.android.collection.MessageCollectionInitPolicy
 import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.exception.SendbirdException
+import com.sendbird.android.handler.GroupChannelHandler
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.handler.MessageCollectionInitHandler
 import com.sendbird.android.message.BaseMessage
@@ -26,11 +28,10 @@ import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
-import com.sendbird.chat.sample.groupchannel.unreadmessages.R
-import com.sendbird.chat.sample.groupchannel.unreadmessages.databinding.ActivityGroupChannelChatBinding
-import com.sendbird.chat.sample.groupchannel.unreadmessages.ui.user.ChatMemberListActivity
-import com.sendbird.chat.sample.groupchannel.unreadmessages.ui.user.SelectUserActivity
-import java.util.*
+import com.sendbird.chat.sample.groupchannel.markmessage.R
+import com.sendbird.chat.sample.groupchannel.markmessage.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.groupchannel.markmessage.ui.user.ChatMemberListActivity
+import com.sendbird.chat.sample.groupchannel.markmessage.ui.user.SelectUserActivity
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
@@ -131,12 +132,6 @@ class GroupChannelChatActivity : AppCompatActivity() {
                         return@setOnMenuItemClickListener true
                     }
                 }
-                val readStatusMenu =
-                    contextMenu.add(Menu.NONE, 3, 4, getString(R.string.read_status))
-                readStatusMenu.setOnMenuItemClickListener {
-                    checkMessageReadStatus(baseMessage)
-                    return@setOnMenuItemClickListener true
-                }
             }
         }, {
             showListDialog(
@@ -147,7 +142,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     1 -> adapter.deletePendingMessages(mutableListOf(it))
                 }
             }
-        })
+        }) { message ->
+            currentGroupChannel?.getUnreadMemberCount(message) == 0
+        }
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
         recyclerObserver = ChatRecyclerDataObserver(binding.recyclerviewChat, adapter)
@@ -163,13 +160,6 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         })
-    }
-
-    private fun checkMessageReadStatus(message: BaseMessage) {
-        val unreadCount = currentGroupChannel?.getUnreadMemberCount(message)
-        val textToShow =
-            if (unreadCount == 0) "Message was read by all member" else "Message was not read by $unreadCount members"
-        showToast(textToShow)
     }
 
     private fun getChannel(channelUrl: String?) {
@@ -188,6 +178,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 currentGroupChannel = groupChannel
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
+                addReadHandler()
             }
         }
     }
@@ -250,6 +241,20 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     }
                 )
             }
+    }
+
+    private fun addReadHandler() {
+        SendbirdChat.addChannelHandler(ChatReadHandler, object : GroupChannelHandler() {
+            override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {
+            }
+
+            override fun onReadStatusUpdated(channel: GroupChannel) {
+                if (channel.url == currentGroupChannel?.url) {
+                    if (channel.url != currentGroupChannel?.url) return
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        })
     }
 
     private fun loadPreviousMessageItems() {
@@ -521,7 +526,6 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        SendbirdChat.removeChannelHandler(UnReadMessageHandlerId)
         messageCollection?.dispose()
         SendbirdChat.autoBackgroundDetection = true
     }
@@ -638,6 +642,6 @@ class GroupChannelChatActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val UnReadMessageHandlerId = UUID.randomUUID().toString()
+        private const val ChatReadHandler = "chat_read_handler"
     }
 }
