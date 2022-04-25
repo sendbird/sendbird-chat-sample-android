@@ -105,7 +105,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
         adapter = GroupChannelChatAdapter({ baseMessage, view ->
             view.setOnCreateContextMenuListener { contextMenu, _, _ ->
                 val currentUser = SendbirdChat.currentUser
-                if (currentUser != null && baseMessage.sender?.userId == currentUser.userId || currentUser != null && operators.contains(currentUser.userId)) {
+                if (currentUser != null && (baseMessage.sender?.userId == currentUser.userId || operators.contains(currentUser.userId))) {
                     val deleteMenu =
                         contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
                     deleteMenu.setOnMenuItemClickListener {
