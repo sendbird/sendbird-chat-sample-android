@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.groupchannel
+package com.sendbird.chat.sample.groupchannel.ban.ui.groupchannel
 
 import android.Manifest
 import android.content.Intent
@@ -26,10 +26,10 @@ import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
-import com.sendbird.chat.sample.groupchannel.R
-import com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.user.ChatMemberListActivity
-import com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.user.SelectUserActivity
-import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.groupchannel.ban.R
+import com.sendbird.chat.sample.groupchannel.ban.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.groupchannel.ban.ui.user.ChatMemberListActivity
+import com.sendbird.chat.sample.groupchannel.ban.ui.user.SelectUserActivity
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
