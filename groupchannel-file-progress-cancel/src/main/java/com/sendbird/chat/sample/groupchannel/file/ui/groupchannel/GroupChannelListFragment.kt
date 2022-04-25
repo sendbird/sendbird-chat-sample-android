@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.groupchannel
+package com.sendbird.chat.sample.groupchannel.file.ui.groupchannel
 
 import android.content.Intent
 import android.os.Bundle
@@ -16,8 +16,8 @@ import com.sendbird.android.params.GroupChannelCollectionCreateParams
 import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.user.SelectUserActivity
-import com.sendbird.chat.sample.groupchannel.databinding.FragmentGroupChannelListBinding
+import com.sendbird.chat.sample.groupchannel.file.databinding.FragmentGroupChannelListBinding
+import com.sendbird.chat.sample.groupchannel.file.ui.user.SelectUserActivity
 
 class GroupChannelListFragment :
     BaseFragment<FragmentGroupChannelListBinding>(FragmentGroupChannelListBinding::inflate) {
@@ -28,9 +28,12 @@ class GroupChannelListFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         init()
         initRecyclerView()
+    }
+
+    override fun onResume() {
+        super.onResume()
         createCollection()
     }
 
@@ -111,10 +114,10 @@ class GroupChannelListFragment :
                 }
             })
         }
-        loadMore()
+        loadMore(true)
     }
 
-    private fun loadMore() {
+    private fun loadMore(isRefreshing: Boolean = false) {
         val collection = groupChannelCollection ?: return
         if (collection.hasMore) {
             collection.loadMore loadMoreLabel@{ channelList, e ->
@@ -122,7 +125,13 @@ class GroupChannelListFragment :
                     showToast("${e?.message}")
                     return@loadMoreLabel
                 }
-                adapter.addChannels(channelList)
+                if (channelList.isNotEmpty()) {
+                    if (isRefreshing) {
+                        adapter.addChannels(emptyList())
+                    }
+                    adapter.addChannels(channelList)
+                }
+
             }
         }
     }
