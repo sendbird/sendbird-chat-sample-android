@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.channel.Role
 import com.sendbird.android.user.Member
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
@@ -48,7 +49,7 @@ class ChatMemberListActivity : AppCompatActivity() {
     }
 
     private fun changeMemberOperatorStatus(member: Member) {
-        if (member.role == Member.Role.OPERATOR) {
+        if (member.role == Role.OPERATOR) {
             removeOperatorRole(member)
             return
         }

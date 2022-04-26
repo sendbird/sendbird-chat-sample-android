@@ -46,7 +46,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
 
     //sendbird
-    implementation files('../libs/sendbird-sdk.aar')
+    implementation "com.sendbird.sdk:sendbird-chat:$sendbirdVersion"
     //
 
     //fragment
