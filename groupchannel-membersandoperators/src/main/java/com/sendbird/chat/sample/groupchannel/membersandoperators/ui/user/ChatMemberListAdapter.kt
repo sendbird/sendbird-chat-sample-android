@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.sendbird.android.channel.Role
 import com.sendbird.android.user.Member
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ListItemMemberBinding
@@ -61,7 +62,7 @@ class ChatMemberListAdapter(
                 }
             }
             binding.textviewName.text = member.nickname.ifBlank { member.userId }
-            if (member.role == Member.Role.OPERATOR) {
+            if (member.role == Role.OPERATOR) {
                 binding.textviewName.append(" (Operator)")
             }
         }

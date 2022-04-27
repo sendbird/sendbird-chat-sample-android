@@ -16,8 +16,8 @@ import com.sendbird.android.params.GroupChannelCollectionCreateParams
 import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.groupchannel.databinding.FragmentGroupChannelListBinding
 import com.sendbird.chat.sample.groupchannel.bannedandmutedusers.ui.user.SelectUserActivity
+import com.sendbird.chat.sample.groupchannel.databinding.FragmentGroupChannelListBinding
 
 class GroupChannelListFragment :
     BaseFragment<FragmentGroupChannelListBinding>(FragmentGroupChannelListBinding::inflate) {
@@ -116,7 +116,7 @@ class GroupChannelListFragment :
 
     private fun loadMore() {
         val collection = groupChannelCollection ?: return
-        if (collection.hasMore()) {
+        if (collection.hasMore) {
             collection.loadMore loadMoreLabel@{ channelList, e ->
                 if (e != null || channelList == null) {
                     showToast("${e?.message}")

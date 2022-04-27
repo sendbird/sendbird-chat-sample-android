@@ -27,6 +27,7 @@ open class BaseApplication : Application() {
 
     open fun sendbirdChatInit(){
         val initParams = InitParams(SENDBIRD_APP_ID, applicationContext, false)
+        initParams.logLevel = LogLevel.ERROR
         SendbirdChat.init(
             initParams,
             object : InitResultHandler {
@@ -40,7 +41,6 @@ open class BaseApplication : Application() {
                 }
 
                 override fun onInitSucceed() {
-                    SendbirdChat.setLoggerLevel(LogLevel.ERROR)
                     initMutableLiveData.changeValue(true)
                 }
             })
