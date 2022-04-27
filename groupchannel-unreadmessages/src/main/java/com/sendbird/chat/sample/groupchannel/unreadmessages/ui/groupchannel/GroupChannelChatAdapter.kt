@@ -1,7 +1,5 @@
 package com.sendbird.chat.sample.groupchannel.unreadmessages.ui.groupchannel
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +20,6 @@ import com.sendbird.chat.sample.groupchannel.unreadmessages.databinding.*
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
     private val failedItemClickListener: OnFailedItemClickListener,
-    private val checkMessageReadStatus: (BaseMessage) -> Boolean,
 ) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
 
     fun interface OnItemLongClickListener {
@@ -144,15 +141,13 @@ class GroupChannelChatAdapter(
 
         when (holder) {
             is GroupChatSendViewHolder -> {
-                val isRead = checkMessageReadStatus.invoke(getItem(position))
-                holder.bind(getItem(position), showDate, showTime, isRead)
+                holder.bind(getItem(position), showDate, showTime)
             }
             is GroupChatReceiveViewHolder -> {
                 holder.bind(getItem(position), showName, showDate, showTime)
             }
             is GroupChatImageSendViewHolder -> {
-                val isRead = checkMessageReadStatus.invoke(getItem(position))
-                holder.bind(getItem(position) as FileMessage, showDate, showTime, isRead)
+                holder.bind(getItem(position) as FileMessage, showDate, showTime)
             }
             is GroupChatImageReceiveViewHolder -> {
                 holder.bind(getItem(position) as FileMessage, showName, showDate, showTime)
@@ -326,16 +321,11 @@ class GroupChannelChatAdapter(
         fun bind(
             message: BaseMessage,
             showDate: Boolean,
-            showTime: Boolean,
-            isRead: Boolean
+            showTime: Boolean
         ) {
             if (message.sendingStatus == BaseMessage.SendingStatus.SUCCEEDED) {
                 binding.progressSend.visibility = View.GONE
                 binding.chatErrorButton.visibility = View.GONE
-                binding.readDisplay.apply {
-                    visibility = View.VISIBLE
-                    imageTintList = ColorStateList.valueOf(if (isRead) Color.BLUE else Color.GRAY)
-                }
                 if (showDate) {
                     binding.dateTagView.setMillisecond(message.createdAt)
                     binding.dateTagView.visibility = View.VISIBLE
@@ -351,7 +341,6 @@ class GroupChannelChatAdapter(
             } else {
                 binding.dateTagView.visibility = View.GONE
                 binding.textviewTime.visibility = View.GONE
-                binding.readDisplay.visibility = View.GONE
                 if (message.sendingStatus == BaseMessage.SendingStatus.PENDING) {
                     binding.progressSend.visibility = View.VISIBLE
                     binding.chatErrorButton.visibility = View.GONE
@@ -403,16 +392,11 @@ class GroupChannelChatAdapter(
             message: FileMessage,
             showDate: Boolean,
             showTime: Boolean,
-            isRead: Boolean
         ) {
             if (message.sendingStatus == BaseMessage.SendingStatus.SUCCEEDED) {
                 binding.chatBubbleImageSend.setImageUrl(message.url, message.plainUrl)
                 binding.progressImageSend.visibility = View.GONE
                 binding.chatImageErrorButton.visibility = View.GONE
-                binding.readDisplay.apply {
-                    visibility = View.VISIBLE
-                    imageTintList = ColorStateList.valueOf(if (isRead) Color.BLUE else Color.GRAY)
-                }
                 if (showDate) {
                     binding.dateTagView.setMillisecond(message.createdAt)
                     binding.dateTagView.visibility = View.VISIBLE
@@ -429,7 +413,6 @@ class GroupChannelChatAdapter(
                 binding.chatBubbleImageSend.setImageFile(message.messageParams?.file)
                 binding.dateTagView.visibility = View.GONE
                 binding.textviewTime.visibility = View.GONE
-                binding.readDisplay.visibility = View.GONE
                 if (message.sendingStatus == BaseMessage.SendingStatus.PENDING) {
                     binding.progressImageSend.visibility = View.VISIBLE
                     binding.chatImageErrorButton.visibility = View.GONE
