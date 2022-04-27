@@ -18,6 +18,7 @@ import com.sendbird.android.collection.MessageCollection
 import com.sendbird.android.collection.MessageCollectionInitPolicy
 import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.exception.SendbirdException
+import com.sendbird.android.handler.FileMessageWithProgressHandler
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.handler.MessageCollectionInitHandler
 import com.sendbird.android.message.BaseMessage
@@ -42,6 +43,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private var messageCollection: MessageCollection? = null
     private var channelTSHashMap = ConcurrentHashMap<String, Long>()
     private var isCollectionInitialized = false
+
+    private var fileMessage: FileMessage? = null
 
     private val startForResultFile =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
@@ -140,6 +143,10 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     1 -> adapter.deletePendingMessages(mutableListOf(it))
                 }
             }
+        }, {
+            if (it.sendingStatus == BaseMessage.SendingStatus.PENDING) {
+                cancelSendingFile()
+            }
         })
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
@@ -156,6 +163,16 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun cancelSendingFile() {
+        val fileMessage = fileMessage ?: return
+        val channel = currentGroupChannel ?: return
+        val isCanceled = channel.cancelFileMessageUpload(fileMessage.requestId)
+        if (!isCanceled) {
+            showToast("File already sent")
+        }
+        this.fileMessage = null
     }
 
     private fun getChannel(channelUrl: String?) {
@@ -450,9 +467,17 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 .setThumbnailSizes(thumbnailSizes)
                 .setMimeType(fileInfo.mime)
             recyclerObserver.scrollToBottom(true)
-            channel.sendFileMessage(
-                params,
-            ) { _, _ -> }
+            fileMessage = channel.sendFileMessage(params, object : FileMessageWithProgressHandler {
+                override fun onResult(message: FileMessage?, e: SendbirdException?) {
+                    e?.printStackTrace()
+                    fileMessage = null
+                }
+
+                override fun onProgress(bytesSent: Int, totalBytesSent: Int, totalBytesToSend: Int) {
+                    val percent = (totalBytesSent * 100) / totalBytesToSend
+                    showToast("File progress: $percent")
+                }
+            })
             if (collection.hasNext) {
                 createMessageCollection(Long.MAX_VALUE)
             }

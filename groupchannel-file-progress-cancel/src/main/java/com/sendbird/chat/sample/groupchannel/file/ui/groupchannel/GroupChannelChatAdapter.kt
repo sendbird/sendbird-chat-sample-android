@@ -19,7 +19,8 @@ import com.sendbird.chat.sample.groupchannel.file.databinding.*
 
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
-    private val failedItemClickListener: OnFailedItemClickListener
+    private val failedItemClickListener: OnFailedItemClickListener,
+    private val cancelImageSending: (FileMessage) -> Unit
 ) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
 
     fun interface OnItemLongClickListener {
@@ -416,6 +417,9 @@ class GroupChannelChatAdapter(
                 if (message.sendingStatus == BaseMessage.SendingStatus.PENDING) {
                     binding.progressImageSend.visibility = View.VISIBLE
                     binding.chatImageErrorButton.visibility = View.GONE
+                    binding.chatBubbleImageSend.setOnClickListener {
+                        cancelImageSending(message)
+                    }
                 } else {
                     binding.progressImageSend.visibility = View.GONE
                     binding.chatImageErrorButton.visibility = View.VISIBLE
