@@ -102,6 +102,14 @@ Once a sample is chosen, create a device and run the app on an Android device or
 │   ├── groupchannel
 │   ├── main
 │   └── user
+├── groupchannel-push-notifications
+│   ├── groupchannel
+│   ├── main
+│   └── user
+├── groupchannel-update-message-operator
+│   ├── groupchannel
+│   ├── main
+│   └── user
 ├── openchannel-basic
 │   ├── openchannel
 │   └── main

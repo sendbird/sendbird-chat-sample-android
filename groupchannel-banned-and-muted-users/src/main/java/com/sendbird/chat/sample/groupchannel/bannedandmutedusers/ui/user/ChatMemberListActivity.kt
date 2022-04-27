@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
-import com.sendbird.android.user.Member
+import com.sendbird.android.channel.Role
 import com.sendbird.android.user.query.GroupChannelMemberListQuery
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
@@ -185,6 +185,6 @@ class ChatMemberListActivity : AppCompatActivity() {
         val currentUser = SendbirdChat.currentUser ?: return false
         val member =
             currentChannel.members.firstOrNull { it.userId == currentUser.userId } ?: return false
-        return member.role == Member.Role.OPERATOR
+        return member.role == Role.OPERATOR
     }
 }
