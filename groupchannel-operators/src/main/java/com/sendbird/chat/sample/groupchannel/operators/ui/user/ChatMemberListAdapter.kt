@@ -6,25 +6,24 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import com.sendbird.android.user.Member
 import com.sendbird.android.user.User
 import com.sendbird.chat.sample.groupchannel.operators.R
 import com.sendbird.chat.sample.groupchannel.operators.databinding.ListItemMemberBinding
 
 class ChatMemberListAdapter(
     private val listener: OnItemClickListener?
-) : ListAdapter<Member, ChatMemberListAdapter.ChatMembersListViewHolder>(diffCallback) {
+) : ListAdapter<User, ChatMemberListAdapter.ChatMembersListViewHolder>(diffCallback) {
     fun interface OnItemClickListener {
-        fun onItemClick(member: Member, position: Int)
+        fun onItemClick(member: User, position: Int)
     }
 
     companion object {
-        val diffCallback = object : DiffUtil.ItemCallback<Member>() {
-            override fun areItemsTheSame(oldItem: Member, newItem: Member): Boolean {
+        val diffCallback = object : DiffUtil.ItemCallback<User>() {
+            override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
                 return oldItem.userId == newItem.userId
             }
 
-            override fun areContentsTheSame(oldItem: Member, newItem: Member): Boolean {
+            override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
                 return oldItem.nickname == oldItem.nickname && oldItem.plainProfileImageUrl == newItem.plainProfileImageUrl
             }
         }
@@ -49,7 +48,7 @@ class ChatMemberListAdapter(
             }
         }
 
-        fun bind(member: Member) {
+        fun bind(member: User) {
             binding.imageviewProfile.clipToOutline = true
             if (member.profileUrl.isEmpty()) {
                 binding.imageviewProfile.load(R.drawable.ic_baseline_person_24) {

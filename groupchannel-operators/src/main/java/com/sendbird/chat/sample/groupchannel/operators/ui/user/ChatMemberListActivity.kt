@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.user.User
+import com.sendbird.android.user.query.OperatorListQuery
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.operators.R
@@ -60,9 +62,48 @@ class ChatMemberListActivity : AppCompatActivity() {
             }
             if (groupChannel != null) {
                 currentChannel = groupChannel
-                adapter.submitList(groupChannel.members)
+                getOperators()
             }
         }
+    }
+
+    private fun getOperators() {
+        val channel = currentChannel ?: return
+        val query = channel.createOperatorListQuery()
+        val operators = mutableListOf<User>()
+        getOperators(query, operators) {
+            adapter.submitList(operators)
+        }
+    }
+
+    private fun getOperators(query: OperatorListQuery, operators: MutableList<User>, onQueryFinished: () -> Unit) {
+        query.getOperators internal@{
+            if (it.isEmpty()) {
+                onQueryFinished.invoke()
+                return@internal
+            }
+            operators.addAll(it)
+            getOperators(query, operators, onQueryFinished)
+        }
+    }
+
+    private fun OperatorListQuery.getOperators(onOperatorsReceived: (List<User>) -> Unit) {
+        if (hasNext) {
+            next { result, exception ->
+                if (exception != null) {
+                    exception.printStackTrace()
+                    onOperatorsReceived(emptyList())
+                    return@next
+                }
+                if (result == null) {
+                    onOperatorsReceived(emptyList())
+                    return@next
+                }
+                onOperatorsReceived(result)
+            }
+            return
+        }
+        onOperatorsReceived(emptyList())
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

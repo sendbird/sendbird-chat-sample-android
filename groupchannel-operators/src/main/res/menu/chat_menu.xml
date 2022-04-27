@@ -18,7 +18,7 @@
                 android:title="@string/update_channel_name" />
             <item
                 android:id="@+id/member_list"
-                android:title="@string/members_list" />
+                android:title="@string/operators" />
             <item
                 android:id="@+id/invite"
                 android:title="@string/invite_members" />
