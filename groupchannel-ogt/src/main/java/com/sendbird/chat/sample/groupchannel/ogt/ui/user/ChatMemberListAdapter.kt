@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.sendbird.android.user.Member
 import com.sendbird.android.user.User
-import com.sendbird.chat.sample.groupchannel.R
-import com.sendbird.chat.sample.groupchannel.databinding.ListItemMemberBinding
+import com.sendbird.chat.sample.groupchannel.ogt.R
+import com.sendbird.chat.sample.groupchannel.ogt.databinding.ListItemMemberBinding
 
 class ChatMemberListAdapter(
     private val listener: OnItemClickListener?

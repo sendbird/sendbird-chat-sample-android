@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.groupchannel.R
-import com.sendbird.chat.sample.groupchannel.databinding.ActivityChatMemberListBinding
+import com.sendbird.chat.sample.groupchannel.ogt.R
+import com.sendbird.chat.sample.groupchannel.ogt.databinding.ActivityChatMemberListBinding
 
 class ChatMemberListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatMemberListBinding

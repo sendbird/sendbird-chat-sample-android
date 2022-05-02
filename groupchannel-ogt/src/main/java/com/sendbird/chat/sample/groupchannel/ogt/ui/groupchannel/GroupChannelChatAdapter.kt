@@ -1,12 +1,15 @@
 package com.sendbird.chat.sample.groupchannel.ogt.ui.groupchannel
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import coil.load
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.message.AdminMessage
 import com.sendbird.android.message.BaseMessage
@@ -338,6 +341,16 @@ class GroupChannelChatAdapter(
                 } else {
                     binding.textviewTime.visibility = View.GONE
                 }
+                val ogt = message.ogMetaData
+                (binding.ogt as LayoutOgtBinding).apply {
+                    root.isVisible = ogt != null
+                    if (ogt != null) {
+                        title.text = ogt.title
+                        url.text = ogt.url
+                        description.text = ogt.url
+                        image.load(Uri.parse(ogt.ogImage?.url))
+                    }
+                }
             } else {
                 binding.dateTagView.visibility = View.GONE
                 binding.textviewTime.visibility = View.GONE
@@ -382,6 +395,16 @@ class GroupChannelChatAdapter(
                 binding.textviewTime.visibility = View.VISIBLE
             } else {
                 binding.textviewTime.visibility = View.GONE
+            }
+            val ogt = message.ogMetaData
+            (binding.ogt as LayoutOgtBinding).apply {
+                root.isVisible = ogt != null
+                if (ogt != null) {
+                    title.text = ogt.title
+                    url.text = ogt.url
+                    description.text = ogt.url
+                    image.load(Uri.parse(ogt.ogImage?.url))
+                }
             }
         }
     }
