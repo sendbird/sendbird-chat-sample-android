@@ -16,6 +16,7 @@ import com.sendbird.android.handler.ConnectionHandler
 import com.sendbird.android.handler.OpenChannelHandler
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
+import com.sendbird.android.message.MessageMetaArray
 import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
@@ -113,6 +114,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
                     val copyMenu = contextMenu.add(Menu.NONE, 2, 2, getString(R.string.copy))
                     copyMenu.setOnMenuItemClickListener {
                         copy(baseMessage.message)
+                        addMetaForCopyMessage(baseMessage)
                         return@setOnMenuItemClickListener true
                     }
                 }
@@ -142,6 +144,49 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun addMetaForCopyMessage(baseMessage: UserMessage) {
+        val meta = baseMessage.allMetaArrays.firstOrNull { it.key == PeopleKey }
+        if (meta == null) {
+            createMetaData(baseMessage)
+        } else {
+            addUserToMetaData(baseMessage)
+        }
+    }
+
+    private fun createMetaData(baseMessage: UserMessage) {
+        val channel = currentOpenChannel ?: return
+        val itemsToCreate = listOf(PeopleKey)
+        channel.createMessageMetaArrayKeys(baseMessage, itemsToCreate) { message, e ->
+            if (e != null) {
+                e.printStackTrace()
+                showToast("Failed to create meta data")
+                return@createMessageMetaArrayKeys
+            }
+            addUserToMetaData(message!!)
+        }
+    }
+
+    private fun addUserToMetaData(baseMessage: BaseMessage) {
+        val channel = currentOpenChannel ?: return
+        val meta = baseMessage.allMetaArrays.firstOrNull { it.key == PeopleKey } ?: return
+        val newMeta = meta.value + (SendbirdChat.currentUser?.nickname ?: "")
+        val valuesToAdd = listOf(MessageMetaArray(PeopleKey, newMeta))
+        channel.addMessageMetaArrayValues(baseMessage, valuesToAdd) { message, e ->
+            if (e != null) {
+                e.printStackTrace()
+                showToast("Failed to add metadata")
+                return@addMessageMetaArrayValues
+            }
+            displayWhoCopiedTheMessage(message!!)
+        }
+    }
+
+    private fun displayWhoCopiedTheMessage(baseMessage: BaseMessage) {
+        val meta = baseMessage.allMetaArrays.firstOrNull { it.key == PeopleKey } ?: return
+        val users = meta.value.joinToString(separator = ", ")
+        showToast("$users copied the message")
     }
 
     private fun enterChannel(channelUrl: String) {
@@ -536,5 +581,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val PeopleKey = "people"
     }
 }
