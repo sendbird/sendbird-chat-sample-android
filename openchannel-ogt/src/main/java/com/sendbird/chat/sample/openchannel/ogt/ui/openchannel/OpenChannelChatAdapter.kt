@@ -272,6 +272,16 @@ class OpenChannelChatAdapter(
             binding.chatBubbleReceive.setText(message.message)
             binding.textviewTime.text = message.createdAt.toTime()
             binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
+            val ogt = message.ogMetaData
+            binding.ogt.root.isVisible = ogt != null
+            if (ogt != null) {
+                binding.ogt.apply {
+                    title.text = ogt.title
+                    url.text = ogt.url
+                    description.text = ogt.url
+                    image.load(Uri.parse(ogt.ogImage?.url))
+                }
+            }
         }
     }
 
