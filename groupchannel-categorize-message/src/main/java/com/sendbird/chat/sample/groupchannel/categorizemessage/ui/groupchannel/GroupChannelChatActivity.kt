@@ -417,6 +417,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
         val channel = currentGroupChannel ?: return
 
         val params = UserMessageCreateParams().setMessage(message.trim())
+        if (message.lowercase().contains("alert")) {
+            params.setCustomType("alert")
+        }
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
         channel.sendUserMessage(params, null)

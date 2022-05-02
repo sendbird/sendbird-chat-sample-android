@@ -3,6 +3,7 @@ package com.sendbird.chat.sample.groupchannel.categorizemessage.ui.groupchannel
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -338,6 +339,7 @@ class GroupChannelChatAdapter(
                 } else {
                     binding.textviewTime.visibility = View.GONE
                 }
+                binding.alertIcon.isVisible = message.customType == "alert"
             } else {
                 binding.dateTagView.visibility = View.GONE
                 binding.textviewTime.visibility = View.GONE
@@ -383,6 +385,7 @@ class GroupChannelChatAdapter(
             } else {
                 binding.textviewTime.visibility = View.GONE
             }
+            binding.alertIcon.isVisible = message.customType == "alert"
         }
     }
 
