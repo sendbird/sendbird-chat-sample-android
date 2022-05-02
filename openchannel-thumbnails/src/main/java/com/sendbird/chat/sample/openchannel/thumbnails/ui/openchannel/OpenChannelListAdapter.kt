@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.OpenChannel
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChannelBinding
+import com.sendbird.chat.sample.openchannel.thumbnails.databinding.ListItemChannelBinding
 
 class OpenChannelListAdapter(private val listener: OnItemClickListener) :
     RecyclerView.Adapter<OpenChannelListAdapter.OpenChannelListViewHolder>() {

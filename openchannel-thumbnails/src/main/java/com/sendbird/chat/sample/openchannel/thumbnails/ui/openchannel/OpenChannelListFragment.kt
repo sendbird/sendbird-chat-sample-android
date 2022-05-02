@@ -11,7 +11,7 @@ import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_TITLE
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_URL
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.openchannel.databinding.FragmentOpenChannelListBinding
+import com.sendbird.chat.sample.openchannel.thumbnails.databinding.FragmentOpenChannelListBinding
 
 class OpenChannelListFragment :
     BaseFragment<FragmentOpenChannelListBinding>(FragmentOpenChannelListBinding::inflate) {

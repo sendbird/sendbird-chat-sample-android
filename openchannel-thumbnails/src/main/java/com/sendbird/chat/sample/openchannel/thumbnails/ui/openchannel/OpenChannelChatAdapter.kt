@@ -12,10 +12,10 @@ import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.toTime
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChatImageReceiveBinding
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChatImageSendBinding
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChatReceiveBinding
-import com.sendbird.chat.sample.openchannel.databinding.ListItemChatSendBinding
+import com.sendbird.chat.sample.openchannel.thumbnails.databinding.ListItemChatImageReceiveBinding
+import com.sendbird.chat.sample.openchannel.thumbnails.databinding.ListItemChatImageSendBinding
+import com.sendbird.chat.sample.openchannel.thumbnails.databinding.ListItemChatReceiveBinding
+import com.sendbird.chat.sample.openchannel.thumbnails.databinding.ListItemChatSendBinding
 
 class OpenChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
@@ -266,7 +266,11 @@ class OpenChannelChatAdapter(
         BaseViewHolder(binding) {
         fun bind(message: FileMessage) {
             if (message.sendingStatus == BaseMessage.SendingStatus.SUCCEEDED) {
-                binding.chatBubbleImageSend.setImageUrl(message.url, message.plainUrl)
+
+                val thumbnailUrl = message.thumbnails.firstOrNull()?.url ?: message.url
+                val thumbnailPlainUrl = message.thumbnails.firstOrNull()?.plainUrl ?: message.plainUrl
+
+                binding.chatBubbleImageSend.setImageUrl(thumbnailUrl, thumbnailPlainUrl)
                 binding.progressImageSend.visibility = View.GONE
                 binding.chatImageErrorButton.visibility = View.GONE
                 binding.textviewTime.text = message.createdAt.toTime()
@@ -291,7 +295,11 @@ class OpenChannelChatAdapter(
     inner class GroupChatImageReceiveViewHolder(private val binding: ListItemChatImageReceiveBinding) :
         BaseViewHolder(binding) {
         fun bind(message: FileMessage) {
-            binding.chatBubbleImageReceive.setImageUrl(message.url, message.plainUrl)
+
+            val thumbnailUrl = message.thumbnails.firstOrNull()?.url ?: message.url
+            val thumbnailPlainUrl = message.thumbnails.firstOrNull()?.plainUrl ?: message.plainUrl
+
+            binding.chatBubbleImageReceive.setImageUrl(thumbnailUrl, thumbnailPlainUrl)
             binding.textviewTime.text = message.createdAt.toTime()
             binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
         }

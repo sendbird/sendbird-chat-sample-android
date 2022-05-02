@@ -20,8 +20,8 @@ import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
-import com.sendbird.chat.sample.openchannel.R
-import com.sendbird.chat.sample.openchannel.databinding.ActivityOpenChannelChatBinding
+import com.sendbird.chat.sample.openchannel.thumbnails.R
+import com.sendbird.chat.sample.openchannel.thumbnails.databinding.ActivityOpenChannelChatBinding
 
 class OpenChannelChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOpenChannelChatBinding
