@@ -1,12 +1,15 @@
 package com.sendbird.chat.sample.openchannel.ogt.ui.openchannel
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import coil.load
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
@@ -236,6 +239,16 @@ class OpenChannelChatAdapter(
                 binding.chatErrorButton.visibility = View.GONE
                 binding.textviewTime.text = message.createdAt.toTime()
                 binding.textviewTime.visibility = View.VISIBLE
+                val ogt = message.ogMetaData
+                binding.ogt.root.isVisible = ogt != null
+                if (ogt != null) {
+                    binding.ogt.apply {
+                        title.text = ogt.title
+                        url.text = ogt.url
+                        description.text = ogt.url
+                        image.load(Uri.parse(ogt.ogImage?.url))
+                    }
+                }
             } else {
                 binding.textviewTime.visibility = View.GONE
                 if (message.sendingStatus == BaseMessage.SendingStatus.PENDING) {
