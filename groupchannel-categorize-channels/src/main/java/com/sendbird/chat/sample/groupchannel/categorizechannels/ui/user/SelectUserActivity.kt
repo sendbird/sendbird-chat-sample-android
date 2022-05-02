@@ -12,9 +12,9 @@ import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.params.GroupChannelCreateParams
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
-import com.sendbird.chat.sample.groupchannel.R
+import com.sendbird.chat.sample.groupchannel.categorizechannels.R
+import com.sendbird.chat.sample.groupchannel.categorizechannels.databinding.ActivitySelectUserBinding
 import com.sendbird.chat.sample.groupchannel.categorizechannels.ui.groupchannel.GroupChannelChatActivity
-import com.sendbird.chat.sample.groupchannel.databinding.ActivitySelectUserBinding
 
 
 class SelectUserActivity : AppCompatActivity() {
@@ -116,6 +116,7 @@ class SelectUserActivity : AppCompatActivity() {
         }
         val params = GroupChannelCreateParams()
             .addUserIds(adapter.selectUserIdSet.toList())
+            .setCustomType("School")
         GroupChannel.createChannel(params) createChannelLabel@{ groupChannel, e ->
             if (e != null) {
                 showToast("${e.message}")

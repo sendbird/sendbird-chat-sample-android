@@ -16,8 +16,8 @@ import com.sendbird.android.params.GroupChannelCollectionCreateParams
 import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
+import com.sendbird.chat.sample.groupchannel.categorizechannels.databinding.FragmentGroupChannelListBinding
 import com.sendbird.chat.sample.groupchannel.categorizechannels.ui.user.SelectUserActivity
-import com.sendbird.chat.sample.groupchannel.databinding.FragmentGroupChannelListBinding
 
 class GroupChannelListFragment :
     BaseFragment<FragmentGroupChannelListBinding>(FragmentGroupChannelListBinding::inflate) {

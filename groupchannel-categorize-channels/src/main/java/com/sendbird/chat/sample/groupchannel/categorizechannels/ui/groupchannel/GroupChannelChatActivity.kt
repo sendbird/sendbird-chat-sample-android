@@ -26,10 +26,10 @@ import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
-import com.sendbird.chat.sample.groupchannel.R
+import com.sendbird.chat.sample.groupchannel.categorizechannels.R
+import com.sendbird.chat.sample.groupchannel.categorizechannels.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.categorizechannels.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.categorizechannels.ui.user.SelectUserActivity
-import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
@@ -180,11 +180,14 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun setChannelTitle() {
         val currentChannel = currentGroupChannel
-        if (channelTitle == TextUtils.CHANNEL_DEFAULT_NAME && currentChannel != null) {
-            binding.toolbar.title = TextUtils.getGroupChannelTitle(currentChannel)
+        binding.toolbar.title = if (channelTitle == TextUtils.CHANNEL_DEFAULT_NAME && currentChannel != null) {
+            TextUtils.getGroupChannelTitle(currentChannel)
         } else {
-            binding.toolbar.title = channelTitle
+            channelTitle
+        }.let {
+            if (currentChannel?.customType == "School") "$it (School)" else it
         }
+
     }
 
     private fun createMessageCollection(timeStamp: Long) {
