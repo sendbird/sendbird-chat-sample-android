@@ -79,7 +79,7 @@ class OpenChannelListAdapter(private val listener: OnItemClickListener) :
 
         fun bind(openChannel: OpenChannel) {
             binding.chatChannelListItemView.setText(
-                openChannel.name,
+                openChannel.name.let { if (openChannel.customType == "MEME") "$it (MEME)" else it },
                 "Participant: ${openChannel.participantCount}"
             )
         }

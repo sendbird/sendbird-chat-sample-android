@@ -161,6 +161,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
                     return@enter
                 }
                 currentOpenChannel = openChannel
+                if (openChannel.customType == "MEME") {
+                    binding.toolbar.title = "$channelTitle (MEME)"
+                }
                 loadMessagesPreviousMessages(Long.MAX_VALUE)
             }
         }

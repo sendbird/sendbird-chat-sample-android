@@ -43,6 +43,7 @@ class OpenChannelCreateActivity : AppCompatActivity() {
         }
         val params = OpenChannelCreateParams()
             .setName(channelName)
+            .setCustomType("MEME")
         val currentUser = SendbirdChat.currentUser
         if (currentUser != null) {
             params.setOperators(listOf(currentUser))
