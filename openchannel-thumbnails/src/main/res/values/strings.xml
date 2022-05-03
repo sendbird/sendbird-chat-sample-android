@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Sendbird Open Chat</string>
+
+    <string name="user">User</string>
+    <string name="more">More</string>
+    <string name="delete_channel">Delete Channel</string>
+    <string name="open_channel_create">Open Channel Create</string>
+    <string name="open_channel_name">Open Channel Name</string>
+    <string name="copy">Copy</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="update">Update</string>
+    <string name="send">Send</string>
+    <string name="delete">Delete</string>
+    <string name="retry">Retry</string>
+
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_denied">Permission Denied</string>
+    <string name="update_channel_name">Update Channel Name</string>
+
+    <!--  msg  -->
+    <string name="channel_deleted_event_msg">This channel has been deleted.</string>
+    <string name="channel_name_enter_msg">Please enter a channel name</string>
+    <string name="channel_delete_msg">Cannot be recovered</string>
+    <string name="enter_message_msg">Please enter your message</string>
+
+    <!--  error  -->
+    <string name="file_transfer_error">error: File transfer failure</string>
+    <string name="channel_url_error">error: Channel url null</string>
+    <string name="channel_error">error: Channel null</string>
+</resources>
