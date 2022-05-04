@@ -14,7 +14,7 @@ import com.sendbird.chat.module.utils.changeValue
 const val SENDBIRD_APP_ID = "0506686A-9918-4F70-A91F-ADCD1691705E"
 
 open class BaseApplication : Application() {
-    private val initMutableLiveData: MutableLiveData<Boolean> =
+    protected val initMutableLiveData: MutableLiveData<Boolean> =
         MutableLiveData<Boolean>().apply { changeValue(false) }
     val initLiveData: LiveData<Boolean>
         get() = initMutableLiveData

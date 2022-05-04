@@ -34,8 +34,24 @@ object FileUtils {
         ) {
             requestStoragePermission(context)
         } else {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            intent.type = type
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, type)
+            startForResult.launch(intent)
+        }
+    }
+
+    fun selectFile(startForResult: ActivityResultLauncher<Intent>, context: Context) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestStoragePermission(context)
+        } else {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "*/*"
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
             startForResult.launch(intent)
         }
     }
@@ -58,6 +74,7 @@ object FileUtils {
     }
 
     data class FileResult(val file: File, val size: Int, val mime: String?, val name: String)
+
     fun getFileInfo(uri: Uri, context: Context): FileResult? {
         var inputStream: FileInputStream? = null
         var outputStream: FileOutputStream? = null
