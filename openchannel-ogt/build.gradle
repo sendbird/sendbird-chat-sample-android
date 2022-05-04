@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.library'
+    id 'com.android.application'
     id 'kotlin-android'
 }
 
@@ -7,13 +7,13 @@ android {
     compileSdk 32
 
     defaultConfig {
+        applicationId "com.sendbird.chat.sample.openchannel.ogt"
         minSdk 26
         targetSdk 32
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -32,9 +32,6 @@ android {
     viewBinding {
         enabled = true
     }
-    buildFeatures {
-        viewBinding true
-    }
 }
 
 dependencies {
@@ -47,9 +44,13 @@ dependencies {
     implementation "com.sendbird.sdk:sendbird-chat:$sendbirdVersion"
     //
 
-    //Coil
-    api "io.coil-kt:coil:$coilVersion"
+    //fragment
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     //
+
+    implementation "androidx.legacy:legacy-support-v4:$legacySupportVersion"
+    implementation project(path: ':commonmodule')
+
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
