@@ -1,32 +1,18 @@
-package com.sendbird.chat.module.ui.base
+package com.sendbird.chat.sample.groupchannel.localcaching.ui
 
-import android.app.Application
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.sendbird.android.LogLevel
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.exception.SendbirdException
 import com.sendbird.android.handler.InitResultHandler
 import com.sendbird.android.params.InitParams
-import com.sendbird.chat.module.utils.SharedPreferenceUtils
+import com.sendbird.chat.module.ui.base.BaseApplication
+import com.sendbird.chat.module.ui.base.SENDBIRD_APP_ID
 import com.sendbird.chat.module.utils.changeValue
 
-const val SENDBIRD_APP_ID = "0506686A-9918-4F70-A91F-ADCD1691705E"
+class CachingApplication : BaseApplication() {
 
-open class BaseApplication : Application() {
-    protected val initMutableLiveData: MutableLiveData<Boolean> =
-        MutableLiveData<Boolean>().apply { changeValue(false) }
-    val initLiveData: LiveData<Boolean>
-        get() = initMutableLiveData
-
-    override fun onCreate() {
-        super.onCreate()
-        sendbirdChatInit()
-        SharedPreferenceUtils.init(applicationContext)
-    }
-
-    open fun sendbirdChatInit(){
-        val initParams = InitParams(SENDBIRD_APP_ID, applicationContext, false)
+    override fun sendbirdChatInit() {
+        val initParams = InitParams(SENDBIRD_APP_ID, applicationContext, true)
         initParams.logLevel = LogLevel.ERROR
         SendbirdChat.init(
             initParams,
@@ -45,5 +31,4 @@ open class BaseApplication : Application() {
                 }
             })
     }
-
 }
