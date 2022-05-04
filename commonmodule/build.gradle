@@ -48,7 +48,7 @@ dependencies {
     //
 
     //Coil
-    implementation "io.coil-kt:coil:$coilVersion"
+    api "io.coil-kt:coil:$coilVersion"
     //
 
     testImplementation "junit:junit:$junitVersion"
