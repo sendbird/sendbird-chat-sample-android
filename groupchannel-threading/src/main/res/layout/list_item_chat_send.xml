@@ -13,7 +13,8 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
     <ProgressBar
         android:id="@+id/progress_send"
@@ -51,7 +52,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/chat_bubble_send"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/date_tag_view"
         tools:text="message replayed"
         tools:visibility="visible" />
 

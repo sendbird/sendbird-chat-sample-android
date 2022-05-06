@@ -55,10 +55,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         app:layout_constrainedWidth="true"
-        app:layout_constraintEnd_toStartOf="@+id/parent_text"
+        app:layout_constraintEnd_toStartOf="@+id/textview_time"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="@+id/parent_text"
+        app:layout_constraintStart_toStartOf="@+id/textview_nickname"
         app:layout_constraintTop_toBottomOf="@+id/parent_text"
         app:layout_goneMarginStart="5dp" />
 

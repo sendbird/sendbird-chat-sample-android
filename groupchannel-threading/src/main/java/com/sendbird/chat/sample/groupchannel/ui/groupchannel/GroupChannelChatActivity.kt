@@ -148,7 +148,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         }, { messageId ->
-            adapter.currentList.firstOrNull { it.messageId == messageId }?.message ?: ""
+            if (messageId == 0L) "" else adapter.currentList.firstOrNull { it.messageId == messageId }?.message ?: ""
         })
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
