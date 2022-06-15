@@ -10,6 +10,7 @@ import androidx.viewbinding.ViewBinding
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
+import com.sendbird.android.message.SendingStatus
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.toTime
 import com.sendbird.chat.sample.openchannel.useronline.databinding.ListItemChatImageReceiveBinding
@@ -231,14 +232,14 @@ class OpenChannelChatAdapter(
     inner class GroupChatSendViewHolder(private val binding: ListItemChatSendBinding) :
         BaseViewHolder(binding) {
         fun bind(message: BaseMessage) {
-            if (message.sendingStatus == BaseMessage.SendingStatus.SUCCEEDED) {
+            if (message.sendingStatus == SendingStatus.SUCCEEDED) {
                 binding.progressSend.visibility = View.GONE
                 binding.chatErrorButton.visibility = View.GONE
                 binding.textviewTime.text = message.createdAt.toTime()
                 binding.textviewTime.visibility = View.VISIBLE
             } else {
                 binding.textviewTime.visibility = View.GONE
-                if (message.sendingStatus == BaseMessage.SendingStatus.PENDING) {
+                if (message.sendingStatus == SendingStatus.PENDING) {
                     binding.progressSend.visibility = View.VISIBLE
                     binding.chatErrorButton.visibility = View.GONE
                 } else {
@@ -265,16 +266,16 @@ class OpenChannelChatAdapter(
     inner class GroupChatImageSendViewHolder(private val binding: ListItemChatImageSendBinding) :
         BaseViewHolder(binding) {
         fun bind(message: FileMessage) {
-            if (message.sendingStatus == BaseMessage.SendingStatus.SUCCEEDED) {
+            if (message.sendingStatus == SendingStatus.SUCCEEDED) {
                 binding.chatBubbleImageSend.setImageUrl(message.url, message.plainUrl)
                 binding.progressImageSend.visibility = View.GONE
                 binding.chatImageErrorButton.visibility = View.GONE
                 binding.textviewTime.text = message.createdAt.toTime()
                 binding.textviewTime.visibility = View.VISIBLE
             } else {
-                binding.chatBubbleImageSend.setImageFile(message.messageParams?.file)
+                binding.chatBubbleImageSend.setImageFile(message.messageCreateParams?.file)
                 binding.textviewTime.visibility = View.GONE
-                if (message.sendingStatus == BaseMessage.SendingStatus.PENDING) {
+                if (message.sendingStatus == SendingStatus.PENDING) {
                     binding.progressImageSend.visibility = View.VISIBLE
                     binding.chatImageErrorButton.visibility = View.GONE
                 } else {

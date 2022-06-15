@@ -6,8 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.params.MemberListQueryParams
 import com.sendbird.android.user.Member
-import com.sendbird.android.user.query.GroupChannelMemberListQuery
+import com.sendbird.android.user.query.MemberListQuery
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.R
@@ -69,8 +70,9 @@ class ChatMemberListActivity : AppCompatActivity() {
 
     private fun getMembersAndOperators() {
         val channel = currentChannel ?: return
-        val listQuery = channel.createMemberListQuery()
-        listQuery.order = GroupChannelMemberListQuery.Order.OPERATOR_THEN_MEMBER_ALPHABETICAL
+        val listQuery = channel.createMemberListQuery(
+            MemberListQueryParams(order = MemberListQuery.Order.OPERATOR_THEN_MEMBER_ALPHABETICAL)
+        )
         while (listQuery.hasNext) {
             listQuery.next(::onMembersAndOperatorsReceived)
         }

@@ -6,7 +6,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
-import com.sendbird.android.channel.query.GroupChannelListQuery
+import com.sendbird.android.channel.HiddenState
+import com.sendbird.android.channel.query.GroupChannelListQueryOrder
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.chat.module.utils.TextUtils
 import com.sendbird.chat.module.utils.toChatTime
@@ -56,8 +57,8 @@ class GroupChannelListAdapter(
             GroupChannel.compareTo(
                 groupChannelA,
                 groupChannelB,
-                GroupChannelListQuery.Order.LATEST_LAST_MESSAGE,
-                GroupChannelListQuery.Order.LATEST_LAST_MESSAGE.channelSortOrder
+                GroupChannelListQueryOrder.LATEST_LAST_MESSAGE,
+                GroupChannelListQueryOrder.LATEST_LAST_MESSAGE.channelSortOrder
             )
         }
 
@@ -97,13 +98,14 @@ class GroupChannelListAdapter(
         fun bind(groupChannel: GroupChannel) {
             val lastMessage = groupChannel.lastMessage
             val isArchived = when (groupChannel.hiddenState) {
-                GroupChannel.HiddenState.HIDDEN_PREVENT_AUTO_UNHIDE -> " (Archived)"
+                HiddenState.HIDDEN_PREVENT_AUTO_UNHIDE -> " (Archived)"
                 else -> ""
             }
-            val channelName = if (groupChannel.name.isBlank() || groupChannel.name == TextUtils.CHANNEL_DEFAULT_NAME)
-                TextUtils.getGroupChannelTitle(groupChannel)
-            else
-                groupChannel.name
+            val channelName =
+                if (groupChannel.name.isBlank() || groupChannel.name == TextUtils.CHANNEL_DEFAULT_NAME)
+                    TextUtils.getGroupChannelTitle(groupChannel)
+                else
+                    groupChannel.name
             binding.chatChannelListItemView.setText(
                 channelName + isArchived,
                 lastMessage?.message ?: TextUtils.NEW_CHANNEL_DEFAULT_TEXT

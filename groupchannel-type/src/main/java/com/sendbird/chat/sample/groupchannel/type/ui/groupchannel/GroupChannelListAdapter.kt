@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
-import com.sendbird.android.channel.query.GroupChannelListQuery
+import com.sendbird.android.channel.query.GroupChannelListQueryOrder
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.chat.module.utils.TextUtils
 import com.sendbird.chat.module.utils.toChatTime
@@ -47,8 +47,8 @@ class GroupChannelListAdapter(private val listener: OnItemClickListener) :
             GroupChannel.compareTo(
                 groupChannelA,
                 groupChannelB,
-                GroupChannelListQuery.Order.LATEST_LAST_MESSAGE,
-                GroupChannelListQuery.Order.LATEST_LAST_MESSAGE.channelSortOrder
+                GroupChannelListQueryOrder.LATEST_LAST_MESSAGE,
+                GroupChannelListQueryOrder.LATEST_LAST_MESSAGE.channelSortOrder
             )
         }
 
@@ -93,7 +93,10 @@ class GroupChannelListAdapter(private val listener: OnItemClickListener) :
                 groupChannel.isSuper -> " (Super)"
                 else -> ""
             }
-            binding.chatChannelListItemView.setText("$title$channelType", lastMessage?.message ?: TextUtils.NEW_CHANNEL_DEFAULT_TEXT)
+            binding.chatChannelListItemView.setText(
+                "$title$channelType",
+                lastMessage?.message ?: TextUtils.NEW_CHANNEL_DEFAULT_TEXT
+            )
             binding.textviewTime.text =
                 (lastMessage?.createdAt ?: groupChannel.createdAt).toChatTime()
         }

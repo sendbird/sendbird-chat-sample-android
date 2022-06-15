@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.params.ApplicationUserListQueryParams
 import com.sendbird.android.params.GroupChannelCreateParams
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
@@ -20,7 +21,9 @@ import com.sendbird.chat.sample.groupchannel.pushtranslations.ui.groupchannel.Gr
 class SelectUserActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySelectUserBinding
     private lateinit var adapter: SelectUserAdapter
-    private var userListQuery = SendbirdChat.createApplicationUserListQuery()
+    private var userListQuery = SendbirdChat.createApplicationUserListQuery(
+        ApplicationUserListQueryParams()
+    )
     private var isCreateMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,7 +118,9 @@ class SelectUserActivity : AppCompatActivity() {
             return
         }
         val params = GroupChannelCreateParams()
-            .addUserIds(adapter.selectUserIdSet.toList())
+            .apply {
+                userIds = adapter.selectUserIdSet.toList()
+            }
         GroupChannel.createChannel(params) createChannelLabel@{ groupChannel, e ->
             if (e != null) {
                 showToast("${e.message}")

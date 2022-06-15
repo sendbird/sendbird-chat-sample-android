@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.params.ApplicationUserListQueryParams
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.openchannel.friends.R
@@ -16,7 +17,9 @@ import com.sendbird.chat.sample.openchannel.friends.databinding.ActivitySelectUs
 class SelectUserActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySelectUserBinding
     private lateinit var adapter: SelectUserAdapter
-    private var userListQuery = SendbirdChat.createApplicationUserListQuery()
+    private var userListQuery = SendbirdChat.createApplicationUserListQuery(
+        ApplicationUserListQueryParams()
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

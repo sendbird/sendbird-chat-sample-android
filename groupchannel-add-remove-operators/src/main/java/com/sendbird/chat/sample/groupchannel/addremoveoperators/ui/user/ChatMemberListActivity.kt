@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.channel.Role
+import com.sendbird.android.params.MemberListQueryParams
 import com.sendbird.android.user.Member
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
@@ -79,7 +80,7 @@ class ChatMemberListActivity : AppCompatActivity() {
     }
 
     private fun refreshMembers() {
-        val query = currentChannel?.createMemberListQuery() ?: return
+        val query = currentChannel?.createMemberListQuery(MemberListQueryParams()) ?: return
         query.next { members, exception ->
             if (exception == null && !members.isNullOrEmpty()) {
                 adapter.submitList(members)

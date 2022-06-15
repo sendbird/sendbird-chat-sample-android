@@ -3,6 +3,7 @@ package com.sendbird.chat.sample.groupchannel.push.ui
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.push.PushTokenRegistrationStatus
 import org.json.JSONObject
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -15,7 +16,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 return@registerPushToken
             }
 
-            if (status == SendbirdChat.PushTokenRegistrationStatus.PENDING) {
+            if (status == PushTokenRegistrationStatus.PENDING) {
                 // A token registration is pending.
                 // Retry the registration after a connection has been successfully established.
             }

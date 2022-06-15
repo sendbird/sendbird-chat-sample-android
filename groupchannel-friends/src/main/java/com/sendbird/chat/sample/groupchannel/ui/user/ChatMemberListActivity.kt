@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.params.FriendListQueryParams
 import com.sendbird.android.user.User
 import com.sendbird.android.user.query.FriendListQuery
 import com.sendbird.chat.module.utils.Constants
@@ -49,7 +50,8 @@ class ChatMemberListActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        binding.toolbar.title = if (!showFriends) getString(R.string.members_list) else getString(R.string.friends)
+        binding.toolbar.title =
+            if (!showFriends) getString(R.string.members_list) else getString(R.string.friends)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
@@ -120,14 +122,18 @@ class ChatMemberListActivity : AppCompatActivity() {
     }
 
     private fun getFriends() {
-        val query = SendbirdChat.createFriendListQuery()
+        val query = SendbirdChat.createFriendListQuery(FriendListQueryParams())
         val users = mutableListOf<User>()
         fetchAllFriends(query, users) {
             adapter.submitList(users)
         }
     }
 
-    private fun fetchAllFriends(query: FriendListQuery, users: MutableList<User>, onLoadFinished: () -> Unit) {
+    private fun fetchAllFriends(
+        query: FriendListQuery,
+        users: MutableList<User>,
+        onLoadFinished: () -> Unit
+    ) {
         getFriends(query) internal@{ usersFetched ->
             users.addAll(usersFetched)
             if (usersFetched.isEmpty()) {
