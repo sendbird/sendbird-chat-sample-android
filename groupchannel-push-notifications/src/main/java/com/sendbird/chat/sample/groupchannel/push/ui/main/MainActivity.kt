@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.google.firebase.messaging.FirebaseMessaging
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.push.PushTokenRegistrationStatus
 import com.sendbird.chat.module.ui.base.BaseMainActivity
 import com.sendbird.chat.sample.groupchannel.push.ui.groupchannel.GroupChannelListFragment
 
@@ -22,7 +23,7 @@ class MainActivity : BaseMainActivity() {
                     return@registerPushToken
                 }
 
-                if (status == SendbirdChat.PushTokenRegistrationStatus.PENDING) {
+                if (status == PushTokenRegistrationStatus.PENDING) {
                     // A token registration is pending.
                     // Retry the registration after a connection has been successfully established.
                 }

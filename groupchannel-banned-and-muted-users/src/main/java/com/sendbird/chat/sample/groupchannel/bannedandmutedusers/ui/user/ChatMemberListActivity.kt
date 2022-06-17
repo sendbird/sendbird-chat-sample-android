@@ -9,7 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.channel.Role
-import com.sendbird.android.user.query.GroupChannelMemberListQuery
+import com.sendbird.android.params.MemberListQueryParams
+import com.sendbird.android.user.query.MutedMemberFilter
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.R
@@ -111,7 +112,7 @@ class ChatMemberListActivity : AppCompatActivity() {
 
     private fun retrieveAndDisplayActiveUsers() {
         val groupChannel = currentChannel ?: return
-        val userQuery = groupChannel.createMemberListQuery()
+        val userQuery = groupChannel.createMemberListQuery(MemberListQueryParams())
         adapter.submitList(emptyList())
         loadNextUsers = {
             if (userQuery.hasNext) {
@@ -160,8 +161,8 @@ class ChatMemberListActivity : AppCompatActivity() {
             return
         }
         val groupChannel = currentChannel ?: return
-        val listQuery = groupChannel.createMemberListQuery()
-        listQuery.mutedMemberFilter = GroupChannelMemberListQuery.MutedMemberFilter.MUTED
+        val listQuery =
+            groupChannel.createMemberListQuery(MemberListQueryParams(mutedMemberFilter = MutedMemberFilter.MUTED))
         adapter.submitList(emptyList())
         loadNextUsers = {
             if (listQuery.hasNext) {

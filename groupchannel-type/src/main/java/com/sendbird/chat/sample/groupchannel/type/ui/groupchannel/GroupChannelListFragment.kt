@@ -8,11 +8,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
-import com.sendbird.android.channel.query.GroupChannelListQuery
+import com.sendbird.android.channel.query.GroupChannelListQueryOrder
+import com.sendbird.android.channel.query.MyMemberStateFilter
+import com.sendbird.android.channel.query.PublicChannelFilter
 import com.sendbird.android.collection.GroupChannelCollection
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.handler.GroupChannelCollectionHandler
 import com.sendbird.android.params.GroupChannelCollectionCreateParams
+import com.sendbird.android.params.GroupChannelListQueryParams
 import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
@@ -85,14 +88,16 @@ class GroupChannelListFragment :
     }
 
     private fun createCollection() {
-        val listQuery = GroupChannel.createMyGroupChannelListQuery().apply {
-            publicChannelFilter = GroupChannelListQuery.PublicChannelFilter.ALL
-            memberStateFilter = GroupChannelListQuery.MemberStateFilter.ALL
-            order = GroupChannelListQuery.Order.LATEST_LAST_MESSAGE
-        }
+        val listQuery = GroupChannel.createMyGroupChannelListQuery(
+            GroupChannelListQueryParams(
+                order = GroupChannelListQueryOrder.LATEST_LAST_MESSAGE,
+                myMemberStateFilter = MyMemberStateFilter.ALL,
+                publicChannelFilter = PublicChannelFilter.ALL
+            )
+        )
         val params = GroupChannelCollectionCreateParams(listQuery)
         groupChannelCollection = SendbirdChat.createGroupChannelCollection(params).apply {
-            setGroupChannelCollectionHandler(object : GroupChannelCollectionHandler {
+            groupChannelCollectionHandler = (object : GroupChannelCollectionHandler {
                 override fun onChannelsAdded(
                     context: GroupChannelContext,
                     channels: List<GroupChannel>

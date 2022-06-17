@@ -11,11 +11,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
-import com.sendbird.android.channel.query.GroupChannelListQuery
+import com.sendbird.android.channel.HiddenState
+import com.sendbird.android.channel.query.GroupChannelListQueryOrder
+import com.sendbird.android.channel.query.HiddenChannelFilter
+import com.sendbird.android.channel.query.MyMemberStateFilter
 import com.sendbird.android.collection.GroupChannelCollection
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.handler.GroupChannelCollectionHandler
 import com.sendbird.android.params.GroupChannelCollectionCreateParams
+import com.sendbird.android.params.GroupChannelListQueryParams
 import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
@@ -90,7 +94,7 @@ class GroupChannelListFragment :
             startActivity(intent)
         }) { view, groupChannel ->
             view.setOnCreateContextMenuListener { contextMenu, _, _ ->
-                if (groupChannel.hiddenState == GroupChannel.HiddenState.HIDDEN_PREVENT_AUTO_UNHIDE) {
+                if (groupChannel.hiddenState == HiddenState.HIDDEN_PREVENT_AUTO_UNHIDE) {
                     val unArchive = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.unarchive))
                     unArchive.setOnMenuItemClickListener {
                         unHideChannel(channel = groupChannel)
@@ -102,7 +106,8 @@ class GroupChannelListFragment :
                         hideOrArchiveChannel(channel = groupChannel, hideChannel = true)
                         return@setOnMenuItemClickListener true
                     }
-                    val archiveChannel = contextMenu.add(Menu.NONE, 1, 1, getString(R.string.archive))
+                    val archiveChannel =
+                        contextMenu.add(Menu.NONE, 1, 1, getString(R.string.archive))
                     archiveChannel.setOnMenuItemClickListener {
                         hideOrArchiveChannel(channel = groupChannel, hideChannel = false)
                         return@setOnMenuItemClickListener true
@@ -159,18 +164,18 @@ class GroupChannelListFragment :
     }
 
     private fun createCollection() {
-        val listQuery = GroupChannel.createMyGroupChannelListQuery().apply {
-            memberStateFilter = GroupChannelListQuery.MemberStateFilter.ALL
-            order = GroupChannelListQuery.Order.LATEST_LAST_MESSAGE
-            isIncludeEmpty = true
-            if (isShowingArchived) {
-                hiddenChannelFilter = GroupChannelListQuery.HiddenChannelFilter.HIDDEN_PREVENT_AUTO_UNHIDE
-            }
-        }
+        val listQuery = GroupChannel.createMyGroupChannelListQuery(
+            GroupChannelListQueryParams(
+                order = GroupChannelListQueryOrder.LATEST_LAST_MESSAGE,
+                myMemberStateFilter = MyMemberStateFilter.ALL,
+                includeEmpty = true,
+                hiddenChannelFilter = if (isShowingArchived) HiddenChannelFilter.HIDDEN_PREVENT_AUTO_UNHIDE else HiddenChannelFilter.HIDDEN_ALLOW_AUTO_UNHIDE
+            )
+        )
         val params = GroupChannelCollectionCreateParams(listQuery)
         adapter.clearChannels()
         groupChannelCollection = SendbirdChat.createGroupChannelCollection(params).apply {
-            setGroupChannelCollectionHandler(object : GroupChannelCollectionHandler {
+            groupChannelCollectionHandler = (object : GroupChannelCollectionHandler {
                 override fun onChannelsAdded(
                     context: GroupChannelContext,
                     channels: List<GroupChannel>
