@@ -26,6 +26,7 @@ import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.categorizemessage.R
 import com.sendbird.chat.sample.groupchannel.categorizemessage.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.groupchannel.categorizemessage.ui.pinned.GroupChannelPinnedMessagesActivity
 import com.sendbird.chat.sample.groupchannel.categorizemessage.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.categorizemessage.ui.user.SelectUserActivity
 import java.util.concurrent.ConcurrentHashMap
@@ -119,6 +120,14 @@ class GroupChannelChatActivity : AppCompatActivity() {
                             )
                             return@setOnMenuItemClickListener true
                         }
+                    }
+                    val pinMenuTitleResId =
+                        if (baseMessage.customType == PINNED) R.string.unpin_message else R.string.pin_message
+                    val pinUnpinMenu =
+                        contextMenu.add(Menu.NONE, 3, 3, getString(pinMenuTitleResId))
+                    pinUnpinMenu.setOnMenuItemClickListener {
+                        pinUnpinMessage(baseMessage)
+                        return@setOnMenuItemClickListener true
                     }
                 }
                 if (baseMessage is UserMessage) {
@@ -290,6 +299,36 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
     }
 
+    private fun pinUnpinMessage(message: BaseMessage) {
+        when (message) {
+            is FileMessage -> {
+                val params = FileMessageUpdateParams().apply {
+                    customType = if (message.customType == PINNED) "" else PINNED
+                }
+                currentGroupChannel?.updateFileMessage(
+                    message.messageId,
+                    params
+                ) { _, e ->
+                    if (e != null) {
+                        showToast("${e.message}")
+                    }
+
+                }
+            }
+            else -> {
+                val params = UserMessageUpdateParams().apply {
+                    customType = if (message.customType == PINNED) "" else PINNED
+                }
+                currentGroupChannel?.updateUserMessage(message.messageId, params) { _, e ->
+                    if (e != null) {
+                        showToast("${e.message}")
+                    }
+                }
+            }
+        }
+
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.delete -> {
@@ -334,6 +373,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     getString(R.string.cancel),
                     { updateChannelView(it, channel) },
                 )
+                true
+            }
+
+            R.id.pinned_messages -> {
+                startActivity(GroupChannelPinnedMessagesActivity.newIntent(this, channelUrl))
                 true
             }
 
@@ -420,9 +464,6 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
         val params = UserMessageCreateParams().apply {
             this.message = message.trim()
-        }
-        if (message.lowercase().contains("alert")) {
-            params.customType = "alert"
         }
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
@@ -628,5 +669,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        const val PINNED = "pinned_message"
     }
 }
