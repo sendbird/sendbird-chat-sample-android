@@ -18,6 +18,7 @@ import com.sendbird.chat.module.utils.equalDate
 import com.sendbird.chat.module.utils.equalTime
 import com.sendbird.chat.module.utils.toTime
 import com.sendbird.chat.sample.groupchannel.categorizemessage.databinding.*
+import com.sendbird.chat.sample.groupchannel.categorizemessage.ui.groupchannel.GroupChannelChatActivity.Companion.PINNED
 
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
@@ -340,7 +341,6 @@ class GroupChannelChatAdapter(
                 } else {
                     binding.textviewTime.visibility = View.GONE
                 }
-                binding.alertIcon.isVisible = message.customType == "alert"
             } else {
                 binding.dateTagView.visibility = View.GONE
                 binding.textviewTime.visibility = View.GONE
@@ -356,6 +356,7 @@ class GroupChannelChatAdapter(
                 }
             }
             binding.chatBubbleSend.setText(message.message)
+            binding.pinnedView.isVisible = message.customType == PINNED
         }
     }
 
@@ -368,6 +369,7 @@ class GroupChannelChatAdapter(
             showTime: Boolean
         ) {
             binding.chatBubbleReceive.setText(message.message)
+            binding.pinnedView.isVisible = message.customType == PINNED
             if (showName) {
                 binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
                 binding.textviewNickname.visibility = View.VISIBLE
@@ -386,7 +388,6 @@ class GroupChannelChatAdapter(
             } else {
                 binding.textviewTime.visibility = View.GONE
             }
-            binding.alertIcon.isVisible = message.customType == "alert"
         }
     }
 
@@ -397,6 +398,7 @@ class GroupChannelChatAdapter(
             showDate: Boolean,
             showTime: Boolean
         ) {
+            binding.pinnedView.isVisible = message.customType == PINNED
             if (message.sendingStatus == SendingStatus.SUCCEEDED) {
                 binding.chatBubbleImageSend.setImageUrl(message.url, message.plainUrl)
                 binding.progressImageSend.visibility = View.GONE
@@ -440,6 +442,7 @@ class GroupChannelChatAdapter(
             showTime: Boolean
         ) {
             binding.chatBubbleImageReceive.setImageUrl(message.url, message.plainUrl)
+            binding.pinnedView.isVisible = message.customType == PINNED
             if (showName) {
                 binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
                 binding.textviewNickname.visibility = View.VISIBLE
