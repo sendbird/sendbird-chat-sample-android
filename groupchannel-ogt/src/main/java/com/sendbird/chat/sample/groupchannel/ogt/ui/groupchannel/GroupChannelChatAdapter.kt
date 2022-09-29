@@ -349,7 +349,7 @@ class GroupChannelChatAdapter(
                         title.text = ogt.title
                         url.text = ogt.url
                         description.text = ogt.url
-                        image.load(Uri.parse(ogt.ogImage?.url))
+                        ogt.ogImage?.url?.let { image.load(Uri.parse(it)) }
                     }
                 }
             } else {
@@ -404,7 +404,7 @@ class GroupChannelChatAdapter(
                     title.text = ogt.title
                     url.text = ogt.url
                     description.text = ogt.url
-                    image.load(Uri.parse(ogt.ogImage?.url))
+                    ogt.ogImage?.url?.let { image.load(it) }
                 }
             }
         }
