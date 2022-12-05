@@ -1,14 +1,22 @@
 package com.sendbird.chat.sample.groupchannel.scheduled.message.ui.groupchannel
 
 import android.Manifest
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.MenuCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
@@ -28,6 +36,7 @@ import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.scheduled.message.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.scheduled.message.ui.user.SelectUserActivity
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
@@ -40,6 +49,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private var messageCollection: MessageCollection? = null
     private var channelTSHashMap = ConcurrentHashMap<String, Long>()
     private var isCollectionInitialized = false
+
+    private var scheduledTime: Long = 0L
 
     private val startForResultFile =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
@@ -93,6 +104,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 )
             }
         })
+
+        binding.chatInputView.findViewById<View>(R.id.textview_send).setOnLongClickListener {
+            openScheduleMessageMenu(it)
+            true
+        }
     }
 
     private fun initRecyclerView() {
@@ -416,17 +432,39 @@ class GroupChannelChatActivity : AppCompatActivity() {
             return
         }
         val collection = messageCollection ?: return
-        val channel = currentGroupChannel ?: return
-
-        val params = UserMessageCreateParams().apply {
-            this.message = message.trim()
+        if (scheduledTime == 0L) {
+            sendNormalMessage(message)
+        } else {
+            sendScheduledMessage(message)
         }
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
-        channel.sendUserMessage(params, null)
+
         if (collection.hasNext) {
             createMessageCollection(Long.MAX_VALUE)
         }
+    }
+
+    private fun sendNormalMessage(message: String) {
+        val channel = currentGroupChannel ?: return
+        val params = UserMessageCreateParams().apply {
+            this.message = message.trim()
+        }
+        channel.sendUserMessage(params, null)
+    }
+
+    private fun sendScheduledMessage(message: String) {
+        val channel = currentGroupChannel ?: return
+        val params = ScheduledUserMessageCreateParams(scheduledTime).apply {
+            this.message = message.trim()
+        }
+        channel.createScheduledUserMessage(params) { _, e ->
+            if (e != null) {
+                Log.e("ScheduledMessage", e.message ?: "Error sending scheduled message")
+            }
+        }
+        scheduledTime = 0L
+        changeSendText()
     }
 
     private fun sendFileMessage(imgUri: Uri?) {
@@ -439,31 +477,61 @@ class GroupChannelChatActivity : AppCompatActivity() {
             return
         }
         val collection = messageCollection ?: return
-        val channel = currentGroupChannel ?: return
-
         val thumbnailSizes = listOf(
             ThumbnailSize(100, 100),
             ThumbnailSize(200, 200)
         )
         val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
         if (fileInfo != null) {
-            val params = FileMessageCreateParams().apply {
-                file = fileInfo.file
-                fileName = fileInfo.name
-                fileSize = fileInfo.size
-                this.thumbnailSizes = thumbnailSizes
-                mimeType = fileInfo.mime
+            if (scheduledTime == 0L) {
+                sendFileMessage(fileInfo, thumbnailSizes)
+            } else {
+                sendScheduledFileMessage(fileInfo, thumbnailSizes)
             }
             recyclerObserver.scrollToBottom(true)
-            channel.sendFileMessage(
-                params,
-            ) { _, _ -> }
+
             if (collection.hasNext) {
                 createMessageCollection(Long.MAX_VALUE)
             }
         } else {
             showToast(R.string.file_transfer_error)
         }
+    }
+
+    private fun sendFileMessage(
+        fileInfo: FileUtils.FileResult,
+        thumbnailSizes: List<ThumbnailSize>
+    ) {
+        val channel = currentGroupChannel ?: return
+        val params = FileMessageCreateParams().apply {
+            file = fileInfo.file
+            fileName = fileInfo.name
+            fileSize = fileInfo.size
+            this.thumbnailSizes = thumbnailSizes
+            mimeType = fileInfo.mime
+        }
+        channel.sendFileMessage(params, null)
+    }
+
+    private fun sendScheduledFileMessage(
+        fileInfo: FileUtils.FileResult,
+        thumbnailSizes: List<ThumbnailSize>
+    ) {
+        val channel = currentGroupChannel ?: return
+        val params = ScheduledFileMessageCreateParams(scheduledTime).apply {
+            file = fileInfo.file
+            fileName = fileInfo.name
+            fileSize = fileInfo.size
+            this.thumbnailSizes = thumbnailSizes
+            mimeType = fileInfo.mime
+        }
+        channel.createScheduledFileMessage(params) { _, e ->
+            if (e != null) {
+                Log.e("ScheduledMessage", e.message ?: "Error sending scheduled message")
+            }
+        }
+        scheduledTime = 0L
+        changeSendText()
     }
 
     private fun resendMessage(baseMessage: BaseMessage) {
@@ -626,4 +694,131 @@ class GroupChannelChatActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun openScheduleMessageMenu(anchor: View) {
+        if (scheduledTime == 0L) {
+            createSelectScheduledMenu(anchor)
+            return
+        }
+        createClearScheduledMenu(anchor)
+    }
+
+    private fun createClearScheduledMenu(anchor: View) {
+        PopupMenu(this, anchor).apply {
+            menuInflater.inflate(R.menu.clear_menu, menu)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.clear -> {
+                        scheduledTime = 0L
+                        changeSendText()
+                    }
+                }
+                true
+            }
+            show()
+        }
+    }
+
+    private fun createSelectScheduledMenu(anchor: View) {
+        PopupMenu(this, anchor).apply {
+            menuInflater.inflate(R.menu.scheduled_message_menu, menu)
+            MenuCompat.setGroupDividerEnabled(menu, true)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.tomorrow -> scheduleTomorrow()
+                    R.id.monday -> scheduleNextMonday()
+                    R.id.custom -> openDateTimeCalendar()
+                }
+                true
+            }
+            show()
+        }
+    }
+
+    private fun scheduleTomorrow() {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 9)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.add(Calendar.DATE, 1)
+        scheduledTime = calendar.timeInMillis
+        changeSendText()
+    }
+
+    private fun scheduleNextMonday() {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 9)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            calendar.add(Calendar.DATE, 1)
+        }
+        scheduledTime = calendar.timeInMillis
+        changeSendText()
+    }
+
+    private fun changeSendText() {
+        val text = if (scheduledTime == 0L) {
+            "Send"
+        } else {
+            "Send scheduled"
+        }
+        binding.chatInputView.findViewById<TextView>(R.id.textview_send).text = text
+    }
+
+    private fun openDateTimeCalendar() {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.MINUTE, 5)
+
+        val datePicker = DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth -> openTimeCalendar(year, month, dayOfMonth) },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePicker.datePicker.minDate = calendar.timeInMillis
+        calendar.add(Calendar.DATE, 30)
+        datePicker.datePicker.maxDate = calendar.timeInMillis
+        datePicker.show()
+    }
+
+    private fun openTimeCalendar(year: Int, month: Int, day: Int) {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.MINUTE, 5)
+
+        val timePicker = TimePickerDialog(
+            this,
+            { _, hour, minute -> setCustomTime(year, month, day, hour, minute) },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        )
+        timePicker.show()
+    }
+
+    private fun setCustomTime(year: Int, month: Int, day: Int, hour: Int, minute: Int) {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month)
+            set(Calendar.DAY_OF_MONTH, day)
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+        }
+        val selectedTime = calendar.timeInMillis
+        if (selectedTime < System.currentTimeMillis() + MinimumTimeAmount) {
+            Toast.makeText(
+                this,
+                "The message must be scheduled at least 5 minutes in the future",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+        scheduledTime = calendar.timeInMillis
+        changeSendText()
+    }
+
+    companion object {
+        private const val MinimumTimeAmount = 5 * 60 * 1_000L
+    }
+
 }
