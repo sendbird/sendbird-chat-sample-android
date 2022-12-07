@@ -1,8 +1,6 @@
 package com.sendbird.chat.sample.groupchannel.scheduled.message.ui.groupchannel
 
 import android.Manifest
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -12,7 +10,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -34,6 +31,8 @@ import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.groupchannel.scheduled.message.ui.openDateTimeSelector
+import com.sendbird.chat.sample.groupchannel.scheduled.message.ui.scheduledmessages.ScheduledMessagesActivity
 import com.sendbird.chat.sample.groupchannel.scheduled.message.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.scheduled.message.ui.user.SelectUserActivity
 import java.util.*
@@ -350,6 +349,14 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     getString(R.string.cancel),
                     { updateChannelView(it, channel) },
                 )
+                true
+            }
+
+            R.id.scheduled_messages -> {
+                startActivity(Intent(this, ScheduledMessagesActivity::class.java).apply {
+                    putExtra(Constants.INTENT_KEY_CHANNEL_URL, channelUrl)
+                    putExtra(Constants.INTENT_KEY_CHANNEL_TITLE, channelTitle)
+                })
                 true
             }
 
@@ -721,13 +728,16 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun createSelectScheduledMenu(anchor: View) {
         PopupMenu(this, anchor).apply {
-            menuInflater.inflate(R.menu.scheduled_message_menu, menu)
+            menuInflater.inflate(R.menu.scheduled_messages_menu, menu)
             MenuCompat.setGroupDividerEnabled(menu, true)
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.tomorrow -> scheduleTomorrow()
                     R.id.monday -> scheduleNextMonday()
-                    R.id.custom -> openDateTimeCalendar()
+                    R.id.custom -> openDateTimeSelector { timeSelected ->
+                        scheduledTime = timeSelected
+                        changeSendText()
+                    }
                 }
                 true
             }
@@ -764,61 +774,4 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
         binding.chatInputView.findViewById<TextView>(R.id.textview_send).text = text
     }
-
-    private fun openDateTimeCalendar() {
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, 5)
-
-        val datePicker = DatePickerDialog(
-            this,
-            { _, year, month, dayOfMonth -> openTimeCalendar(year, month, dayOfMonth) },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-        datePicker.datePicker.minDate = calendar.timeInMillis
-        calendar.add(Calendar.DATE, 30)
-        datePicker.datePicker.maxDate = calendar.timeInMillis
-        datePicker.show()
-    }
-
-    private fun openTimeCalendar(year: Int, month: Int, day: Int) {
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.MINUTE, 5)
-
-        val timePicker = TimePickerDialog(
-            this,
-            { _, hour, minute -> setCustomTime(year, month, day, hour, minute) },
-            calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE),
-            true
-        )
-        timePicker.show()
-    }
-
-    private fun setCustomTime(year: Int, month: Int, day: Int, hour: Int, minute: Int) {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.YEAR, year)
-            set(Calendar.MONTH, month)
-            set(Calendar.DAY_OF_MONTH, day)
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-        }
-        val selectedTime = calendar.timeInMillis
-        if (selectedTime < System.currentTimeMillis() + MinimumTimeAmount) {
-            Toast.makeText(
-                this,
-                "The message must be scheduled at least 5 minutes in the future",
-                Toast.LENGTH_LONG
-            ).show()
-            return
-        }
-        scheduledTime = calendar.timeInMillis
-        changeSendText()
-    }
-
-    companion object {
-        private const val MinimumTimeAmount = 5 * 60 * 1_000L
-    }
-
 }

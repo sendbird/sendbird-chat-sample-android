@@ -45,6 +45,11 @@
             android:name="com.sendbird.chat.module.ui.base.BaseSignUpActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".scheduled.message.ui.scheduledmessages.ScheduledMessagesActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.sendbird.chat.module.ui.base.BaseSplashActivity"
             android:exported="true"

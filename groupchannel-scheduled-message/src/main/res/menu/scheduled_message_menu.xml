@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:id="@+id/static_options">
-        <item
-            android:id="@+id/tomorrow"
-            android:title="Tomorrow at 9:00" />
+    <item
+        android:id="@+id/send_now"
+        android:title="Send now" />
 
-        <item
-            android:id="@+id/monday"
-            android:title="Next Monday at 9:00" />
-    </group>
-    <group android:id="@+id/dynamic_options">
-        <item
-            android:id="@+id/custom"
-            android:title="Custom Time" />
-    </group>
+    <item
+        android:id="@+id/cancel"
+        android:title="Cancel" />
+
+    <item
+        android:id="@+id/reschedule"
+        android:title="Reschedule" />
 </menu>
