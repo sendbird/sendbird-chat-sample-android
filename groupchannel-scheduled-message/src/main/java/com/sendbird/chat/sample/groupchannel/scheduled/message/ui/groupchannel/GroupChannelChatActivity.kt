@@ -104,9 +104,17 @@ class GroupChannelChatActivity : AppCompatActivity() {
             }
         })
 
-        binding.chatInputView.findViewById<View>(R.id.textview_send).setOnLongClickListener {
-            openScheduleMessageMenu(it)
-            true
+        binding.chatInputView.findViewById<TextView>(R.id.textview_send).apply {
+            setCompoundDrawablesRelativeWithIntrinsicBounds(
+                null,
+                null,
+                resources.getDrawable(R.drawable.ic_chevron_right, null),
+                null
+            )
+            setOnLongClickListener {
+                openScheduleMessageMenu(it)
+                true
+            }
         }
     }
 
