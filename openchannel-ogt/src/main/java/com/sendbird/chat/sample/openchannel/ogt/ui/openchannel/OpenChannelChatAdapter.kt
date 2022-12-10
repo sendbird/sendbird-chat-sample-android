@@ -1,6 +1,5 @@
 package com.sendbird.chat.sample.openchannel.ogt.ui.openchannel
 
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -247,7 +246,7 @@ class OpenChannelChatAdapter(
                         title.text = ogt.title
                         url.text = ogt.url
                         description.text = ogt.url
-                        image.load(Uri.parse(ogt.ogImage?.url))
+                        ogt.ogImage?.url?.let { image.load(it) }
                     }
                 }
             } else {
@@ -280,7 +279,7 @@ class OpenChannelChatAdapter(
                     title.text = ogt.title
                     url.text = ogt.url
                     description.text = ogt.url
-                    image.load(Uri.parse(ogt.ogImage?.url))
+                    ogt.ogImage?.url?.let { image.load(it) }
                 }
             }
         }
