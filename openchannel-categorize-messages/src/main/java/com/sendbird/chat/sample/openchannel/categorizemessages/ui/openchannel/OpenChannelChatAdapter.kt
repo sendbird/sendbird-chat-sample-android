@@ -18,6 +18,7 @@ import com.sendbird.chat.sample.openchannel.categorizemessages.databinding.ListI
 import com.sendbird.chat.sample.openchannel.categorizemessages.databinding.ListItemChatImageSendBinding
 import com.sendbird.chat.sample.openchannel.categorizemessages.databinding.ListItemChatReceiveBinding
 import com.sendbird.chat.sample.openchannel.categorizemessages.databinding.ListItemChatSendBinding
+import com.sendbird.chat.sample.openchannel.categorizemessages.ui.openchannel.OpenChannelChatActivity.Companion.PinnedMessage
 
 class OpenChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
@@ -238,7 +239,6 @@ class OpenChannelChatAdapter(
                 binding.chatErrorButton.visibility = View.GONE
                 binding.textviewTime.text = message.createdAt.toTime()
                 binding.textviewTime.visibility = View.VISIBLE
-                binding.alertIcon.isVisible = message.customType == "alert"
             } else {
                 binding.textviewTime.visibility = View.GONE
                 if (message.sendingStatus == SendingStatus.PENDING) {
@@ -253,6 +253,7 @@ class OpenChannelChatAdapter(
                 }
             }
             binding.chatBubbleSend.setText(message.message)
+            binding.pinnedView.isVisible = message.customType == PinnedMessage
         }
     }
 
@@ -262,13 +263,14 @@ class OpenChannelChatAdapter(
             binding.chatBubbleReceive.setText(message.message)
             binding.textviewTime.text = message.createdAt.toTime()
             binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
-            binding.alertIcon.isVisible = message.customType == "alert"
+            binding.pinnedView.isVisible = message.customType == PinnedMessage
         }
     }
 
     inner class GroupChatImageSendViewHolder(private val binding: ListItemChatImageSendBinding) :
         BaseViewHolder(binding) {
         fun bind(message: FileMessage) {
+            binding.pinnedView.isVisible = message.customType == PinnedMessage
             if (message.sendingStatus == SendingStatus.SUCCEEDED) {
                 binding.chatBubbleImageSend.setImageUrl(message.url, message.plainUrl)
                 binding.progressImageSend.visibility = View.GONE
@@ -295,6 +297,7 @@ class OpenChannelChatAdapter(
     inner class GroupChatImageReceiveViewHolder(private val binding: ListItemChatImageReceiveBinding) :
         BaseViewHolder(binding) {
         fun bind(message: FileMessage) {
+            binding.pinnedView.isVisible = message.customType == PinnedMessage
             binding.chatBubbleImageReceive.setImageUrl(message.url, message.plainUrl)
             binding.textviewTime.text = message.createdAt.toTime()
             binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
