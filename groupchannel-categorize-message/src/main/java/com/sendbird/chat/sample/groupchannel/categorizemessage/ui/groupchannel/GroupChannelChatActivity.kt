@@ -20,14 +20,13 @@ import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.exception.SendbirdException
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.handler.MessageCollectionInitHandler
-import com.sendbird.android.message.BaseMessage
-import com.sendbird.android.message.FileMessage
-import com.sendbird.android.message.UserMessage
+import com.sendbird.android.message.*
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.categorizemessage.R
 import com.sendbird.chat.sample.groupchannel.categorizemessage.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.groupchannel.categorizemessage.ui.pinned.GroupChannelPinnedMessagesActivity
 import com.sendbird.chat.sample.groupchannel.categorizemessage.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.categorizemessage.ui.user.SelectUserActivity
 import java.util.concurrent.ConcurrentHashMap
@@ -122,6 +121,14 @@ class GroupChannelChatActivity : AppCompatActivity() {
                             return@setOnMenuItemClickListener true
                         }
                     }
+                    val pinMenuTitleResId =
+                        if (baseMessage.customType == PINNED) R.string.unpin_message else R.string.pin_message
+                    val pinUnpinMenu =
+                        contextMenu.add(Menu.NONE, 3, 3, getString(pinMenuTitleResId))
+                    pinUnpinMenu.setOnMenuItemClickListener {
+                        pinUnpinMessage(baseMessage)
+                        return@setOnMenuItemClickListener true
+                    }
                 }
                 if (baseMessage is UserMessage) {
                     val copyMenu = contextMenu.add(Menu.NONE, 2, 2, getString(R.string.copy))
@@ -204,8 +211,10 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
         val messageCollectionCreateParams =
             MessageCollectionCreateParams(channel, messageListParams)
-                .setStartingPoint(timeStamp)
-                .setMessageCollectionHandler(collectionHandler)
+                .apply {
+                    startingPoint = timeStamp
+                    messageCollectionHandler = collectionHandler
+                }
         messageCollection =
             SendbirdChat.createMessageCollection(messageCollectionCreateParams).apply {
                 initialize(
@@ -278,7 +287,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
             showToast(R.string.enter_message_msg)
             return
         }
-        val params = UserMessageUpdateParams().setMessage(msg)
+        val params = UserMessageUpdateParams().apply {
+            message = msg
+        }
         currentGroupChannel?.updateUserMessage(
             baseMessage.messageId, params
         ) { _, e ->
@@ -286,6 +297,36 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 showToast("${e.message}")
             }
         }
+    }
+
+    private fun pinUnpinMessage(message: BaseMessage) {
+        when (message) {
+            is FileMessage -> {
+                val params = FileMessageUpdateParams().apply {
+                    customType = if (message.customType == PINNED) "" else PINNED
+                }
+                currentGroupChannel?.updateFileMessage(
+                    message.messageId,
+                    params
+                ) { _, e ->
+                    if (e != null) {
+                        showToast("${e.message}")
+                    }
+
+                }
+            }
+            else -> {
+                val params = UserMessageUpdateParams().apply {
+                    customType = if (message.customType == PINNED) "" else PINNED
+                }
+                currentGroupChannel?.updateUserMessage(message.messageId, params) { _, e ->
+                    if (e != null) {
+                        showToast("${e.message}")
+                    }
+                }
+            }
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -335,6 +376,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 true
             }
 
+            R.id.pinned_messages -> {
+                startActivity(GroupChannelPinnedMessagesActivity.newIntent(this, channelUrl))
+                true
+            }
+
             android.R.id.home -> {
                 finish()
                 true
@@ -378,7 +424,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private fun inviteUser(selectIds: List<String>?) {
         if (selectIds != null && selectIds.isNotEmpty()) {
             val channel = currentGroupChannel ?: return
-            channel.inviteWithUserIds(selectIds.toList()) {
+            channel.invite(selectIds.toList()) {
                 if (it != null) {
                     showToast("${it.message}")
                 }
@@ -393,7 +439,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
         if (channel.name != name) {
             val params = GroupChannelUpdateParams()
-                .setName(name)
+                .apply { this.name = name }
             channel.updateChannel(
                 params
             ) { _, e ->
@@ -416,9 +462,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
         val collection = messageCollection ?: return
         val channel = currentGroupChannel ?: return
 
-        val params = UserMessageCreateParams().setMessage(message.trim())
-        if (message.lowercase().contains("alert")) {
-            params.setCustomType("alert")
+        val params = UserMessageCreateParams().apply {
+            this.message = message.trim()
         }
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
@@ -441,17 +486,18 @@ class GroupChannelChatActivity : AppCompatActivity() {
         val channel = currentGroupChannel ?: return
 
         val thumbnailSizes = listOf(
-            FileMessage.ThumbnailSize(100, 100),
-            FileMessage.ThumbnailSize(200, 200)
+            ThumbnailSize(100, 100),
+            ThumbnailSize(200, 200)
         )
         val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
         if (fileInfo != null) {
-            val params = FileMessageCreateParams()
-                .setFile(fileInfo.file)
-                .setFileName(fileInfo.name)
-                .setFileSize(fileInfo.size)
-                .setThumbnailSizes(thumbnailSizes)
-                .setMimeType(fileInfo.mime)
+            val params = FileMessageCreateParams().apply {
+                file = fileInfo.file
+                fileName = fileInfo.name
+                fileSize = fileInfo.size
+                this.thumbnailSizes = thumbnailSizes
+                mimeType = fileInfo.mime
+            }
             recyclerObserver.scrollToBottom(true)
             channel.sendFileMessage(
                 params,
@@ -471,7 +517,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 channel.resendMessage(baseMessage, null)
             }
             is FileMessage -> {
-                val params = baseMessage.messageParams
+                val params = baseMessage.messageCreateParams
                 if (params != null) {
                     channel.resendMessage(
                         baseMessage,
@@ -521,12 +567,12 @@ class GroupChannelChatActivity : AppCompatActivity() {
             messages: List<BaseMessage>
         ) {
             when (context.messagesSendingStatus) {
-                BaseMessage.SendingStatus.SUCCEEDED -> {
+                SendingStatus.SUCCEEDED -> {
                     adapter.addMessages(messages)
                     markAsRead()
                 }
 
-                BaseMessage.SendingStatus.PENDING -> adapter.addPendingMessages(messages)
+                SendingStatus.PENDING -> adapter.addPendingMessages(messages)
 
                 else -> {
                 }
@@ -539,13 +585,13 @@ class GroupChannelChatActivity : AppCompatActivity() {
             messages: List<BaseMessage>
         ) {
             when (context.messagesSendingStatus) {
-                BaseMessage.SendingStatus.SUCCEEDED -> adapter.updateSucceedMessages(messages)
+                SendingStatus.SUCCEEDED -> adapter.updateSucceedMessages(messages)
 
-                BaseMessage.SendingStatus.PENDING -> adapter.updatePendingMessages(messages)
+                SendingStatus.PENDING -> adapter.updatePendingMessages(messages)
 
-                BaseMessage.SendingStatus.FAILED -> adapter.updatePendingMessages(messages)
+                SendingStatus.FAILED -> adapter.updatePendingMessages(messages)
 
-                BaseMessage.SendingStatus.CANCELED -> adapter.deletePendingMessages(messages)// The cancelled messages in the sample will be deleted
+                SendingStatus.CANCELED -> adapter.deletePendingMessages(messages)// The cancelled messages in the sample will be deleted
 
                 else -> {
                 }
@@ -558,9 +604,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
             messages: List<BaseMessage>
         ) {
             when (context.messagesSendingStatus) {
-                BaseMessage.SendingStatus.SUCCEEDED -> adapter.deleteMessages(messages)
+                SendingStatus.SUCCEEDED -> adapter.deleteMessages(messages)
 
-                BaseMessage.SendingStatus.FAILED -> adapter.deletePendingMessages(messages)
+                SendingStatus.FAILED -> adapter.deletePendingMessages(messages)
 
                 else -> {
                 }
@@ -623,5 +669,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        const val PINNED = "pinned_message"
     }
 }

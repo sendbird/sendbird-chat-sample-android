@@ -87,9 +87,10 @@ class BaseUserInfoActivity : AppCompatActivity() {
                 showToast(R.string.file_transfer_error)
                 return
             }
-            val params = UserUpdateParams()
-                .setNickname(nickname)
-                .setProfileImageFile(fileInfo.file)
+            val params = UserUpdateParams().apply {
+                this.nickname = nickname
+                this.profileImageFile = fileInfo.file
+            }
 
             SendbirdChat.updateCurrentUserInfo(params) {
                 if (it != null) {
@@ -100,8 +101,9 @@ class BaseUserInfoActivity : AppCompatActivity() {
             }
         } else {
             if (userNickname != nickname) {
-                val params = UserUpdateParams()
-                    .setNickname(nickname)
+                val params = UserUpdateParams().apply {
+                    this.nickname = nickname
+                }
                 SendbirdChat.updateCurrentUserInfo(params) {
                     if (it != null) {
                         showToast("${it.message}")

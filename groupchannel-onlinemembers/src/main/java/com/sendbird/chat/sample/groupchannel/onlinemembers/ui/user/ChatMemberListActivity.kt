@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.params.ApplicationUserListQueryParams
 import com.sendbird.android.user.User
+import com.sendbird.android.user.query.ApplicationUserListQuery
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.R
@@ -20,9 +22,13 @@ class ChatMemberListActivity : AppCompatActivity() {
     private lateinit var adapter: ChatMemberListAdapter
     private var currentChannel: GroupChannel? = null
     private var channelUrl: String? = null
-    private val query = SendbirdChat.createApplicationUserListQuery()
     private val handler = Handler(Looper.getMainLooper())
-    private val queryRunnable: () -> Unit = { query.next(::onNextQuery) }
+    private var isQueryInProgress = false
+    private val queryRunnable: () -> Unit = queryRunnable@{
+        if (isQueryInProgress) return@queryRunnable
+        isQueryInProgress = true
+        getOnlineUsers()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,27 +80,56 @@ class ChatMemberListActivity : AppCompatActivity() {
     }
 
     private fun startListeningForOnlineMembers() {
-        addUsersToQuery()
         startPeriodicCheck()
     }
 
-    private fun addUsersToQuery() {
+    private fun getOnlineUsers() {
         val channel = currentChannel ?: return
         val membersIds = channel.members.map { it.userId }
-        query.setUserIdsFilter(membersIds)
+        val query = SendbirdChat.createApplicationUserListQuery(
+            ApplicationUserListQueryParams(
+                userIdsFilter = membersIds
+            )
+        )
+        val users = mutableListOf<User>()
+        getOnlineUsers(query, users) {
+            adapter.submitList(users.sortedBy { it.nickname })
+            isQueryInProgress = false
+        }
+    }
+
+    private fun getOnlineUsers(
+        query: ApplicationUserListQuery,
+        users: MutableList<User>,
+        onLoadFinished: () -> Unit
+    ) {
+        getUsers(query) internal@{ usersFetched ->
+            users.addAll(usersFetched)
+            if (usersFetched.isEmpty()) {
+                onLoadFinished()
+                return@internal
+            }
+            getOnlineUsers(query, users, onLoadFinished)
+        }
+    }
+
+    private fun getUsers(query: ApplicationUserListQuery, onLoadFinished: (List<User>) -> Unit) {
+        if (query.hasNext) {
+            query.next { users, e ->
+                if (e != null) {
+                    e.printStackTrace()
+                    onLoadFinished(emptyList())
+                    return@next
+                }
+                onLoadFinished(users ?: emptyList())
+            }
+        } else {
+            onLoadFinished(emptyList())
+        }
     }
 
     private fun startPeriodicCheck() {
         handler.postDelayed(queryRunnable, CheckIntervalMillis)
-    }
-
-    private fun onNextQuery(users: List<User>?, exception: Exception?) {
-        if (exception != null) {
-            exception.printStackTrace()
-            return
-        }
-        users ?: return
-        adapter.submitList(users.sortedBy { it.nickname })
     }
 
     override fun onDestroy() {

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.params.ApplicationUserListQueryParams
 import com.sendbird.android.params.GroupChannelCreateParams
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
@@ -20,7 +21,9 @@ import com.sendbird.chat.sample.groupchannel.addremoveoperators.ui.groupchannel.
 class SelectUserActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySelectUserBinding
     private lateinit var adapter: SelectUserAdapter
-    private var userListQuery = SendbirdChat.createApplicationUserListQuery()
+    private var userListQuery = SendbirdChat.createApplicationUserListQuery(
+        ApplicationUserListQueryParams()
+    )
     private var isCreateMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,11 +117,11 @@ class SelectUserActivity : AppCompatActivity() {
             showToast(R.string.select_user_msg)
             return
         }
-        //make the current user operator for the new channel
-        val operators = SendbirdChat.currentUser?.userId?.let { listOf(it) } ?: emptyList()
         val params = GroupChannelCreateParams()
-            .addUserIds(adapter.selectUserIdSet.toList())
-            .setOperatorUserIds(operators)
+            .apply {
+                userIds = adapter.selectUserIdSet.toList()
+                this.operators = SendbirdChat.currentUser?.let { listOf(it) } ?: emptyList()
+            }
         GroupChannel.createChannel(params) createChannelLabel@{ groupChannel, e ->
             if (e != null) {
                 showToast("${e.message}")

@@ -1,6 +1,5 @@
 package com.sendbird.chat.sample.openchannel.ogt.ui.openchannel
 
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +12,7 @@ import coil.load
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
+import com.sendbird.android.message.SendingStatus
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.toTime
 import com.sendbird.chat.sample.openchannel.ogt.databinding.ListItemChatImageReceiveBinding
@@ -234,7 +234,7 @@ class OpenChannelChatAdapter(
     inner class GroupChatSendViewHolder(private val binding: ListItemChatSendBinding) :
         BaseViewHolder(binding) {
         fun bind(message: BaseMessage) {
-            if (message.sendingStatus == BaseMessage.SendingStatus.SUCCEEDED) {
+            if (message.sendingStatus == SendingStatus.SUCCEEDED) {
                 binding.progressSend.visibility = View.GONE
                 binding.chatErrorButton.visibility = View.GONE
                 binding.textviewTime.text = message.createdAt.toTime()
@@ -246,12 +246,12 @@ class OpenChannelChatAdapter(
                         title.text = ogt.title
                         url.text = ogt.url
                         description.text = ogt.url
-                        image.load(Uri.parse(ogt.ogImage?.url))
+                        ogt.ogImage?.url?.let { image.load(it) }
                     }
                 }
             } else {
                 binding.textviewTime.visibility = View.GONE
-                if (message.sendingStatus == BaseMessage.SendingStatus.PENDING) {
+                if (message.sendingStatus == SendingStatus.PENDING) {
                     binding.progressSend.visibility = View.VISIBLE
                     binding.chatErrorButton.visibility = View.GONE
                 } else {
@@ -279,7 +279,7 @@ class OpenChannelChatAdapter(
                     title.text = ogt.title
                     url.text = ogt.url
                     description.text = ogt.url
-                    image.load(Uri.parse(ogt.ogImage?.url))
+                    ogt.ogImage?.url?.let { image.load(it) }
                 }
             }
         }
@@ -288,16 +288,16 @@ class OpenChannelChatAdapter(
     inner class GroupChatImageSendViewHolder(private val binding: ListItemChatImageSendBinding) :
         BaseViewHolder(binding) {
         fun bind(message: FileMessage) {
-            if (message.sendingStatus == BaseMessage.SendingStatus.SUCCEEDED) {
+            if (message.sendingStatus == SendingStatus.SUCCEEDED) {
                 binding.chatBubbleImageSend.setImageUrl(message.url, message.plainUrl)
                 binding.progressImageSend.visibility = View.GONE
                 binding.chatImageErrorButton.visibility = View.GONE
                 binding.textviewTime.text = message.createdAt.toTime()
                 binding.textviewTime.visibility = View.VISIBLE
             } else {
-                binding.chatBubbleImageSend.setImageFile(message.messageParams?.file)
+                binding.chatBubbleImageSend.setImageFile(message.messageCreateParams?.file)
                 binding.textviewTime.visibility = View.GONE
-                if (message.sendingStatus == BaseMessage.SendingStatus.PENDING) {
+                if (message.sendingStatus == SendingStatus.PENDING) {
                     binding.progressImageSend.visibility = View.VISIBLE
                     binding.chatImageErrorButton.visibility = View.GONE
                 } else {

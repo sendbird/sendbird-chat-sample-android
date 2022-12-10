@@ -8,10 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.GroupChannel
+import com.sendbird.android.params.MemberListQueryParams
 import com.sendbird.android.user.Member
+import com.sendbird.android.user.RestrictedUser
 import com.sendbird.android.user.User
-import com.sendbird.android.user.query.GroupChannelMemberListQuery
-import com.sendbird.android.user.query.UserListQuery
+import com.sendbird.android.user.query.BannedUserListQuery
+import com.sendbird.android.user.query.MemberListQuery
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.ban.R
@@ -151,7 +153,7 @@ class ChatMemberListActivity : AppCompatActivity() {
     private fun retrieveAndDisplayActiveUsers() {
         val groupChannel = currentChannel ?: return
         areBannedUsersDisplayed = false
-        val query = groupChannel.createMemberListQuery()
+        val query = groupChannel.createMemberListQuery(MemberListQueryParams())
         val members = mutableListOf<Member>()
         groupChannel.getMembers(query, members) {
             adapter.submitList(members as List<User>?)
@@ -162,13 +164,17 @@ class ChatMemberListActivity : AppCompatActivity() {
         val groupChannel = currentChannel ?: return
         areBannedUsersDisplayed = true
         val query = groupChannel.createBannedUserListQuery()
-        val bannedUsers = mutableListOf<User>()
+        val bannedUsers = mutableListOf<RestrictedUser>()
         groupChannel.getUsers(query, bannedUsers) {
-            adapter.submitList(bannedUsers)
+            adapter.submitList(bannedUsers as List<User>?)
         }
     }
 
-    private fun GroupChannel.getMembers(query: GroupChannelMemberListQuery, allUsers: MutableList<Member>, onQueryFinished: () -> Unit) {
+    private fun GroupChannel.getMembers(
+        query: MemberListQuery,
+        allUsers: MutableList<Member>,
+        onQueryFinished: () -> Unit
+    ) {
         query.getMembers internal@{ users ->
             if (users.isEmpty()) {
                 onQueryFinished.invoke()
@@ -179,7 +185,7 @@ class ChatMemberListActivity : AppCompatActivity() {
         }
     }
 
-    private fun GroupChannelMemberListQuery.getMembers(onUsersReceived: (List<Member>) -> Unit) {
+    private fun MemberListQuery.getMembers(onUsersReceived: (List<Member>) -> Unit) {
         if (hasNext) {
             next { result, exception ->
                 if (exception != null) {
@@ -198,7 +204,11 @@ class ChatMemberListActivity : AppCompatActivity() {
         onUsersReceived(emptyList())
     }
 
-    private fun GroupChannel.getUsers(query: UserListQuery, allUsers: MutableList<User>, onQueryFinished: () -> Unit) {
+    private fun GroupChannel.getUsers(
+        query: BannedUserListQuery,
+        allUsers: MutableList<RestrictedUser>,
+        onQueryFinished: () -> Unit
+    ) {
         query.getUsers internal@{ users ->
             if (users.isEmpty()) {
                 onQueryFinished.invoke()
@@ -209,7 +219,7 @@ class ChatMemberListActivity : AppCompatActivity() {
         }
     }
 
-    private fun UserListQuery.getUsers(onUsersReceived: (List<User>) -> Unit) {
+    private fun BannedUserListQuery.getUsers(onUsersReceived: (List<RestrictedUser>) -> Unit) {
         if (hasNext) {
             next { result, exception ->
                 if (exception != null) {

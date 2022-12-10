@@ -11,11 +11,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.BaseChannel
+import com.sendbird.android.channel.ChannelType
 import com.sendbird.android.channel.OpenChannel
+import com.sendbird.android.channel.ReportCategory
 import com.sendbird.android.handler.ConnectionHandler
 import com.sendbird.android.handler.OpenChannelHandler
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
+import com.sendbird.android.message.ThumbnailSize
 import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.android.user.User
@@ -117,12 +120,14 @@ class OpenChannelChatActivity : AppCompatActivity() {
                         return@setOnMenuItemClickListener true
                     }
                 }
-                val reportMessageOption = contextMenu.add(Menu.NONE, 3, 3, getString(R.string.report_message))
+                val reportMessageOption =
+                    contextMenu.add(Menu.NONE, 3, 3, getString(R.string.report_message))
                 reportMessageOption.setOnMenuItemClickListener {
                     reportUserMessage(baseMessage)
                     return@setOnMenuItemClickListener true
                 }
-                val reportUserOption = contextMenu.add(Menu.NONE, 4, 4, getString(R.string.report_user))
+                val reportUserOption =
+                    contextMenu.add(Menu.NONE, 4, 4, getString(R.string.report_user))
                 reportUserOption.setOnMenuItemClickListener {
                     val userToReport = baseMessage.sender ?: return@setOnMenuItemClickListener true
                     reportUser(userToReport)
@@ -157,7 +162,11 @@ class OpenChannelChatActivity : AppCompatActivity() {
     }
 
     private fun reportUserMessage(baseMessage: BaseMessage) {
-        currentOpenChannel?.reportMessage(baseMessage, BaseChannel.ReportCategory.SUSPICIOUS, "Reason to report") {
+        currentOpenChannel?.reportMessage(
+            baseMessage,
+            ReportCategory.SUSPICIOUS,
+            "Reason to report"
+        ) {
             if (it != null) {
                 showToast("Report failed ${it.message}")
                 return@reportMessage
@@ -167,7 +176,11 @@ class OpenChannelChatActivity : AppCompatActivity() {
     }
 
     private fun reportUser(userToReport: User) {
-        currentOpenChannel?.reportUser(userToReport, BaseChannel.ReportCategory.SUSPICIOUS, "Reason to report") callback@{
+        currentOpenChannel?.reportUser(
+            userToReport,
+            ReportCategory.SUSPICIOUS,
+            "Reason to report"
+        ) callback@{
             if (it != null) {
                 showToast("Report failed ${it.message}")
                 return@callback
@@ -245,7 +258,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
 
             override fun onChannelDeleted(
                 channelUrl: String,
-                channelType: BaseChannel.ChannelType
+                channelType: ChannelType
             ) {
                 showToast(R.string.channel_deleted_event_msg)
                 finish()
@@ -272,7 +285,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
             return
         }
         val params = UserMessageUpdateParams()
-            .setMessage(msg)
+            .apply {
+                message = msg
+            }
         currentOpenChannel?.updateUserMessage(
             baseMessage.messageId,
             params
@@ -329,7 +344,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
     }
 
     private fun reportChannel() {
-        currentOpenChannel?.report(BaseChannel.ReportCategory.SUSPICIOUS, "Reason for reporting") {
+        currentOpenChannel?.report(ReportCategory.SUSPICIOUS, "Reason for reporting") {
             if (it != null) {
                 showToast("Report failed ${it.message}")
                 return@report
@@ -353,7 +368,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
             return
         }
         val params = OpenChannelUpdateParams()
-            .setName(name)
+            .apply { this.name = name }
         channel.updateChannel(params) { _, e ->
             if (e != null) {
                 showToast("${e.message}")
@@ -418,7 +433,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
         }
         val channel = currentOpenChannel ?: return
         val params = UserMessageCreateParams()
-            .setMessage(msg.trim())
+            .apply {
+                message = msg.trim()
+            }
         binding.chatInputView.clearText()
         val pendingMessage = channel.sendUserMessage(params) { message, e ->
             if (e != null) {
@@ -442,17 +459,18 @@ class OpenChannelChatActivity : AppCompatActivity() {
         }
         val channel = currentOpenChannel ?: return
         val thumbnailSizes = listOf(
-            FileMessage.ThumbnailSize(100, 100),
-            FileMessage.ThumbnailSize(200, 200)
+            ThumbnailSize(100, 100),
+            ThumbnailSize(200, 200)
         )
         val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
         if (fileInfo != null) {
-            val params = FileMessageCreateParams()
-                .setFile(fileInfo.file)
-                .setFileName(fileInfo.name)
-                .setFileSize(fileInfo.size)
-                .setThumbnailSizes(thumbnailSizes)
-                .setMimeType(fileInfo.mime)
+            val params = FileMessageCreateParams().apply {
+                file = fileInfo.file
+                fileName = fileInfo.name
+                fileSize = fileInfo.size
+                this.thumbnailSizes = thumbnailSizes
+                mimeType = fileInfo.mime
+            }
             val pendingMessage = channel.sendFileMessage(
                 params
             ) sendFileMessageLabel@{ fileMessage, e ->
@@ -480,7 +498,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 channel.resendMessage(baseMessage, null)
             }
             is FileMessage -> {
-                val params = baseMessage.messageParams
+                val params = baseMessage.messageCreateParams
                 if (params != null) {
                     channel.resendMessage(
                         baseMessage,

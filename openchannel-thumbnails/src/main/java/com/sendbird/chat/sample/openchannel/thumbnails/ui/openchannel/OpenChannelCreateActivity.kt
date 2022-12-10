@@ -41,11 +41,12 @@ class OpenChannelCreateActivity : AppCompatActivity() {
             showToast(R.string.channel_name_enter_msg)
             return
         }
-        val params = OpenChannelCreateParams()
-            .setName(channelName)
+        val params = OpenChannelCreateParams().apply {
+            name = channelName
+        }
         val currentUser = SendbirdChat.currentUser
         if (currentUser != null) {
-            params.setOperators(listOf(currentUser))
+            params.operators = listOf(currentUser)
         }
 
         OpenChannel.createChannel(params) { openChannel, e ->

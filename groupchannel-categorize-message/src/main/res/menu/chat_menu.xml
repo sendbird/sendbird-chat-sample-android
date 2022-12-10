@@ -22,6 +22,9 @@
             <item
                 android:id="@+id/invite"
                 android:title="@string/invite_members" />
+            <item
+                android:id="@+id/pinned_messages"
+                android:title="@string/pinned_messages" />
         </menu>
     </item>
 </menu>

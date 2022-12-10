@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.channel.OpenChannel
 import com.sendbird.android.channel.query.OpenChannelListQuery
+import com.sendbird.android.params.OpenChannelListQueryParams
 import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_TITLE
 import com.sendbird.chat.module.utils.Constants.INTENT_KEY_CHANNEL_URL
@@ -72,7 +73,7 @@ class OpenChannelListFragment :
     }
 
     private fun createOpenChannelListQuery() {
-        openChannelListQuery = OpenChannel.createOpenChannelListQuery()
+        openChannelListQuery = OpenChannel.createOpenChannelListQuery(OpenChannelListQueryParams())
         loadNextOpenChannels(true)
     }
 

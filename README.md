@@ -4,6 +4,11 @@
 
 This repository provides feature-level Chat samples with Kotlin to demonstrate how to use the [Sendbird Chat SDK](https://sendbird.com/docs/chat).
 
+## 🔒 Security tip
+When a new Sendbird application is created in the dashboard the default security settings are set permissive to simplify running samples and implementing your first code.
+
+Before launching make sure to review the security tab under ⚙️ Settings -> Security, and set Access token permission to Read Only or Disabled so that unauthenticated users can not login as someone else. And review the Access Control lists. Most apps will want to disable "Allow retrieving user list" as that could expose usage numbers and other information.
+
 ## Requirements
 
 Android Studio 2.0+
@@ -167,3 +172,6 @@ Once a sample is chosen, create a device and run the app on an Android device or
 - openchannel-update-message
 - openchannel-copy-message
 ...
+
+## Considerations in real world app
+ - In this sample repo users are connecting to sendbird using a user ID (Sendbird Dashboard --> Security --> Read & Write). Read & Write is not secure and will create a new user automatically from the SDK if none exists. In production be sure to change the Sendbird Dashboard security settings to Deny login, and [authenticate users](https://sendbird.com/docs/chat/v4/android/guides/authentication#2-connect-to-sendbird-server-with-a-user-id-and-a-token) with a Sendbird generated Session Token.

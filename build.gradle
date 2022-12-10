@@ -5,7 +5,7 @@ buildscript {
         androidxCoreKtxVersion = '1.7.0'
         androidxAppcompatVersion = '1.4.1'
         googleMaterialVersion = '1.5.0'
-        sendbirdVersion = '4.0.0-beta'
+        sendbirdVersion = '4.+'
 
         junitVersion = '4.+'
         androidxTestExtJunitVersion = '1.1.3'
@@ -21,7 +21,7 @@ buildscript {
 plugins {
     id 'com.android.application' version '4.2.0' apply false
     id 'com.android.library' version '4.2.0' apply false
-    id 'org.jetbrains.kotlin.android' version '1.5.30' apply false
+    id 'org.jetbrains.kotlin.android' version '1.6.21' apply false
 }
 task clean(type: Delete) {
     delete rootProject.buildDir

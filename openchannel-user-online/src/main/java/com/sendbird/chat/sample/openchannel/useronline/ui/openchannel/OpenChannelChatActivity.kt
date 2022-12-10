@@ -11,11 +11,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.BaseChannel
+import com.sendbird.android.channel.ChannelType
 import com.sendbird.android.channel.OpenChannel
 import com.sendbird.android.handler.ConnectionHandler
 import com.sendbird.android.handler.OpenChannelHandler
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.android.message.FileMessage
+import com.sendbird.android.message.ThumbnailSize
 import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
@@ -213,7 +215,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
 
             override fun onChannelDeleted(
                 channelUrl: String,
-                channelType: BaseChannel.ChannelType
+                channelType: ChannelType
             ) {
                 showToast(R.string.channel_deleted_event_msg)
                 finish()
@@ -239,8 +241,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
             showToast(R.string.enter_message_msg)
             return
         }
-        val params = UserMessageUpdateParams()
-            .setMessage(msg)
+        val params = UserMessageUpdateParams().apply {
+            message = msg
+        }
         currentOpenChannel?.updateUserMessage(
             baseMessage.messageId,
             params
@@ -305,8 +308,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
             showToast(R.string.enter_message_msg)
             return
         }
-        val params = OpenChannelUpdateParams()
-            .setName(name)
+        val params = OpenChannelUpdateParams().apply {
+            this.name = name
+        }
         channel.updateChannel(params) { _, e ->
             if (e != null) {
                 showToast("${e.message}")
@@ -370,8 +374,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
             return
         }
         val channel = currentOpenChannel ?: return
-        val params = UserMessageCreateParams()
-            .setMessage(msg.trim())
+        val params = UserMessageCreateParams().apply {
+            this.message = msg.trim()
+        }
         binding.chatInputView.clearText()
         val pendingMessage = channel.sendUserMessage(params) { message, e ->
             if (e != null) {
@@ -395,17 +400,17 @@ class OpenChannelChatActivity : AppCompatActivity() {
         }
         val channel = currentOpenChannel ?: return
         val thumbnailSizes = listOf(
-            FileMessage.ThumbnailSize(100, 100),
-            FileMessage.ThumbnailSize(200, 200)
+            ThumbnailSize(100, 100),
+            ThumbnailSize(200, 200)
         )
         val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
         if (fileInfo != null) {
-            val params = FileMessageCreateParams()
-                .setFile(fileInfo.file)
-                .setFileName(fileInfo.name)
-                .setFileSize(fileInfo.size)
-                .setThumbnailSizes(thumbnailSizes)
-                .setMimeType(fileInfo.mime)
+            val params = FileMessageCreateParams().apply {
+                file = fileInfo.file
+                fileName = fileInfo.name
+                fileSize = fileInfo.size
+                mimeType = fileInfo.mime
+            }
             val pendingMessage = channel.sendFileMessage(
                 params
             ) sendFileMessageLabel@{ fileMessage, e ->
@@ -433,7 +438,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 channel.resendMessage(baseMessage, null)
             }
             is FileMessage -> {
-                val params = baseMessage.messageParams
+                val params = baseMessage.messageCreateParams
                 if (params != null) {
                     channel.resendMessage(
                         baseMessage,

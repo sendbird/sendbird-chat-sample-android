@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/send_now"
+        android:title="Send now" />
+
+    <item
+        android:id="@+id/cancel"
+        android:title="Cancel" />
+
+    <item
+        android:id="@+id/reschedule"
+        android:title="Reschedule" />
+</menu>
