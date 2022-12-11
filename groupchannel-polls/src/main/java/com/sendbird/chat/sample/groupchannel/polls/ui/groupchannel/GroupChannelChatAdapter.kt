@@ -1,5 +1,6 @@
 package com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,19 +9,21 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.sendbird.android.SendbirdChat
-import com.sendbird.android.message.AdminMessage
-import com.sendbird.android.message.BaseMessage
-import com.sendbird.android.message.FileMessage
-import com.sendbird.android.message.SendingStatus
+import com.sendbird.android.message.*
+import com.sendbird.android.poll.Poll
+import com.sendbird.android.poll.PollOption
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.equalDate
 import com.sendbird.chat.module.utils.equalTime
 import com.sendbird.chat.module.utils.toTime
+import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.*
 
 class GroupChannelChatAdapter(
+    context: Context,
     private val longClickListener: OnItemLongClickListener,
-    private val failedItemClickListener: OnFailedItemClickListener
+    private val failedItemClickListener: OnFailedItemClickListener,
+    private val onPollOptionVoted: (Poll, PollOption) -> Unit
 ) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
 
     fun interface OnItemLongClickListener {
@@ -53,57 +56,75 @@ class GroupChannelChatAdapter(
         const val VIEW_TYPE_SEND_IMAGE = 2
         const val VIEW_TYPE_RECEIVE_IMAGE = 3
         const val VIEW_TYPE_ADMIN = 4
+        const val VIEW_TYPE_POOL = 5
     }
 
     private val baseMessageList = mutableListOf<BaseMessage>()
     private val pendingMessageList = mutableListOf<BaseMessage>()
+
+    private val layoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
         when (viewType) {
             VIEW_TYPE_SEND -> return GroupChatSendViewHolder(
                 ListItemChatSendBinding.inflate(
-                    LayoutInflater.from(parent.context),
+                    layoutInflater,
                     parent,
                     false
                 )
             )
             VIEW_TYPE_RECEIVE -> return GroupChatReceiveViewHolder(
                 ListItemChatReceiveBinding.inflate(
-                    LayoutInflater.from(parent.context),
+                    layoutInflater,
                     parent,
                     false
                 )
             )
             VIEW_TYPE_SEND_IMAGE -> return GroupChatImageSendViewHolder(
                 ListItemChatImageSendBinding.inflate(
-                    LayoutInflater.from(parent.context),
+                    layoutInflater,
                     parent,
                     false
                 )
             )
             VIEW_TYPE_RECEIVE_IMAGE -> return GroupChatImageReceiveViewHolder(
                 ListItemChatImageReceiveBinding.inflate(
-                    LayoutInflater.from(parent.context),
+                    layoutInflater,
                     parent,
                     false
                 )
             )
             VIEW_TYPE_ADMIN -> return GroupChatAdminViewHolder(
                 ListItemChatAdminBinding.inflate(
-                    LayoutInflater.from(parent.context),
+                    layoutInflater,
+                    parent,
+                    false
+                )
+            )
+            VIEW_TYPE_POOL -> return GroupChatPollViewHolder(
+                ListItemChatPollBinding.inflate(
+                    layoutInflater,
                     parent,
                     false
                 )
             )
             else -> return GroupChatSendViewHolder(
                 ListItemChatSendBinding.inflate(
-                    LayoutInflater.from(parent.context),
+                    layoutInflater,
                     parent,
                     false
                 )
             )
         }
+    }
+
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -156,12 +177,18 @@ class GroupChannelChatAdapter(
             is GroupChatAdminViewHolder -> {
                 holder.bind(getItem(position), showDate)
             }
+            is GroupChatPollViewHolder -> {
+                val poll = (getItem(position) as UserMessage).poll ?: return
+                holder.bind(poll)
+            }
         }
     }
 
     override fun getItemViewType(position: Int): Int {
         return if (getItem(position) is AdminMessage) {
             VIEW_TYPE_ADMIN
+        } else if ((getItem(position) as? UserMessage)?.poll != null) {
+            VIEW_TYPE_POOL
         } else {
             val currentUser = SendbirdChat.currentUser
             if (currentUser != null) {
@@ -470,6 +497,29 @@ class GroupChannelChatAdapter(
                 binding.dateTagView.visibility = View.VISIBLE
             } else {
                 binding.dateTagView.visibility = View.GONE
+            }
+        }
+    }
+
+    inner class GroupChatPollViewHolder(private val binding: ListItemChatPollBinding) :
+        BaseViewHolder(binding) {
+        fun bind(poll: Poll) {
+            binding.tvPollTitle.text = poll.title
+            poll.options.forEach { option ->
+                val textViewBinding =
+                    ItemPollOptionBinding.inflate(layoutInflater, binding.llOptions, true)
+                textViewBinding.tvOption.text = option.text
+                option.voteCount.takeIf { it != 0L }
+                    ?.let { textViewBinding.tvVotersCount.text = "+$it" }
+                textViewBinding.root.setOnClickListener {
+                    onPollOptionVoted(poll, option)
+                }
+                val background = if (poll.votedPollOptionIds.contains(option.id)) {
+                    R.drawable.background_rect_voted
+                } else {
+                    R.drawable.background_rect
+                }
+                textViewBinding.root.setBackgroundResource(background)
             }
         }
     }

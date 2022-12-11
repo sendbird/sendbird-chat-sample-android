@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,20 +13,26 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
+import com.sendbird.android.channel.BaseChannel
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.collection.GroupChannelContext
 import com.sendbird.android.collection.MessageCollection
 import com.sendbird.android.collection.MessageCollectionInitPolicy
 import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.exception.SendbirdException
+import com.sendbird.android.handler.GroupChannelHandler
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.handler.MessageCollectionInitHandler
 import com.sendbird.android.message.*
 import com.sendbird.android.params.*
+import com.sendbird.android.poll.Poll
+import com.sendbird.android.poll.PollOption
+import com.sendbird.android.poll.PollVoteEvent
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls.CreatePollActivity
 import com.sendbird.chat.sample.groupchannel.polls.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.polls.ui.user.SelectUserActivity
 import java.util.concurrent.ConcurrentHashMap
@@ -96,7 +103,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        adapter = GroupChannelChatAdapter({ baseMessage, view ->
+        adapter = GroupChannelChatAdapter(this, { baseMessage, view ->
             view.setOnCreateContextMenuListener { contextMenu, _, _ ->
                 if (SendbirdChat.currentUser != null && baseMessage.sender?.userId == SendbirdChat.currentUser!!.userId) {
                     val deleteMenu =
@@ -138,7 +145,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     1 -> adapter.deletePendingMessages(mutableListOf(it))
                 }
             }
-        })
+        }, this::votePollOption)
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
         recyclerObserver = ChatRecyclerDataObserver(binding.recyclerviewChat, adapter)
@@ -236,6 +243,17 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     }
                 )
             }
+
+        SendbirdChat.addChannelHandler(GroupChannelPollHandler, object : GroupChannelHandler() {
+            override fun onMessageReceived(channel: BaseChannel, message: BaseMessage) {
+                //no-op
+            }
+
+            override fun onPollVoted(channel: GroupChannel, pollVoteEvent: PollVoteEvent) {
+                super.onPollVoted(channel, pollVoteEvent)
+                updatePoll(pollVoteEvent)
+            }
+        })
     }
 
     private fun loadPreviousMessageItems() {
@@ -334,6 +352,13 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     getString(R.string.cancel),
                     { updateChannelView(it, channel) },
                 )
+                true
+            }
+
+            R.id.poll -> {
+                val intent = Intent(this, CreatePollActivity::class.java)
+                intent.putExtra(Constants.INTENT_KEY_CHANNEL_URL, channelUrl)
+                startActivity(intent)
                 true
             }
 
@@ -599,6 +624,31 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     }
 
+    private fun votePollOption(poll: Poll, pollOption: PollOption) {
+        val channel = currentGroupChannel ?: return
+        channel.votePoll(poll.id, listOf(pollOption.id)) { event, exception ->
+            if (exception != null) {
+                Log.d("PollEvent", exception.message ?: "Error voting")
+            }
+            event ?: return@votePoll
+            updatePoll(pollVoteEvent = event)
+        }
+    }
+
+    private fun updatePoll(pollVoteEvent: PollVoteEvent) {
+//        val channel = currentGroupChannel ?: return
+//        channel.getMessagesByMessageId(
+//            pollVoteEvent.messageId,
+//            MessageListParams()
+//        ) { messages, exception ->
+//            if (exception != null) {
+//                Log.d("PollEvent", exception.message ?: "Error updating poll")
+//            }
+//            messages ?: return@getMessagesByMessageId
+//            adapter.updateSucceedMessages(messages)
+//        }
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
@@ -625,5 +675,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val GroupChannelPollHandler = "chat_poll_handler"
     }
 }
