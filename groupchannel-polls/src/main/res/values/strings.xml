@@ -34,4 +34,6 @@
     <string name="channel_url_error">error: Channel url null</string>
     <string name="channel_error">error: Channel null</string>
     <string name="create_poll">Create poll</string>
+    <string name="add">Add</string>
+    <string name="add_option">Add option</string>
 </resources>

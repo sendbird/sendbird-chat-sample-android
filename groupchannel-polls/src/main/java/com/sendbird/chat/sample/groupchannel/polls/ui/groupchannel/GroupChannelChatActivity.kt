@@ -27,6 +27,7 @@ import com.sendbird.android.message.*
 import com.sendbird.android.params.*
 import com.sendbird.android.poll.Poll
 import com.sendbird.android.poll.PollOption
+import com.sendbird.android.poll.PollUpdateEvent
 import com.sendbird.android.poll.PollVoteEvent
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
@@ -145,7 +146,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     1 -> adapter.deletePendingMessages(mutableListOf(it))
                 }
             }
-        }, this::votePollOption)
+        }, this::votePollOption, this::onAddOptionToPoll, this::deletePollOption, this::closePoll)
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
         recyclerObserver = ChatRecyclerDataObserver(binding.recyclerviewChat, adapter)
@@ -251,7 +252,12 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
             override fun onPollVoted(channel: GroupChannel, pollVoteEvent: PollVoteEvent) {
                 super.onPollVoted(channel, pollVoteEvent)
-                updatePoll(pollVoteEvent)
+                updatePoll(pollVoteEvent.messageId)
+            }
+
+            override fun onPollUpdated(channel: GroupChannel, pollUpdateEvent: PollUpdateEvent) {
+                super.onPollUpdated(channel, pollUpdateEvent)
+                updatePoll(pollUpdateEvent.messageId)
             }
         })
     }
@@ -448,7 +454,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
-        channel.sendUserMessage(params, null)
+        channel.sendUserMessage(params) { _, exception ->
+            if (exception != null) {
+                Log.e("Send message exception", exception.message!!)
+            }
+        }
         if (collection.hasNext) {
             createMessageCollection(Long.MAX_VALUE)
         }
@@ -626,27 +636,79 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun votePollOption(poll: Poll, pollOption: PollOption) {
         val channel = currentGroupChannel ?: return
-        channel.votePoll(poll.id, listOf(pollOption.id)) { event, exception ->
-            if (exception != null) {
-                Log.d("PollEvent", exception.message ?: "Error voting")
+        val optionsIds = poll.options.map(PollOption::id)
+        val listToUpdate = if (poll.allowMultipleVotes) {
+            poll.votedPollOptionIds.toMutableList().apply {
+                if (contains(pollOption.id))
+                    remove(pollOption.id)
+                else
+                    add(pollOption.id)
             }
-            event ?: return@votePoll
-            updatePoll(pollVoteEvent = event)
+        } else {
+            if (poll.votedPollOptionIds.contains(pollOption.id)) emptyList() else listOf(pollOption.id)
+        }.filter(optionsIds::contains)
+        channel.votePoll(poll.id, listToUpdate) { _, exception ->
+            if (exception != null) {
+                Log.e("PollEvent", exception.message ?: "Error voting")
+            }
+            updatePoll(poll.messageId)
         }
     }
 
-    private fun updatePoll(pollVoteEvent: PollVoteEvent) {
-//        val channel = currentGroupChannel ?: return
-//        channel.getMessagesByMessageId(
-//            pollVoteEvent.messageId,
-//            MessageListParams()
-//        ) { messages, exception ->
-//            if (exception != null) {
-//                Log.d("PollEvent", exception.message ?: "Error updating poll")
-//            }
-//            messages ?: return@getMessagesByMessageId
-//            adapter.updateSucceedMessages(messages)
-//        }
+    private fun onAddOptionToPoll(poll: Poll) {
+        showInputDialog(
+            getString(R.string.add_option),
+            null,
+            "",
+            getString(R.string.add),
+            getString(R.string.cancel),
+            {
+                currentGroupChannel?.addPollOption(poll.id, it) { _, exception ->
+                    if (exception != null) {
+                        Log.e("PollException", exception.message!!)
+                    }
+                    updatePoll(messageId = poll.messageId)
+                }
+            },
+        )
+    }
+
+    private fun deletePollOption(poll: Poll, option: PollOption) {
+        val channel = currentGroupChannel ?: return
+        channel.deletePollOption(poll.id, option.id) { exception ->
+            if (exception != null) {
+                Log.e("PollException", exception.message!!)
+                return@deletePollOption
+            }
+            updatePoll(poll.messageId)
+        }
+    }
+
+    private fun closePoll(poll: Poll) {
+        val channel = currentGroupChannel ?: return
+        channel.closePoll(poll.id) { _, exception ->
+            if (exception != null) {
+                Log.e("PollException", exception.message!!)
+            }
+            updatePoll(messageId = poll.messageId)
+        }
+    }
+
+    private fun updatePoll(messageId: Long) {
+        val channel = currentGroupChannel ?: return
+        BaseMessage.getMessage(
+            MessageRetrievalParams(
+                channelUrl,
+                channel.channelType,
+                messageId
+            )
+        ) { messages, exception ->
+            if (exception != null) {
+                Log.d("PollEvent", exception.message ?: "Error updating poll")
+            }
+            messages ?: return@getMessage
+            binding.root.post { adapter.updateSucceedMessages(listOf(messages)) }
+        }
     }
 
     override fun onRequestPermissionsResult(

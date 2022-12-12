@@ -2,8 +2,10 @@ package com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -12,18 +14,25 @@ import com.sendbird.android.SendbirdChat
 import com.sendbird.android.message.*
 import com.sendbird.android.poll.Poll
 import com.sendbird.android.poll.PollOption
+import com.sendbird.android.poll.PollStatus
 import com.sendbird.chat.module.utils.ListUtils
 import com.sendbird.chat.module.utils.equalDate
 import com.sendbird.chat.module.utils.equalTime
 import com.sendbird.chat.module.utils.toTime
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.properties.Delegates
 
 class GroupChannelChatAdapter(
     context: Context,
     private val longClickListener: OnItemLongClickListener,
     private val failedItemClickListener: OnFailedItemClickListener,
-    private val onPollOptionVoted: (Poll, PollOption) -> Unit
+    private val onPollOptionVoted: (Poll, PollOption) -> Unit,
+    private val addOptionToPoll: (Poll) -> Unit,
+    private val deletePollOption: (Poll, PollOption) -> Unit,
+    private val closePoll: (Poll) -> Unit
 ) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
 
     fun interface OnItemLongClickListener {
@@ -49,6 +58,9 @@ class GroupChannelChatAdapter(
                         && oldItem.sender?.nickname == newItem.sender?.nickname
                         && oldItem.sendingStatus == newItem.sendingStatus
                         && oldItem.updatedAt == newItem.updatedAt
+                        && (oldItem as? UserMessage)?.poll?.updatedAt == (newItem as? UserMessage)?.poll?.updatedAt
+                        && (oldItem as? UserMessage)?.poll?.options == (newItem as? UserMessage)?.poll?.options
+                        && (oldItem as? UserMessage)?.poll?.votedPollOptionIds == (newItem as? UserMessage)?.poll?.votedPollOptionIds
             }
         }
         const val VIEW_TYPE_SEND = 0
@@ -117,14 +129,6 @@ class GroupChannelChatAdapter(
                 )
             )
         }
-    }
-
-    override fun onBindViewHolder(
-        holder: RecyclerView.ViewHolder,
-        position: Int,
-        payloads: MutableList<Any>
-    ) {
-
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -268,7 +272,7 @@ class GroupChannelChatAdapter(
             }
         }
         pendingMessageList.clear()
-        pendingMessageList.addAll(resultMessageList)
+        pendingMessageList.addAll(resultMessageList.mapNotNull { BaseMessage.clone(it) })
         mergeList()
     }
 
@@ -503,24 +507,95 @@ class GroupChannelChatAdapter(
 
     inner class GroupChatPollViewHolder(private val binding: ListItemChatPollBinding) :
         BaseViewHolder(binding) {
+
+        private val adapter = PollOptionAdapter()
+
+        init {
+            binding.rvOptions.adapter = adapter
+        }
+
         fun bind(poll: Poll) {
-            binding.tvPollTitle.text = poll.title
-            poll.options.forEach { option ->
-                val textViewBinding =
-                    ItemPollOptionBinding.inflate(layoutInflater, binding.llOptions, true)
-                textViewBinding.tvOption.text = option.text
-                option.voteCount.takeIf { it != 0L }
-                    ?.let { textViewBinding.tvVotersCount.text = "+$it" }
-                textViewBinding.root.setOnClickListener {
-                    onPollOptionVoted(poll, option)
+            val isPollOpened = poll.status == PollStatus.OPEN
+            binding.tvPollTitle.text =
+                poll.title + if (!isPollOpened) "-Closed" else ""
+            binding.btnAddOption.isVisible = poll.allowUserSuggestion
+            if (isPollOpened) {
+                binding.btnAddOption.setOnClickListener { addOptionToPoll(poll) }
+                binding.btnClosePoll.setOnClickListener { closePoll(poll) }
+            }
+            binding.btnClosePoll.isVisible =
+                SendbirdChat.currentUser?.userId == poll.createdBy && isPollOpened
+            adapter.poll = poll
+            binding.tvClosesAt.isVisible = false
+            if (poll.closeAt > 0L) {
+                binding.tvClosesAt.apply {
+                    isVisible = true
+                    text =
+                        Date(poll.closeAt * 1_000).let {
+                            SimpleDateFormat("dd/MM/yyyy-HH:mm").format(
+                                it
+                            )
+                        }
                 }
-                val background = if (poll.votedPollOptionIds.contains(option.id)) {
-                    R.drawable.background_rect_voted
-                } else {
-                    R.drawable.background_rect
+            }
+        }
+
+        inner class PollOptionAdapter : RecyclerView.Adapter<PollOptionAdapter.PollViewHolder>() {
+
+            var poll: Poll? by Delegates.observable(null) { _, _, _ -> notifyDataSetChanged() }
+
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PollViewHolder {
+                return PollViewHolder(ItemPollOptionBinding.inflate(layoutInflater, parent, false))
+            }
+
+            override fun onBindViewHolder(holder: PollViewHolder, position: Int) {
+                val poll = poll ?: return
+                holder.bindOption(poll = poll, option = poll.options[position])
+            }
+
+            override fun getItemCount(): Int = poll?.options?.size ?: 0
+
+            inner class PollViewHolder(private val binding: ItemPollOptionBinding) :
+                RecyclerView.ViewHolder(binding.root) {
+
+                fun bindOption(poll: Poll, option: PollOption) {
+                    binding.tvOption.text = option.text
+                    binding.tvVotersCount.text =
+                        option.voteCount.takeIf { it != 0L }?.let { "+$it" } ?: ""
+                    if (poll.status == PollStatus.OPEN) {
+                        binding.root.setOnClickListener { onPollOptionVoted(poll, option) }
+                        addDeleteMenuToOption(poll, option)
+                    }
+                    val background = if (poll.votedPollOptionIds.contains(option.id)) {
+                        R.drawable.background_rect_voted
+                    } else {
+                        R.drawable.background_rect
+                    }
+                    binding.root.setBackgroundResource(background)
                 }
-                textViewBinding.root.setBackgroundResource(background)
+
+                private fun addDeleteMenuToOption(poll: Poll, option: PollOption) {
+                    if (SendbirdChat.currentUser?.userId == poll.createdBy) {
+                        binding.root.setOnLongClickListener {
+                            it.setOnCreateContextMenuListener { menu, _, _ ->
+                                val deleteMenu =
+                                    menu.add(
+                                        Menu.NONE,
+                                        0,
+                                        0,
+                                        itemView.resources.getString(R.string.delete)
+                                    )
+                                deleteMenu.setOnMenuItemClickListener {
+                                    deletePollOption(poll, option)
+                                    return@setOnMenuItemClickListener true
+                                }
+                            }
+                            false
+                        }
+                    }
+                }
             }
         }
     }
+
 }
