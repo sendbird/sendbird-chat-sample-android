@@ -52,7 +52,7 @@ class CreatePollActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             openDateTimeSelector {
-                closeAt = it
+                closeAt = it / 1_000
                 binding.etCloseAt.text = Date(it).toString()
                 binding.btnCloseAt.text = "Clear"
             }
@@ -125,6 +125,7 @@ class CreatePollActivity : AppCompatActivity() {
         Poll.create(params) { poll, exception ->
             if (exception != null) {
                 Log.e("CreatePoll", exception.message ?: "error creating poll")
+                showToast(exception.message!!)
                 return@create
             }
 
@@ -135,6 +136,7 @@ class CreatePollActivity : AppCompatActivity() {
             channel.sendUserMessage(userMessageParams) { _, ex ->
                 if (ex != null) {
                     Log.e("CreatePoll", ex.message ?: "error creating poll")
+                    showToast(ex.message!!)
                     return@sendUserMessage
                 }
                 finish()

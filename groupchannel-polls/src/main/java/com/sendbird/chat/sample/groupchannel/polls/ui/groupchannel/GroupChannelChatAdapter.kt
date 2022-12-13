@@ -518,7 +518,7 @@ class GroupChannelChatAdapter(
             val isPollOpened = poll.status == PollStatus.OPEN
             binding.tvPollTitle.text =
                 poll.title + if (!isPollOpened) "-Closed" else ""
-            binding.btnAddOption.isVisible = poll.allowUserSuggestion
+            binding.btnAddOption.isVisible = poll.allowUserSuggestion && isPollOpened
             if (isPollOpened) {
                 binding.btnAddOption.setOnClickListener { addOptionToPoll(poll) }
                 binding.btnClosePoll.setOnClickListener { closePoll(poll) }

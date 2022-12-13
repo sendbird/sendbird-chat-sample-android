@@ -3,10 +3,7 @@ package com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.widget.Toast
 import java.util.*
-
-private const val MinimumTimeAmount = 6 * 60 * 1_000L
 
 fun Context.openDateTimeSelector(onTimeSelected: (Long) -> Unit) {
     val calendar = Calendar.getInstance()
@@ -53,7 +50,7 @@ private fun Context.openTimeCalendar(
     timePicker.show()
 }
 
-private fun Context.onDateTimeSelected(
+private fun onDateTimeSelected(
     year: Int,
     month: Int,
     day: Int,
@@ -68,14 +65,5 @@ private fun Context.onDateTimeSelected(
         set(Calendar.HOUR_OF_DAY, hour)
         set(Calendar.MINUTE, minute)
     }
-    val selectedTime = calendar.timeInMillis
-    if (selectedTime < System.currentTimeMillis() + MinimumTimeAmount) {
-        Toast.makeText(
-            this,
-            "The message must be scheduled at least 5 minutes in the future",
-            Toast.LENGTH_LONG
-        ).show()
-        return
-    }
-    onTimeSelected(selectedTime)
+    onTimeSelected(calendar.timeInMillis)
 }
