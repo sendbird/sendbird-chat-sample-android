@@ -1,0 +1,66 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    compileSdk 32
+
+    defaultConfig {
+        applicationId "com.sendbird.chat.sample.groupchannel"
+        minSdk 26
+        targetSdk 32
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    viewBinding {
+        enabled = true
+    }
+    packagingOptions {
+        exclude 'META-INF/kotlin-stdlib.kotlin_module'
+        exclude 'META-INF/okio.kotlin_module'
+        exclude 'META-INF/kotlin-stdlib-common.kotlin_module'
+    }
+}
+
+dependencies {
+    implementation "androidx.core:core-ktx:$androidxCoreKtxVersion"
+    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation "com.google.android.material:material:$googleMaterialVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
+
+    //sendbird
+    implementation "com.sendbird.sdk:sendbird-chat:$sendbirdVersion"
+    //
+
+    //fragment
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
+    //
+
+    //Coil
+    implementation "io.coil-kt:coil:$coilVersion"
+    //
+
+    implementation "androidx.legacy:legacy-support-v4:$legacySupportVersion"
+    implementation project(path: ':commonmodule')
+
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxTestEspressoCoreVersion"
+}

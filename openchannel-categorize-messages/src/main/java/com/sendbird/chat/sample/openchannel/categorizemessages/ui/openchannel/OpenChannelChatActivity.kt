@@ -24,6 +24,7 @@ import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.openchannel.categorizemessages.R
 import com.sendbird.chat.sample.openchannel.categorizemessages.databinding.ActivityOpenChannelChatBinding
+import com.sendbird.chat.sample.openchannel.categorizemessages.ui.pinned.OpenChannelPinnedMessagesActivity
 
 class OpenChannelChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOpenChannelChatBinding
@@ -109,6 +110,14 @@ class OpenChannelChatActivity : AppCompatActivity() {
                             )
                             return@setOnMenuItemClickListener false
                         }
+                    }
+                    val pinMenuTitleResId =
+                        if (baseMessage.customType == PinnedMessage) R.string.unpin_message else R.string.pin_mepnissage
+                    val pinUnpinMenu =
+                        contextMenu.add(Menu.NONE, 3, 3, getString(pinMenuTitleResId))
+                    pinUnpinMenu.setOnMenuItemClickListener {
+                        pinUnpinMessage(baseMessage)
+                        return@setOnMenuItemClickListener true
                     }
                 }
                 if (baseMessage is UserMessage) {
@@ -287,6 +296,11 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 true
             }
 
+            R.id.pinned_messages -> {
+                startActivity(OpenChannelPinnedMessagesActivity.newIntent(this, channelUrl))
+                true
+            }
+
             android.R.id.home -> {
                 finish()
                 true
@@ -378,9 +392,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
             .apply {
                 message = msg.trim()
             }
-        if (msg.lowercase().contains("alert")) {
-            params.customType = "alert"
-        }
         binding.chatInputView.clearText()
         val pendingMessage = channel.sendUserMessage(params) { message, e ->
             if (e != null) {
@@ -452,6 +463,46 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun pinUnpinMessage(message: BaseMessage) {
+        when (message) {
+            is FileMessage -> {
+                val params = FileMessageUpdateParams().apply {
+                    customType = if (message.customType == PinnedMessage) "" else PinnedMessage
+                }
+                currentOpenChannel?.updateFileMessage(
+                    message.messageId,
+                    params
+                ) { updatedMessage, e ->
+                    if (e != null) {
+                        showToast("${e.message}")
+                        return@updateFileMessage
+                    }
+                    if (updatedMessage != null) {
+                        adapter.updateMessages(listOf(updatedMessage))
+                    }
+                }
+            }
+            else -> {
+                val params = UserMessageUpdateParams().apply {
+                    customType = if (message.customType == PinnedMessage) "" else PinnedMessage
+                }
+                currentOpenChannel?.updateUserMessage(
+                    message.messageId,
+                    params
+                ) { updatedMessage, e ->
+                    if (e != null) {
+                        showToast("${e.message}")
+                        return@updateUserMessage
+                    }
+                    if (updatedMessage != null) {
+                        adapter.updateMessages(listOf(updatedMessage))
+                    }
+                }
+            }
+        }
+
     }
 
     private fun getMessageChangeLogsSinceTimestamp(timeStamp: Long) {
@@ -546,5 +597,9 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        const val PinnedMessage = "pinned_message"
     }
 }

@@ -28,4 +28,8 @@
     <string name="file_transfer_error">error: File transfer failure</string>
     <string name="channel_url_error">error: Channel url null</string>
     <string name="channel_error">error: Channel null</string>
+    <string name="pinned_messages">Pinned messages</string>
+    <string name="unpin_message">Unpin Message</string>
+    <string name="pin_mepnissage">Pin message</string>
+    <string name="pinned">Pinned</string>
 </resources>
