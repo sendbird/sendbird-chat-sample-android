@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
@@ -28,6 +29,8 @@ import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.user.SelectUserActivity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
@@ -128,6 +131,19 @@ class GroupChannelChatActivity : AppCompatActivity() {
                         return@setOnMenuItemClickListener true
                     }
                 }
+                if (adapter.pinnedMessagesIds.contains(baseMessage.messageId)) {
+                    val pinMenu = contextMenu.add(Menu.NONE, 3, 3, R.string.unpin)
+                    pinMenu.setOnMenuItemClickListener {
+                        unpinMessage(baseMessage)
+                        return@setOnMenuItemClickListener true
+                    }
+                } else {
+                    val pinMenu = contextMenu.add(Menu.NONE, 3, 3, R.string.pin)
+                    pinMenu.setOnMenuItemClickListener {
+                        pinMessage(baseMessage)
+                        return@setOnMenuItemClickListener true
+                    }
+                }
             }
         }, {
             showListDialog(
@@ -220,6 +236,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                             }
                             adapter.changeMessages(cachedList)
                             adapter.addPendingMessages(this@apply.pendingMessages)
+                            adapter.pinnedMessagesIds = channel.pinnedMessageIds
                         }
 
                         override fun onApiResult(
@@ -232,6 +249,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                             adapter.changeMessages(apiResultList, false)
                             markAsRead()
                             isCollectionInitialized = true
+                            adapter.pinnedMessagesIds = channel.pinnedMessageIds
                         }
                     }
                 )
@@ -290,6 +308,35 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
     }
 
+    private fun pinMessage(baseMessage: BaseMessage) {
+        val channel = currentGroupChannel ?: return
+        channel.pinMessage(baseMessage.messageId) completionHandler@{ error ->
+            error ?: run {
+                lifecycleScope.launch {
+                    delay(500)
+                    adapter.pinnedMessagesIds = channel.pinnedMessageIds
+                }
+                return@completionHandler
+            }
+            showToast(error.message ?: "Error pinning message")
+            adapter.pinnedMessagesIds = channel.pinnedMessageIds
+        }
+    }
+
+    private fun unpinMessage(baseMessage: BaseMessage) {
+        val channel = currentGroupChannel ?: return
+        channel.unpinMessage(baseMessage.messageId) completionHandler@{ error ->
+            error ?: run {
+                lifecycleScope.launch {
+                    delay(500)
+                    adapter.pinnedMessagesIds = channel.pinnedMessageIds
+                }
+                return@completionHandler
+            }
+            showToast(error.message ?: "Error unpinning message")
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.delete -> {
@@ -336,6 +383,16 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 )
                 true
             }
+            R.id.show_pinned_messages -> {
+                adapter.showPinnedMessages = true
+                invalidateOptionsMenu()
+                true
+            }
+            R.id.show_all_messages -> {
+                adapter.showPinnedMessages = false
+                invalidateOptionsMenu()
+                true
+            }
 
             android.R.id.home -> {
                 finish()
@@ -344,6 +401,12 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(R.id.show_pinned_messages)?.isVisible = !adapter.showPinnedMessages
+        menu?.findItem(R.id.show_all_messages)?.isVisible = adapter.showPinnedMessages
+        return super.onPrepareOptionsMenu(menu)
     }
 
     private fun deleteChannel() {

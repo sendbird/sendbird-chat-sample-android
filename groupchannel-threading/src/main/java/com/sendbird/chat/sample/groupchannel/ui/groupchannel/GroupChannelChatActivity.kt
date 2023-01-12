@@ -20,9 +20,7 @@ import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.exception.SendbirdException
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.handler.MessageCollectionInitHandler
-import com.sendbird.android.message.BaseMessage
-import com.sendbird.android.message.FileMessage
-import com.sendbird.android.message.UserMessage
+import com.sendbird.android.message.*
 import com.sendbird.android.params.*
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
@@ -148,7 +146,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 }
             }
         }, { messageId ->
-            if (messageId == 0L) "" else adapter.currentList.firstOrNull { it.messageId == messageId }?.message ?: ""
+            if (messageId == 0L) "" else adapter.currentList.firstOrNull { it.messageId == messageId }?.message
+                ?: ""
         })
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
@@ -212,9 +211,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
             nextResultSize = 20
         }
         val messageCollectionCreateParams =
-            MessageCollectionCreateParams(channel, messageListParams)
-                .setStartingPoint(timeStamp)
-                .setMessageCollectionHandler(collectionHandler)
+            MessageCollectionCreateParams(channel, messageListParams, timeStamp, collectionHandler)
         messageCollection =
             SendbirdChat.createMessageCollection(messageCollectionCreateParams).apply {
                 initialize(
@@ -287,7 +284,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
             showToast(R.string.enter_message_msg)
             return
         }
-        val params = UserMessageUpdateParams().setMessage(msg)
+        val params = UserMessageUpdateParams(msg)
         currentGroupChannel?.updateUserMessage(
             baseMessage.messageId, params
         ) { _, e ->
@@ -387,7 +384,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private fun inviteUser(selectIds: List<String>?) {
         if (selectIds != null && selectIds.isNotEmpty()) {
             val channel = currentGroupChannel ?: return
-            channel.inviteWithUserIds(selectIds.toList()) {
+            channel.invite(selectIds) {
                 if (it != null) {
                     showToast("${it.message}")
                 }
@@ -401,8 +398,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
             return
         }
         if (channel.name != name) {
-            val params = GroupChannelUpdateParams()
-                .setName(name)
+            val params = GroupChannelUpdateParams().apply {
+                this.name = name
+            }
             channel.updateChannel(
                 params
             ) { _, e ->
@@ -425,9 +423,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
         val collection = messageCollection ?: return
         val channel = currentGroupChannel ?: return
 
-        val params = UserMessageCreateParams().setMessage(message.trim())
+        val params = UserMessageCreateParams(message.trim())
         if (replayMessageId != -1L) {
-            params.setParentMessageId(replayMessageId)
+            params.parentMessageId = replayMessageId
             replayMessageId = -1L
         }
         binding.chatInputView.clearText()
@@ -453,17 +451,17 @@ class GroupChannelChatActivity : AppCompatActivity() {
         val channel = currentGroupChannel ?: return
 
         val thumbnailSizes = listOf(
-            FileMessage.ThumbnailSize(100, 100),
-            FileMessage.ThumbnailSize(200, 200)
+            ThumbnailSize(100, 100),
+            ThumbnailSize(200, 200)
         )
         val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
         if (fileInfo != null) {
-            val params = FileMessageCreateParams()
-                .setFile(fileInfo.file)
-                .setFileName(fileInfo.name)
-                .setFileSize(fileInfo.size)
-                .setThumbnailSizes(thumbnailSizes)
-                .setMimeType(fileInfo.mime)
+            val params = FileMessageCreateParams(fileInfo.file).apply {
+                fileName = fileInfo.name
+                fileSize = fileInfo.size
+                this.thumbnailSizes = thumbnailSizes
+                mimeType = fileInfo.mime
+            }
             recyclerObserver.scrollToBottom(true)
             channel.sendFileMessage(
                 params,
@@ -483,7 +481,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 channel.resendMessage(baseMessage, null)
             }
             is FileMessage -> {
-                val params = baseMessage.messageParams
+                val params = baseMessage.messageCreateParams
                 if (params != null) {
                     channel.resendMessage(
                         baseMessage,
@@ -533,12 +531,12 @@ class GroupChannelChatActivity : AppCompatActivity() {
             messages: List<BaseMessage>
         ) {
             when (context.messagesSendingStatus) {
-                BaseMessage.SendingStatus.SUCCEEDED -> {
+                SendingStatus.SUCCEEDED -> {
                     adapter.addMessages(messages)
                     markAsRead()
                 }
 
-                BaseMessage.SendingStatus.PENDING -> adapter.addPendingMessages(messages)
+                SendingStatus.PENDING -> adapter.addPendingMessages(messages)
 
                 else -> {
                 }
@@ -551,13 +549,13 @@ class GroupChannelChatActivity : AppCompatActivity() {
             messages: List<BaseMessage>
         ) {
             when (context.messagesSendingStatus) {
-                BaseMessage.SendingStatus.SUCCEEDED -> adapter.updateSucceedMessages(messages)
+                SendingStatus.SUCCEEDED -> adapter.updateSucceedMessages(messages)
 
-                BaseMessage.SendingStatus.PENDING -> adapter.updatePendingMessages(messages)
+                SendingStatus.PENDING -> adapter.updatePendingMessages(messages)
 
-                BaseMessage.SendingStatus.FAILED -> adapter.updatePendingMessages(messages)
+                SendingStatus.FAILED -> adapter.updatePendingMessages(messages)
 
-                BaseMessage.SendingStatus.CANCELED -> adapter.deletePendingMessages(messages)// The cancelled messages in the sample will be deleted
+                SendingStatus.CANCELED -> adapter.deletePendingMessages(messages)// The cancelled messages in the sample will be deleted
 
                 else -> {
                 }
@@ -570,9 +568,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
             messages: List<BaseMessage>
         ) {
             when (context.messagesSendingStatus) {
-                BaseMessage.SendingStatus.SUCCEEDED -> adapter.deleteMessages(messages)
+                SendingStatus.SUCCEEDED -> adapter.deleteMessages(messages)
 
-                BaseMessage.SendingStatus.FAILED -> adapter.deletePendingMessages(messages)
+                SendingStatus.FAILED -> adapter.deletePendingMessages(messages)
 
                 else -> {
                 }

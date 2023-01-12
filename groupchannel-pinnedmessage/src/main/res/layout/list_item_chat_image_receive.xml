@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -41,5 +42,15 @@
         app:layout_constraintTop_toBottomOf="@+id/textview_nickname"
         app:layout_goneMarginStart="5dp"
         app:layout_goneMarginTop="5dp" />
+
+    <ImageView
+        android:id="@+id/iv_pin"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_pin"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@id/chat_bubble_image_receive"
+        app:layout_constraintTop_toTopOf="@id/chat_bubble_image_receive"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,6 +3,7 @@ package com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.groupchannel
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +18,7 @@ import com.sendbird.chat.module.utils.equalDate
 import com.sendbird.chat.module.utils.equalTime
 import com.sendbird.chat.module.utils.toTime
 import com.sendbird.chat.sample.groupchannel.databinding.*
+import kotlin.properties.Delegates
 
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
@@ -57,6 +59,9 @@ class GroupChannelChatAdapter(
 
     private val baseMessageList = mutableListOf<BaseMessage>()
     private val pendingMessageList = mutableListOf<BaseMessage>()
+    var pinnedMessagesIds: List<Long> by Delegates.observable(emptyList()) { _, _, _ -> mergeList();notifyDataSetChanged() }
+
+    var showPinnedMessages: Boolean by Delegates.observable(false) { _, _, _ -> mergeList() }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
@@ -304,7 +309,15 @@ class GroupChannelChatAdapter(
         mergeList()
     }
 
-    private fun mergeList() = submitList(baseMessageList + pendingMessageList)
+    private fun mergeList() {
+        if (showPinnedMessages) {
+            val pinnedMessages = (baseMessageList + pendingMessageList)
+                .filter { pinnedMessagesIds.contains(it.messageId) }
+            submitList(pinnedMessages)
+        } else {
+            submitList(baseMessageList + pendingMessageList)
+        }
+    }
 
     open inner class BaseViewHolder(binding: ViewBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
@@ -339,6 +352,7 @@ class GroupChannelChatAdapter(
                 } else {
                     binding.textviewTime.visibility = View.GONE
                 }
+                binding.ivPin.isVisible = pinnedMessagesIds.contains(message.messageId)
             } else {
                 binding.dateTagView.visibility = View.GONE
                 binding.textviewTime.visibility = View.GONE
@@ -366,6 +380,7 @@ class GroupChannelChatAdapter(
             showTime: Boolean
         ) {
             binding.chatBubbleReceive.setText(message.message)
+            binding.ivPin.isVisible = pinnedMessagesIds.contains(message.messageId)
             if (showName) {
                 binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
                 binding.textviewNickname.visibility = View.VISIBLE
@@ -410,6 +425,7 @@ class GroupChannelChatAdapter(
                 } else {
                     binding.textviewTime.visibility = View.GONE
                 }
+                binding.ivPin.isVisible = pinnedMessagesIds.contains(message.messageId)
             } else {
                 binding.chatBubbleImageSend.setImageFile(message.messageCreateParams?.file)
                 binding.dateTagView.visibility = View.GONE
@@ -437,6 +453,7 @@ class GroupChannelChatAdapter(
             showTime: Boolean
         ) {
             binding.chatBubbleImageReceive.setImageUrl(message.url, message.plainUrl)
+            binding.ivPin.isVisible = pinnedMessagesIds.contains(message.messageId)
             if (showName) {
                 binding.textviewNickname.text = message.sender?.nickname ?: message.sender?.userId
                 binding.textviewNickname.visibility = View.VISIBLE
@@ -465,6 +482,7 @@ class GroupChannelChatAdapter(
             showDate: Boolean
         ) {
             binding.chatBubbleAdminView.setText(message.message)
+            binding.ivPin.isVisible = pinnedMessagesIds.contains(message.messageId)
             if (showDate) {
                 binding.dateTagView.setMillisecond(message.createdAt)
                 binding.dateTagView.visibility = View.VISIBLE
