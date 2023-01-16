@@ -1,12 +1,14 @@
 package com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls
 
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.params.PollCreateParams
 import com.sendbird.android.params.UserMessageCreateParams
@@ -26,6 +28,8 @@ class CreatePollActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCreatePollBinding
 
     private var closeAt: Long? = null
+    private val dateFormat by lazy { DateFormat.getMediumDateFormat(this) }
+    private val timeFormat by lazy { DateFormat.getTimeFormat(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,17 +48,19 @@ class CreatePollActivity : AppCompatActivity() {
         binding.llOptions.addView(createOption())
         binding.llOptions.addView(createOption())
         binding.btnAddOption.setOnClickListener { binding.llOptions.addView(createOption()) }
-        binding.btnCloseAt.setOnClickListener {
-            if (closeAt != null) {
+        binding.switchClosingTime.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                openDateTimeSelector {
+                    closeAt = it / 1_000
+                    val formattedDate = dateFormat.format(Date(it))
+                    val formattedTime = timeFormat.format(Date(it))
+                    binding.etCloseAt.text = "$formattedDate $formattedTime"
+                    binding.etCloseAt.isVisible = true
+                }
+            } else {
                 closeAt = null
-                binding.btnCloseAt.text = "Close at"
                 binding.etCloseAt.text = ""
-                return@setOnClickListener
-            }
-            openDateTimeSelector {
-                closeAt = it / 1_000
-                binding.etCloseAt.text = Date(it).toString()
-                binding.btnCloseAt.text = "Clear"
+                binding.etCloseAt.isVisible = false
             }
         }
 

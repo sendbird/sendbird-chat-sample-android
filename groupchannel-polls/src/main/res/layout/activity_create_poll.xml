@@ -72,32 +72,61 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/btn_close_at"
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Close at" />
+                    android:text="Closing time" />
 
-                <TextView
-                    android:id="@+id/et_close_at"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_closing_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/cb_user_sugestions"
+            <TextView
+                android:id="@+id/et_close_at"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Allow user suggestions" />
+                android:visibility="gone" />
 
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/cb_multiple_votes"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Allow multiple votes" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Allow user suggestions" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/cb_user_sugestions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Allow multiple votes" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/cb_multiple_votes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </ScrollView>
