@@ -2,6 +2,7 @@ package com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
@@ -43,7 +44,6 @@ class CreatePollActivity : AppCompatActivity() {
         binding.llOptions.addView(createOption())
         binding.llOptions.addView(createOption())
         binding.btnAddOption.setOnClickListener { binding.llOptions.addView(createOption()) }
-        binding.btnCreatePoll.setOnClickListener { createPoll() }
         binding.btnCloseAt.setOnClickListener {
             if (closeAt != null) {
                 closeAt = null
@@ -61,10 +61,19 @@ class CreatePollActivity : AppCompatActivity() {
         getChannel(channelUrl)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.create_poll_menu, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 finish()
+                true
+            }
+            R.id.btn_create_poll -> {
+                createPoll()
                 true
             }
             else -> super.onOptionsItemSelected(item)
