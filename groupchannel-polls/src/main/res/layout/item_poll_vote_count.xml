@@ -28,7 +28,33 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_poll_option_title"
-        />
+        app:layout_constraintTop_toBottomOf="@id/tv_poll_option_title" />
+
+    <LinearLayout
+        android:id="@+id/personLayout1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toStartOf="@id/personLayout2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progress_poll_option_vote" />
+
+    <LinearLayout
+        android:id="@+id/personLayout2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toStartOf="@id/personLayout3"
+        app:layout_constraintStart_toEndOf="@id/personLayout1"
+        app:layout_constraintTop_toBottomOf="@id/progress_poll_option_vote" />
+
+    <LinearLayout
+        android:id="@+id/personLayout3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/personLayout2"
+        app:layout_constraintTop_toBottomOf="@id/progress_poll_option_vote" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

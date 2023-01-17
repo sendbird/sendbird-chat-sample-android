@@ -11,16 +11,21 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
 import com.sendbird.android.params.PollRetrievalParams
 import com.sendbird.android.poll.Poll
 import com.sendbird.android.poll.PollOption
 import com.sendbird.android.poll.PollStatus
+import com.sendbird.android.user.User
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityPollDetailBinding
 import com.sendbird.chat.sample.groupchannel.databinding.ItemPollVoteCountBinding
+import com.sendbird.chat.sample.groupchannel.databinding.ListItemMemberBinding
+import com.sendbird.chat.sample.groupchannel.databinding.ListItemMemberSmallBinding
 import java.util.*
 
 class PollDetailActivity : AppCompatActivity() {
@@ -140,6 +145,19 @@ class PollDetailActivity : AppCompatActivity() {
             option.voteCount.toString()
         optionLayout.progressPollOptionVote.progress =
             ((option.voteCount.toFloat() / memberCount.toFloat()) * 100).toInt()
+
+        currentGroupChannel!!.createPollVoterListQuery(pollId, option.id).next { voters, e ->
+            if(voters != null) {
+                val (even, odd) = voters.withIndex().partition { (index, _) -> index % 2 == 0 }
+                even.forEach { (_, user) ->
+                    optionLayout.personLayout1.addView(createPerson(user))
+                }
+                odd.forEach { (_, user) ->
+                    optionLayout.personLayout2.addView(createPerson(user))
+                }
+            }
+        }
+
         return optionLayout.root
     }
 
@@ -156,4 +174,14 @@ class PollDetailActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun createPerson(user: User): View {
+        val binding = ListItemMemberSmallBinding.inflate(layoutInflater)
+        binding.imageviewProfile.load(user.profileUrl) {
+            transformations(CircleCropTransformation())
+        }
+        binding.textviewName.text = user.nickname
+        return binding.root
+    }
+
 }
