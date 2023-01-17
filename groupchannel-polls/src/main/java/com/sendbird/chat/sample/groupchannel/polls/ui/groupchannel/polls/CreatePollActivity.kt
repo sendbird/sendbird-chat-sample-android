@@ -113,7 +113,7 @@ class CreatePollActivity : AppCompatActivity() {
             channelTitle
         }
 
-        binding.toolbar.title = "Create Poll in $title"
+        binding.toolbar.title = "Create a Poll"
     }
 
     private fun createPoll() {
@@ -160,8 +160,9 @@ class CreatePollActivity : AppCompatActivity() {
     }
 
     private fun createOption(): EditText {
-        return EditText(this).apply {
-            hint = "Option ${binding.llOptions.childCount + 1}"
-        }
+        val view = layoutInflater.inflate(R.layout.item_edit, binding.llOptions, false)
+        val ed = view as EditText
+        ed.hint = "Option ${binding.llOptions.childCount + 1}"
+        return ed
     }
 }
