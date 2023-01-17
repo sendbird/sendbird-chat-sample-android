@@ -1,6 +1,7 @@
 package com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel
 
 import android.content.Context
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -10,6 +11,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.message.*
 import com.sendbird.android.poll.Poll
@@ -21,20 +24,24 @@ import com.sendbird.chat.module.utils.equalTime
 import com.sendbird.chat.module.utils.toTime
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.*
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.properties.Delegates
+import kotlin.reflect.KFunction1
 
 class GroupChannelChatAdapter(
     context: Context,
     private val longClickListener: OnItemLongClickListener,
     private val failedItemClickListener: OnFailedItemClickListener,
-    private val onPollClicked: (Poll) -> Unit,
-    private val onPollOptionVoted: (Poll, PollOption) -> Unit,
+    private val onViewResultClicked: (Poll) -> Unit,
     private val onVoteNowClicked: (Poll) -> Unit,
     private val deletePollOption: (Poll, PollOption) -> Unit,
     private val closePoll: (Poll) -> Unit,
 ) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
+
+    var memberCount = 1
+
+    private val dateFormat by lazy { DateFormat.getMediumDateFormat(context) }
+    private val timeFormat by lazy { DateFormat.getTimeFormat(context) }
 
     fun interface OnItemLongClickListener {
         fun onItemLongClick(baseMessage: BaseMessage, view: View)
@@ -183,8 +190,7 @@ class GroupChannelChatAdapter(
                 holder.bind(getItem(position), showDate)
             }
             is GroupChatPollViewHolder -> {
-                val poll = (getItem(position) as UserMessage).poll ?: return
-                holder.bind(poll)
+                holder.bind(getItem(position) as UserMessage)
             }
         }
     }
@@ -510,28 +516,64 @@ class GroupChannelChatAdapter(
         BaseViewHolder(binding) {
 
         private val adapter = PollOptionAdapter()
+        private val votedAdapter = VotedPollOptionAdapter()
 
         init {
             binding.rvOptions.adapter = adapter
         }
 
-        fun bind(poll: Poll) {
-            binding.root.setOnClickListener {
-                onPollClicked(poll)
+        fun bind(userMessage: UserMessage) {
+            val poll = userMessage.poll ?: return
+            binding.btnViewMore.isVisible = poll.status != PollStatus.OPEN
+            binding.btnViewMore.setOnClickListener {
+                onViewResultClicked(poll)
+            }
+            binding.btnViewResult.isVisible = poll.status == PollStatus.OPEN
+            binding.btnViewResult.setOnClickListener {
+                onViewResultClicked(poll)
+            }
+            val closeEnabled = poll.createdBy == SendbirdChat.currentUser?.userId && poll.status == PollStatus.OPEN
+            binding.btnClosePoll.isVisible = closeEnabled
+            binding.btnClosePoll.setOnClickListener {
+                closePoll(poll)
             }
             val isPollOpened = poll.status == PollStatus.OPEN
-            binding.tvPollTitle.text =
-                poll.title + if (!isPollOpened) "-Closed" else ""
+            binding.tvPollTitle.text = poll.title
             // binding.btnVoteNow.isVisible = poll.allowUserSuggestion && isPollOpened
+
+            binding.senderProfile.load(userMessage.sender?.profileUrl) {
+                transformations(CircleCropTransformation())
+            }
+            binding.sender.text = userMessage.sender?.nickname
+
             binding.btnVoteNow.isVisible = isPollOpened
             if (isPollOpened) {
                 binding.btnVoteNow.setOnClickListener { onVoteNowClicked(poll) }
-                binding.btnClosePoll.setOnClickListener { closePoll(poll) }
             }
-            binding.btnClosePoll.isVisible =
-                SendbirdChat.currentUser?.userId == poll.createdBy && isPollOpened
-            adapter.poll = poll
+
+            val date = Date(poll.createdAt * 1000L)
+            binding.tvPollMultipleCreatedAt.text = if(poll.allowMultipleVotes) {
+                "Multi select | Created on ${dateFormat.format(date)} ${timeFormat.format(date)}"
+            } else {
+                "${dateFormat.format(date)} ${timeFormat.format(date)}"
+            }
+
+            val voted = poll.votedPollOptionIds.isNotEmpty()
+            if(voted) {
+                binding.rvOptions.adapter = votedAdapter
+                votedAdapter.poll = poll
+            } else {
+                binding.rvOptions.adapter = adapter
+                adapter.poll = poll
+            }
             binding.tvClosesAt.isVisible = false
+
+            binding.btnVoteNow.text = if(poll.votedPollOptionIds.isEmpty()) {
+                "Vote now"
+            } else {
+                "Vote again"
+            }
+/*
             if (poll.closeAt > 0L) {
                 binding.tvClosesAt.apply {
                     isVisible = true
@@ -543,6 +585,7 @@ class GroupChannelChatAdapter(
                         }
                 }
             }
+*/
         }
 
         inner class PollOptionAdapter : RecyclerView.Adapter<PollOptionAdapter.PollViewHolder>() {
@@ -568,10 +611,8 @@ class GroupChannelChatAdapter(
                     binding.tvVotersCount.text =
                         option.voteCount.takeIf { it != 0L }?.let { "+$it" } ?: ""
                     if (poll.status == PollStatus.OPEN) {
-                        binding.root.setOnClickListener { onPollOptionVoted(poll, option) }
                         addDeleteMenuToOption(poll, option)
                     }
-                    binding.checkBox.isChecked = poll.votedPollOptionIds.contains(option.id)
                 }
 
                 private fun addDeleteMenuToOption(poll: Poll, option: PollOption) {
@@ -592,6 +633,59 @@ class GroupChannelChatAdapter(
                             }
                             false
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    inner class VotedPollOptionAdapter : RecyclerView.Adapter<VotedPollOptionAdapter.VotedPollOptionViewHolder>() {
+
+        var poll: Poll? by Delegates.observable(null) { _, _, _ -> notifyDataSetChanged() }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VotedPollOptionViewHolder {
+            return VotedPollOptionViewHolder(ItemPollOptionProgressBinding.inflate(layoutInflater, parent, false))
+        }
+
+        override fun onBindViewHolder(holder: VotedPollOptionViewHolder, position: Int) {
+            val poll = poll ?: return
+            holder.bindOption(poll = poll, option = poll.options[position])
+        }
+
+        override fun getItemCount(): Int = poll?.options?.size ?: 0
+
+        inner class VotedPollOptionViewHolder(private val binding: ItemPollOptionProgressBinding) :
+            RecyclerView.ViewHolder(binding.root) {
+
+            fun bindOption(poll: Poll, option: PollOption) {
+                binding.tvPollOptionTitle.text = option.text
+                binding.tvPollOptionTotalVote.text = "${option.voteCount} votes"
+
+                val percent = (option.voteCount / memberCount.toFloat() * 100).toInt()
+                binding.tvPercent.text = "$percent%"
+                binding.progressPollOptionVote.progress = percent
+                if (poll.status == PollStatus.OPEN) {
+                    addDeleteMenuToOption(poll, option)
+                }
+            }
+
+            private fun addDeleteMenuToOption(poll: Poll, option: PollOption) {
+                if (SendbirdChat.currentUser?.userId == poll.createdBy) {
+                    binding.root.setOnLongClickListener {
+                        it.setOnCreateContextMenuListener { menu, _, _ ->
+                            val deleteMenu =
+                                menu.add(
+                                    Menu.NONE,
+                                    0,
+                                    0,
+                                    itemView.resources.getString(R.string.delete)
+                                )
+                            deleteMenu.setOnMenuItemClickListener {
+                                deletePollOption(poll, option)
+                                return@setOnMenuItemClickListener true
+                            }
+                        }
+                        false
                     }
                 }
             }

@@ -3,33 +3,47 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:minWidth="300dp"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:background="@drawable/background_rect">
+    android:minWidth="340dp"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/sender_profile"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <TextView
+        android:id="@+id/sender"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toEndOf="@id/sender_profile"
+        app:layout_constraintTop_toTopOf="@id/sender_profile"
+        tools:text="Jerry" />
+
 
     <TextView
         android:id="@+id/tv_poll_title"
+        style="@style/MaterialAlertDialog.Material3.Title.Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Poll title" />
+        app:layout_constraintStart_toStartOf="@id/sender"
+        app:layout_constraintTop_toBottomOf="@id/sender"
+        tools:text="What should we eat for lunch?" />
 
-    <Button
-        android:id="@+id/btn_close_poll"
-        android:layout_width="74dp"
-        android:layout_height="36dp"
-        android:layout_margin="5dp"
-        android:text="Close"
-        android:textSize="9sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_poll_title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_poll_title" />
+    <TextView
+        android:id="@+id/tv_poll_multiple_created_at"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="@id/tv_poll_title"
+        app:layout_constraintTop_toBottomOf="@id/tv_poll_title" />
 
     <TextView
         android:id="@+id/tv_closes_at"
@@ -38,32 +52,73 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_poll_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_poll_multiple_created_at"
         tools:text="Closes at 09:00" />
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_options"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/pollLayout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/background_rect"
         android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@+id/btn_vote_now"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_closes_at" />
+        app:layout_constraintStart_toStartOf="@id/tv_poll_multiple_created_at"
+        app:layout_constraintTop_toBottomOf="@+id/tv_closes_at">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="5"
+            tools:listitem="@layout/item_poll_option" />
+
+        <Button
+            android:id="@+id/btn_vote_now"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginHorizontal="10dp"
+            android:text="Vote now"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/btn_view_more"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View more"
+            android:visibility="gone"
+            style="@style/Widget.Material3.Button.TextButton"
+            />
+
+    </LinearLayout>
 
     <Button
-        android:id="@+id/btn_vote_now"
+        android:id="@+id/btn_close_poll"
+        style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="30dp"
-        android:layout_marginBottom="10dp"
-        android:text="Vote now"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="4dp"
+        android:text="Close poll"
+        app:layout_constraintStart_toStartOf="@id/pollLayout"
+        app:layout_constraintTop_toBottomOf="@id/pollLayout" />
+
+    <Button
+        android:id="@+id/btn_view_result"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="4dp"
+        android:text="View result"
+        app:layout_constraintStart_toEndOf="@id/btn_close_poll"
+        android:layout_marginStart="4dp"
+        app:layout_constraintTop_toBottomOf="@id/pollLayout" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

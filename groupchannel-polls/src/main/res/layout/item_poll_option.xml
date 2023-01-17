@@ -6,13 +6,6 @@
     android:layout_marginBottom="5dp"
     android:orientation="horizontal">
 
-    <CheckBox
-        android:id="@+id/checkBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Widget.Material3.CompoundButton.CheckBox"
-        />
-
     <TextView
         android:id="@+id/tv_option"
         android:layout_width="wrap_content"
@@ -31,5 +24,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
+        android:visibility="gone"
         tools:text="+2" />
 </LinearLayout>

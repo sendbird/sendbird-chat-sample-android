@@ -152,8 +152,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     }
                 }
             },
-            onPollClicked = this::onPollClicked,
-            onPollOptionVoted = this::votePollOption,
+            onViewResultClicked = this::onPollClicked,
             onVoteNowClicked = this::onVoteNowClicked,
             deletePollOption = this::deletePollOption,
             closePoll = this::closePoll
@@ -189,6 +188,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
             }
             if (groupChannel != null) {
                 currentGroupChannel = groupChannel
+                adapter.memberCount = groupChannel.memberCount
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
             }
