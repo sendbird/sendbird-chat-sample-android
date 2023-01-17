@@ -570,12 +570,7 @@ class GroupChannelChatAdapter(
                         binding.root.setOnClickListener { onPollOptionVoted(poll, option) }
                         addDeleteMenuToOption(poll, option)
                     }
-                    val background = if (poll.votedPollOptionIds.contains(option.id)) {
-                        R.drawable.background_rect_voted
-                    } else {
-                        R.drawable.background_rect
-                    }
-                    binding.root.setBackgroundResource(background)
+                    binding.checkBox.isChecked = poll.votedPollOptionIds.contains(option.id)
                 }
 
                 private fun addDeleteMenuToOption(poll: Poll, option: PollOption) {
