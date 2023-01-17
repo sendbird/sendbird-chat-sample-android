@@ -36,4 +36,6 @@
     <string name="create_poll">Create poll</string>
     <string name="add">Add</string>
     <string name="add_option">Add option</string>
+    <string name="poll_detail">Poll Detail</string>
+    <string name="close_poll">Close a poll</string>
 </resources>

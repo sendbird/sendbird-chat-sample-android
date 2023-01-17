@@ -29,10 +29,11 @@ class GroupChannelChatAdapter(
     context: Context,
     private val longClickListener: OnItemLongClickListener,
     private val failedItemClickListener: OnFailedItemClickListener,
+    private val onPollClicked: (Poll) -> Unit,
     private val onPollOptionVoted: (Poll, PollOption) -> Unit,
     private val addOptionToPoll: (Poll) -> Unit,
     private val deletePollOption: (Poll, PollOption) -> Unit,
-    private val closePoll: (Poll) -> Unit
+    private val closePoll: (Poll) -> Unit,
 ) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
 
     fun interface OnItemLongClickListener {
@@ -515,6 +516,9 @@ class GroupChannelChatAdapter(
         }
 
         fun bind(poll: Poll) {
+            binding.root.setOnClickListener {
+                onPollClicked(poll)
+            }
             val isPollOpened = poll.status == PollStatus.OPEN
             binding.tvPollTitle.text =
                 poll.title + if (!isPollOpened) "-Closed" else ""

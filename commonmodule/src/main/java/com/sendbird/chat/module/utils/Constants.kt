@@ -9,6 +9,8 @@ object Constants {
     const val INTENT_KEY_BASE_USER = "base_user"
     const val INTENT_KEY_NICKNAME_REQUIRE = "nickname_state"
 
+    const val INTENT_KEY_POLL_ID = "poll_id"
+
     const val CHANNEL_HANDLER_ID = "channel_handler_id"
 
     const val CONNECTION_HANDLER_ID = "connection_handler_id"

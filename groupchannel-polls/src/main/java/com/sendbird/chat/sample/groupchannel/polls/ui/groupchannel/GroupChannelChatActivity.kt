@@ -34,6 +34,7 @@ import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls.CreatePollActivity
+import com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls.PollDetailActivity
 import com.sendbird.chat.sample.groupchannel.polls.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.polls.ui.user.SelectUserActivity
 import java.util.concurrent.ConcurrentHashMap
@@ -104,49 +105,57 @@ class GroupChannelChatActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        adapter = GroupChannelChatAdapter(this, { baseMessage, view ->
-            view.setOnCreateContextMenuListener { contextMenu, _, _ ->
-                if (SendbirdChat.currentUser != null && baseMessage.sender?.userId == SendbirdChat.currentUser!!.userId) {
-                    val deleteMenu =
-                        contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
-                    deleteMenu.setOnMenuItemClickListener {
-                        deleteMessage(baseMessage)
-                        return@setOnMenuItemClickListener true
+        adapter = GroupChannelChatAdapter(this,
+            longClickListener = { baseMessage, view ->
+                view.setOnCreateContextMenuListener { contextMenu, _, _ ->
+                    if (SendbirdChat.currentUser != null && baseMessage.sender?.userId == SendbirdChat.currentUser!!.userId) {
+                        val deleteMenu =
+                            contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
+                        deleteMenu.setOnMenuItemClickListener {
+                            deleteMessage(baseMessage)
+                            return@setOnMenuItemClickListener true
+                        }
+                        if (baseMessage is UserMessage) {
+                            val updateMenu =
+                                contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
+                            updateMenu.setOnMenuItemClickListener {
+                                showInputDialog(
+                                    getString(R.string.update),
+                                    null,
+                                    baseMessage.message,
+                                    getString(R.string.update),
+                                    getString(R.string.cancel),
+                                    { updateMessage(it, baseMessage) },
+                                )
+                                return@setOnMenuItemClickListener true
+                            }
+                        }
                     }
                     if (baseMessage is UserMessage) {
-                        val updateMenu =
-                            contextMenu.add(Menu.NONE, 1, 1, getString(R.string.update))
-                        updateMenu.setOnMenuItemClickListener {
-                            showInputDialog(
-                                getString(R.string.update),
-                                null,
-                                baseMessage.message,
-                                getString(R.string.update),
-                                getString(R.string.cancel),
-                                { updateMessage(it, baseMessage) },
-                            )
+                        val copyMenu = contextMenu.add(Menu.NONE, 2, 2, getString(R.string.copy))
+                        copyMenu.setOnMenuItemClickListener {
+                            copy(baseMessage.message)
                             return@setOnMenuItemClickListener true
                         }
                     }
                 }
-                if (baseMessage is UserMessage) {
-                    val copyMenu = contextMenu.add(Menu.NONE, 2, 2, getString(R.string.copy))
-                    copyMenu.setOnMenuItemClickListener {
-                        copy(baseMessage.message)
-                        return@setOnMenuItemClickListener true
+            },
+            failedItemClickListener = {
+                showListDialog(
+                    listOf(getString(R.string.retry), getString(R.string.delete))
+                ) { _, position ->
+                    when (position) {
+                        0 -> resendMessage(it)
+                        1 -> adapter.deletePendingMessages(mutableListOf(it))
                     }
                 }
-            }
-        }, {
-            showListDialog(
-                listOf(getString(R.string.retry), getString(R.string.delete))
-            ) { _, position ->
-                when (position) {
-                    0 -> resendMessage(it)
-                    1 -> adapter.deletePendingMessages(mutableListOf(it))
-                }
-            }
-        }, this::votePollOption, this::onAddOptionToPoll, this::deletePollOption, this::closePoll)
+            },
+            this::onPollClicked,
+            this::votePollOption,
+            this::onAddOptionToPoll,
+            this::deletePollOption,
+            this::closePoll
+        )
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
         recyclerObserver = ChatRecyclerDataObserver(binding.recyclerviewChat, adapter)
@@ -632,6 +641,13 @@ class GroupChannelChatActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun onPollClicked(poll: Poll) {
+        val intent = Intent(this, PollDetailActivity::class.java)
+        intent.putExtra(Constants.INTENT_KEY_CHANNEL_URL, channelUrl)
+        intent.putExtra(Constants.INTENT_KEY_POLL_ID, poll.id)
+        startActivity(intent)
     }
 
     private fun votePollOption(poll: Poll, pollOption: PollOption) {
