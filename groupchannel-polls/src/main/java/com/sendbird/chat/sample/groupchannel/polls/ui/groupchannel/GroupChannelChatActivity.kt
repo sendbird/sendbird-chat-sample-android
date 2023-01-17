@@ -35,6 +35,7 @@ import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls.CreatePollActivity
 import com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls.PollDetailActivity
+import com.sendbird.chat.sample.groupchannel.polls.ui.groupchannel.polls.PollVoteActivity
 import com.sendbird.chat.sample.groupchannel.polls.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.polls.ui.user.SelectUserActivity
 import java.util.concurrent.ConcurrentHashMap
@@ -105,7 +106,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        adapter = GroupChannelChatAdapter(this,
+        adapter = GroupChannelChatAdapter(
+            context = this,
             longClickListener = { baseMessage, view ->
                 view.setOnCreateContextMenuListener { contextMenu, _, _ ->
                     if (SendbirdChat.currentUser != null && baseMessage.sender?.userId == SendbirdChat.currentUser!!.userId) {
@@ -150,11 +152,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     }
                 }
             },
-            this::onPollClicked,
-            this::votePollOption,
-            this::onAddOptionToPoll,
-            this::deletePollOption,
-            this::closePoll
+            onPollClicked = this::onPollClicked,
+            onPollOptionVoted = this::votePollOption,
+            onVoteNowClicked = this::onVoteNowClicked,
+            deletePollOption = this::deletePollOption,
+            closePoll = this::closePoll
         )
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
@@ -671,22 +673,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun onAddOptionToPoll(poll: Poll) {
-        showInputDialog(
-            getString(R.string.add_option),
-            null,
-            "",
-            getString(R.string.add),
-            getString(R.string.cancel),
-            {
-                currentGroupChannel?.addPollOption(poll.id, it) { _, exception ->
-                    if (exception != null) {
-                        Log.e("PollException", exception.message!!)
-                    }
-                    updatePoll(messageId = poll.messageId)
-                }
-            },
-        )
+    private fun onVoteNowClicked(poll: Poll) {
+        val intent = Intent(this, PollVoteActivity::class.java)
+        intent.putExtra(Constants.INTENT_KEY_CHANNEL_URL, channelUrl)
+        intent.putExtra(Constants.INTENT_KEY_POLL_ID, poll.id)
+        startActivity(intent)
     }
 
     private fun deletePollOption(poll: Poll, option: PollOption) {

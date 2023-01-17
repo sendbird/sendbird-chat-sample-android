@@ -31,7 +31,7 @@ class GroupChannelChatAdapter(
     private val failedItemClickListener: OnFailedItemClickListener,
     private val onPollClicked: (Poll) -> Unit,
     private val onPollOptionVoted: (Poll, PollOption) -> Unit,
-    private val addOptionToPoll: (Poll) -> Unit,
+    private val onVoteNowClicked: (Poll) -> Unit,
     private val deletePollOption: (Poll, PollOption) -> Unit,
     private val closePoll: (Poll) -> Unit,
 ) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
@@ -522,9 +522,10 @@ class GroupChannelChatAdapter(
             val isPollOpened = poll.status == PollStatus.OPEN
             binding.tvPollTitle.text =
                 poll.title + if (!isPollOpened) "-Closed" else ""
-            binding.btnAddOption.isVisible = poll.allowUserSuggestion && isPollOpened
+            // binding.btnVoteNow.isVisible = poll.allowUserSuggestion && isPollOpened
+            binding.btnVoteNow.isVisible = isPollOpened
             if (isPollOpened) {
-                binding.btnAddOption.setOnClickListener { addOptionToPoll(poll) }
+                binding.btnVoteNow.setOnClickListener { onVoteNowClicked(poll) }
                 binding.btnClosePoll.setOnClickListener { closePoll(poll) }
             }
             binding.btnClosePoll.isVisible =
