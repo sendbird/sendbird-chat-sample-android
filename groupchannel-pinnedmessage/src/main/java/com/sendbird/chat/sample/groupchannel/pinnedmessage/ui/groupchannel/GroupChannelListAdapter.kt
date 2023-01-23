@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.ui.groupchannel
+package com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.groupchannel
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

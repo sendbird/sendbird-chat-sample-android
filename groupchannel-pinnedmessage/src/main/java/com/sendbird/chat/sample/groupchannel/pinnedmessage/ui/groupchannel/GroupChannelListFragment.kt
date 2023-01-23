@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.ui.groupchannel
+package com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.groupchannel
 
 import android.content.Intent
 import android.os.Bundle
@@ -19,7 +19,7 @@ import com.sendbird.chat.module.ui.base.BaseFragment
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.databinding.FragmentGroupChannelListBinding
-import com.sendbird.chat.sample.groupchannel.ui.user.SelectUserActivity
+import com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.user.SelectUserActivity
 
 class GroupChannelListFragment :
     BaseFragment<FragmentGroupChannelListBinding>(FragmentGroupChannelListBinding::inflate) {
@@ -95,7 +95,7 @@ class GroupChannelListFragment :
         )
         val params = GroupChannelCollectionCreateParams(listQuery)
         groupChannelCollection = SendbirdChat.createGroupChannelCollection(params).apply {
-            groupChannelCollectionHandler = object : GroupChannelCollectionHandler {
+            groupChannelCollectionHandler = (object : GroupChannelCollectionHandler {
                 override fun onChannelsAdded(
                     context: GroupChannelContext,
                     channels: List<GroupChannel>
@@ -116,7 +116,7 @@ class GroupChannelListFragment :
                 ) {
                     adapter.updateChannels(channels)
                 }
-            }
+            })
         }
         loadMore(true)
     }

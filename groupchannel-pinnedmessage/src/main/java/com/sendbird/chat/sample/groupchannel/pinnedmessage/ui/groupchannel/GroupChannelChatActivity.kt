@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.ui.groupchannel
+package com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.groupchannel
 
 import android.Manifest
 import android.content.Intent
@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
@@ -26,8 +27,10 @@ import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.*
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivityGroupChannelChatBinding
-import com.sendbird.chat.sample.groupchannel.ui.user.ChatMemberListActivity
-import com.sendbird.chat.sample.groupchannel.ui.user.SelectUserActivity
+import com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.user.ChatMemberListActivity
+import com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.user.SelectUserActivity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
@@ -40,8 +43,6 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private var messageCollection: MessageCollection? = null
     private var channelTSHashMap = ConcurrentHashMap<String, Long>()
     private var isCollectionInitialized = false
-
-    private var replayMessageId: Long = -1L
 
     private val startForResultFile =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
@@ -129,10 +130,18 @@ class GroupChannelChatActivity : AppCompatActivity() {
                         copy(baseMessage.message)
                         return@setOnMenuItemClickListener true
                     }
-                    val replayMenu = contextMenu.add(Menu.NONE, 3, 3, "Replay")
-                    replayMenu.setOnMenuItemClickListener {
-                        replayMessageId = baseMessage.messageId
-                        true
+                }
+                if (adapter.pinnedMessagesIds.contains(baseMessage.messageId)) {
+                    val pinMenu = contextMenu.add(Menu.NONE, 3, 3, R.string.unpin)
+                    pinMenu.setOnMenuItemClickListener {
+                        unpinMessage(baseMessage)
+                        return@setOnMenuItemClickListener true
+                    }
+                } else {
+                    val pinMenu = contextMenu.add(Menu.NONE, 3, 3, R.string.pin)
+                    pinMenu.setOnMenuItemClickListener {
+                        pinMessage(baseMessage)
+                        return@setOnMenuItemClickListener true
                     }
                 }
             }
@@ -145,9 +154,6 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     1 -> adapter.deletePendingMessages(mutableListOf(it))
                 }
             }
-        }, { messageId ->
-            if (messageId == 0L) "" else adapter.currentList.firstOrNull { it.messageId == messageId }?.message
-                ?: ""
         })
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter
@@ -211,7 +217,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
             nextResultSize = 20
         }
         val messageCollectionCreateParams =
-            MessageCollectionCreateParams(channel, messageListParams, timeStamp, collectionHandler)
+            MessageCollectionCreateParams(channel, messageListParams)
+                .apply {
+                    startingPoint = timeStamp
+                    messageCollectionHandler = collectionHandler
+                }
         messageCollection =
             SendbirdChat.createMessageCollection(messageCollectionCreateParams).apply {
                 initialize(
@@ -226,6 +236,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                             }
                             adapter.changeMessages(cachedList)
                             adapter.addPendingMessages(this@apply.pendingMessages)
+                            adapter.pinnedMessagesIds = channel.pinnedMessageIds
                         }
 
                         override fun onApiResult(
@@ -238,6 +249,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                             adapter.changeMessages(apiResultList, false)
                             markAsRead()
                             isCollectionInitialized = true
+                            adapter.pinnedMessagesIds = channel.pinnedMessageIds
                         }
                     }
                 )
@@ -284,13 +296,44 @@ class GroupChannelChatActivity : AppCompatActivity() {
             showToast(R.string.enter_message_msg)
             return
         }
-        val params = UserMessageUpdateParams(msg)
+        val params = UserMessageUpdateParams().apply {
+            message = msg
+        }
         currentGroupChannel?.updateUserMessage(
             baseMessage.messageId, params
         ) { _, e ->
             if (e != null) {
                 showToast("${e.message}")
             }
+        }
+    }
+
+    private fun pinMessage(baseMessage: BaseMessage) {
+        val channel = currentGroupChannel ?: return
+        channel.pinMessage(baseMessage.messageId) completionHandler@{ error ->
+            error ?: run {
+                lifecycleScope.launch {
+                    delay(500)
+                    adapter.pinnedMessagesIds = channel.pinnedMessageIds
+                }
+                return@completionHandler
+            }
+            showToast(error.message ?: "Error pinning message")
+            adapter.pinnedMessagesIds = channel.pinnedMessageIds
+        }
+    }
+
+    private fun unpinMessage(baseMessage: BaseMessage) {
+        val channel = currentGroupChannel ?: return
+        channel.unpinMessage(baseMessage.messageId) completionHandler@{ error ->
+            error ?: run {
+                lifecycleScope.launch {
+                    delay(500)
+                    adapter.pinnedMessagesIds = channel.pinnedMessageIds
+                }
+                return@completionHandler
+            }
+            showToast(error.message ?: "Error unpinning message")
         }
     }
 
@@ -340,6 +383,16 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 )
                 true
             }
+            R.id.show_pinned_messages -> {
+                adapter.showPinnedMessages = true
+                invalidateOptionsMenu()
+                true
+            }
+            R.id.show_all_messages -> {
+                adapter.showPinnedMessages = false
+                invalidateOptionsMenu()
+                true
+            }
 
             android.R.id.home -> {
                 finish()
@@ -348,6 +401,12 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(R.id.show_pinned_messages)?.isVisible = !adapter.showPinnedMessages
+        menu?.findItem(R.id.show_all_messages)?.isVisible = adapter.showPinnedMessages
+        return super.onPrepareOptionsMenu(menu)
     }
 
     private fun deleteChannel() {
@@ -384,7 +443,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private fun inviteUser(selectIds: List<String>?) {
         if (selectIds != null && selectIds.isNotEmpty()) {
             val channel = currentGroupChannel ?: return
-            channel.invite(selectIds) {
+            channel.invite(selectIds.toList()) {
                 if (it != null) {
                     showToast("${it.message}")
                 }
@@ -398,9 +457,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
             return
         }
         if (channel.name != name) {
-            val params = GroupChannelUpdateParams().apply {
-                this.name = name
-            }
+            val params = GroupChannelUpdateParams()
+                .apply { this.name = name }
             channel.updateChannel(
                 params
             ) { _, e ->
@@ -423,16 +481,12 @@ class GroupChannelChatActivity : AppCompatActivity() {
         val collection = messageCollection ?: return
         val channel = currentGroupChannel ?: return
 
-        val params = UserMessageCreateParams(message.trim())
-        if (replayMessageId != -1L) {
-            params.parentMessageId = replayMessageId
-            replayMessageId = -1L
+        val params = UserMessageCreateParams().apply {
+            this.message = message.trim()
         }
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
-        channel.sendUserMessage(params) { _, e ->
-            e?.printStackTrace()
-        }
+        channel.sendUserMessage(params, null)
         if (collection.hasNext) {
             createMessageCollection(Long.MAX_VALUE)
         }
@@ -456,7 +510,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
         )
         val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
         if (fileInfo != null) {
-            val params = FileMessageCreateParams(fileInfo.file).apply {
+            val params = FileMessageCreateParams().apply {
+                file = fileInfo.file
                 fileName = fileInfo.name
                 fileSize = fileInfo.size
                 this.thumbnailSizes = thumbnailSizes

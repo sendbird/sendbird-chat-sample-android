@@ -1,4 +1,4 @@
-package com.sendbird.chat.sample.groupchannel.ui.user
+package com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.user
 
 import android.content.Intent
 import android.os.Bundle
@@ -15,7 +15,7 @@ import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.showToast
 import com.sendbird.chat.sample.groupchannel.R
 import com.sendbird.chat.sample.groupchannel.databinding.ActivitySelectUserBinding
-import com.sendbird.chat.sample.groupchannel.ui.groupchannel.GroupChannelChatActivity
+import com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.groupchannel.GroupChannelChatActivity
 
 
 class SelectUserActivity : AppCompatActivity() {
@@ -117,9 +117,10 @@ class SelectUserActivity : AppCompatActivity() {
             showToast(R.string.select_user_msg)
             return
         }
-        val params = GroupChannelCreateParams().apply {
-            userIds = adapter.selectUserIdSet.toList()
-        }
+        val params = GroupChannelCreateParams()
+            .apply {
+                userIds = adapter.selectUserIdSet.toList()
+            }
         GroupChannel.createChannel(params) createChannelLabel@{ groupChannel, e ->
             if (e != null) {
                 showToast("${e.message}")
