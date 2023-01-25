@@ -1,5 +1,6 @@
 package com.sendbird.chat.sample.groupchannel.pinnedmessage.ui.groupchannel
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -352,7 +353,12 @@ class GroupChannelChatAdapter(
                 } else {
                     binding.textviewTime.visibility = View.GONE
                 }
-                binding.ivPin.isVisible = pinnedMessagesIds.contains(message.messageId)
+                val showPins = pinnedMessagesIds.contains(message.messageId)
+                binding.grPin.isVisible = showPins
+                binding.root.setBackgroundColor(
+                    if (showPins) Color.parseColor("#10FF0000")
+                    else Color.TRANSPARENT
+                )
             } else {
                 binding.dateTagView.visibility = View.GONE
                 binding.textviewTime.visibility = View.GONE
