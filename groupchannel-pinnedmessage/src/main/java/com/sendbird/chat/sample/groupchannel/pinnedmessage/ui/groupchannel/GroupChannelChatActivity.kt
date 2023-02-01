@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -188,6 +189,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 currentGroupChannel = groupChannel
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
+                drawLastPinnedMessage()
             }
         }
     }
@@ -557,6 +559,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
             if (groupChannel.name.isBlank() || groupChannel.name == TextUtils.CHANNEL_DEFAULT_NAME)
                 TextUtils.getGroupChannelTitle(groupChannel)
             else groupChannel.name
+        adapter.pinnedMessagesIds = groupChannel.pinnedMessageIds
+        adapter.notifyDataSetChanged()
+        drawLastPinnedMessage()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -687,6 +692,18 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun drawLastPinnedMessage() {
+        val channel = currentGroupChannel ?: return
+        binding.lastPinnedMessageLayout.isVisible = channel.lastPinnedMessage != null
+        channel.lastPinnedMessage?.let {
+            binding.lastPinnedMessage.text = it.message
+        }
+
+        binding.closeLastPinnedMessage.setOnClickListener {
+            binding.lastPinnedMessageLayout.isVisible = false
         }
     }
 }
