@@ -67,3 +67,5 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxTestEspressoCoreVersion"
 }
+
+apply plugin: 'com.google.gms.google-services'

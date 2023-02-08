@@ -16,12 +16,11 @@ private const val NotificationId = 1
 
 fun sendNotification(
     context: Context,
-    messageTitle: String,
-    messageBody: String,
-    channelUrl: String
+    messageTitle: String?,
+    messageBody: String
 ) {
 
-    val notification = NotificationCompat.Builder(context, channelUrl)
+    val notification = NotificationCompat.Builder(context, ChannelId)
         .setSmallIcon(R.drawable.ic_logo_symbol)
         .setColor(Color.parseColor("#7469C4")) // small icon background color
         .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.ic_logo_horizontal))

@@ -27,13 +27,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         try {
             if (remoteMessage.data.containsKey("sendbird")) {
                 val sendbird = remoteMessage.data["sendbird"]?.let { JSONObject(it) } ?: return
-                val channel = sendbird.get("channel") as JSONObject
-                val channelUrl = channel["channel_url"] as String
-                val messageTitle = sendbird.get("push_title") as String
+                val messageTitle = sendbird.get("push_title") as? String
                 val messageBody = sendbird.get("message") as String
                 // If you want to customize a notification with the received FCM message,
                 // write your method like sendNotification() below.
-                sendNotification(applicationContext, messageTitle, messageBody, channelUrl)
+                sendNotification(applicationContext, messageTitle, messageBody)
             }
         } catch (exception: Exception) {
 
