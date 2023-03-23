@@ -138,6 +138,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     1 -> adapter.deletePendingMessages(mutableListOf(it))
                 }
             }
+        }, { fileMessage ->
+            val intent = Intent(this, ChatImageActivity::class.java).apply {
+                putExtra("image_url", fileMessage.url)
+            }
+            startActivity(intent)
         })
         binding.recyclerviewChat.itemAnimator = null
         binding.recyclerviewChat.adapter = adapter

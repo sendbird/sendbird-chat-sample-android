@@ -20,7 +20,8 @@ import com.sendbird.chat.sample.groupchannel.databinding.*
 
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
-    private val failedItemClickListener: OnFailedItemClickListener
+    private val failedItemClickListener: OnFailedItemClickListener,
+    private val imageClickListener: (FileMessage) -> Unit = {}
 ) : ListAdapter<BaseMessage, RecyclerView.ViewHolder>(diffCallback) {
 
     fun interface OnItemLongClickListener {
@@ -410,6 +411,7 @@ class GroupChannelChatAdapter(
                 } else {
                     binding.textviewTime.visibility = View.GONE
                 }
+                binding.chatBubbleImageSend.setOnClickListener { imageClickListener(message) }
             } else {
                 binding.chatBubbleImageSend.setImageFile(message.messageCreateParams?.file)
                 binding.dateTagView.visibility = View.GONE
@@ -455,6 +457,7 @@ class GroupChannelChatAdapter(
             } else {
                 binding.textviewTime.visibility = View.GONE
             }
+            binding.chatBubbleImageReceive.setOnClickListener { imageClickListener(message) }
         }
     }
 
