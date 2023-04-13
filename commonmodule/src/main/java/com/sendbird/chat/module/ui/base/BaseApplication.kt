@@ -26,7 +26,7 @@ open class BaseApplication : Application() {
     }
 
     open fun sendbirdChatInit(){
-        val initParams = InitParams(SENDBIRD_APP_ID, applicationContext, false)
+        val initParams = InitParams(SENDBIRD_APP_ID, applicationContext, true)
         initParams.logLevel = LogLevel.ERROR
         SendbirdChat.init(
             initParams,
