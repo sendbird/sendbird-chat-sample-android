@@ -4,7 +4,15 @@
 실행화면 이미지는 마지막에 작업
 
 ## Requirements
-기존 README.md 복사
++ Android Studio
+  + Android Studio Electric Eel | 2022.1.1
++ Android SDK
+    + compileSdk: 34
+    + minSdk: 26
+    + targetSdk: 34
++ Gradle Version
+    + gradle: 7.5
+    + android gradle plugin: 7.4.2
 
 ## Application ID에 대한 설명
 실행하려면 APP_ID가 필요하다 
