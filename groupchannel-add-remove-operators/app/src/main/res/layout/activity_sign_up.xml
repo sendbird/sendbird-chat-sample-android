@@ -31,7 +31,7 @@
         app:layout_constraintTop_toBottomOf="@+id/imageview_symbol"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <com.sendbird.chat.sample.addremoveoperators.view.TagEditText
+    <com.sendbird.chat.sample.groupchannel.addremoveoperators.view.TagEditText
         android:id="@+id/tag_edittext_user_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
         app:layout_constraintVertical_chainStyle="packed"
         app:text="@string/user_id" />
 
-    <com.sendbird.chat.sample.addremoveoperators.view.PurpleButton
+    <com.sendbird.chat.sample.groupchannel.addremoveoperators.view.PurpleButton
         android:id="@+id/button_signin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

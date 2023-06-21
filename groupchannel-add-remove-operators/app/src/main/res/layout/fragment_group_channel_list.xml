@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.sendbird.chat.sample.addremoveoperators.view.CircularImageView
+    <com.sendbird.chat.sample.groupchannel.addremoveoperators.view.CircularImageView
         android:id="@+id/circular_imageview_add_channel"
         android:layout_width="56dp"
         android:layout_height="56dp"

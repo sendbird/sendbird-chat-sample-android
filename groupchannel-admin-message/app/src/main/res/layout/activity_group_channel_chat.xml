@@ -23,7 +23,7 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:stackFromEnd="true" />
 
-    <com.sendbird.chat.sample.adminmessage.view.ChatInputView
+    <com.sendbird.chat.sample.groupchannel.adminmessage.view.ChatInputView
         android:id="@+id/chat_input_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

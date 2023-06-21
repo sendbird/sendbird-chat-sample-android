@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.sendbird.chat.sample.adminmessage.view.DateTagView
+    <com.sendbird.chat.sample.groupchannel.adminmessage.view.DateTagView
         android:id="@+id/date_tag_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -13,7 +13,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.sendbird.chat.sample.adminmessage.view.ChatBubbleAdminView
+    <com.sendbird.chat.sample.groupchannel.adminmessage.view.ChatBubbleAdminView
         android:id="@+id/chat_bubble_admin_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

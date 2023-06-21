@@ -102,5 +102,5 @@ private fun refreshMember(member: Member, position: Int, isOperator: Boolean) {
 ## How to run
 ``` bash
 ./gradlew :app:installDebug
-adb shell am start -n "com.sendbird.chat.sample.adminmessage/com.sendbird.chat.sample.adminmessage.base.SplashActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER --splashscreen-show-icon
+adb shell am start -n "com.sendbird.chat.sample.groupchannel.adminmessage/com.sendbird.chat.sample.groupchannel.adminmessage.base.SplashActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER --splashscreen-show-icon
 ```

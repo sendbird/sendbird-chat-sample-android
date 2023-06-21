@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.sendbird.chat.sample.addremoveoperators.view.DateTagView
+    <com.sendbird.chat.sample.groupchannel.addremoveoperators.view.DateTagView
         android:id="@+id/date_tag_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -26,7 +26,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.sendbird.chat.sample.addremoveoperators.view.ChatErrorButton
+    <com.sendbird.chat.sample.groupchannel.addremoveoperators.view.ChatErrorButton
         android:id="@+id/chat_error_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.sendbird.chat.sample.addremoveoperators.view.ChatBubbleSendView
+    <com.sendbird.chat.sample.groupchannel.addremoveoperators.view.ChatBubbleSendView
         android:id="@+id/chat_bubble_send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

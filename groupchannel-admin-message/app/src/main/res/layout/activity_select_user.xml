@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.sendbird.chat.sample.adminmessage.user.SelectUserActivity">
+    tools:context=".user.SelectUserActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"

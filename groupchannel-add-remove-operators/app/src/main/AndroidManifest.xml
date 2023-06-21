@@ -12,7 +12,7 @@
     <!--        android:name=".ui.BaseApplication"-->
 
     <application
-        android:name="com.sendbird.chat.sample.addremoveoperators.BaseApplication"
+        android:name=".BaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -20,19 +20,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.sendbird.chat.sample.addremoveoperators.user.ChatMemberListActivity"
+            android:name=".user.ChatMemberListActivity"
             android:exported="false"
             android:screenOrientation="fullSensor" />
         <activity
-            android:name="com.sendbird.chat.sample.addremoveoperators.user.SelectUserActivity"
+            android:name=".user.SelectUserActivity"
             android:exported="false"
             android:screenOrientation="fullSensor" />
         <activity
-            android:name="com.sendbird.chat.sample.addremoveoperators.groupchannel.GroupChannelChatActivity"
+            android:name=".groupchannel.GroupChannelChatActivity"
             android:exported="false"
             android:screenOrientation="fullSensor" />
         <activity
-            android:name="com.sendbird.chat.sample.addremoveoperators.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:screenOrientation="fullSensor">
             <intent-filter>
@@ -41,15 +41,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.sendbird.chat.sample.addremoveoperators.base.UserInfoActivity"
+            android:name=".base.UserInfoActivity"
             android:exported="false"
             android:screenOrientation="fullSensor" />
         <activity
-            android:name="com.sendbird.chat.sample.addremoveoperators.base.SignUpActivity"
+            android:name=".base.SignUpActivity"
             android:exported="false"
             android:screenOrientation="fullSensor" />
         <activity
-            android:name="com.sendbird.chat.sample.addremoveoperators.base.SplashActivity"
+            android:name=".base.SplashActivity"
             android:exported="true"
             android:screenOrientation="fullSensor"
             android:theme="@style/SplashTheme">
