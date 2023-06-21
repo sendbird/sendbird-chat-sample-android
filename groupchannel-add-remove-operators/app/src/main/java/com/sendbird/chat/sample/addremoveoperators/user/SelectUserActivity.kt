@@ -14,8 +14,8 @@ import com.sendbird.android.params.GroupChannelCreateParams
 import com.sendbird.chat.sample.addremoveoperators.groupchannel.GroupChannelChatActivity
 import com.sendbird.chat.sample.addremoveoperators.util.Constants
 import com.sendbird.chat.sample.addremoveoperators.util.showToast
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ActivitySelectUserBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ActivitySelectUserBinding
 
 
 class SelectUserActivity : AppCompatActivity() {

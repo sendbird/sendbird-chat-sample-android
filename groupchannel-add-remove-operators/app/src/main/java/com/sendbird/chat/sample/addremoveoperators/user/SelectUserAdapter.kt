@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.sendbird.android.user.User
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ListItemSelectUserBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ListItemSelectUserBinding
 
 class SelectUserAdapter(
     private val listener: OnItemClickListener?,

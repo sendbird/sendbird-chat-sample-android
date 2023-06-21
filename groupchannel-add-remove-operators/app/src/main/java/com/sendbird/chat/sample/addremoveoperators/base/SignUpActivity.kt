@@ -7,8 +7,8 @@ import com.sendbird.android.SendbirdChat
 import com.sendbird.chat.sample.addremoveoperators.util.Constants
 import com.sendbird.chat.sample.addremoveoperators.util.SharedPreferenceUtils
 import com.sendbird.chat.sample.addremoveoperators.util.showToast
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ActivitySignUpBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ActivitySignUpBinding
 
 class SignUpActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignUpBinding

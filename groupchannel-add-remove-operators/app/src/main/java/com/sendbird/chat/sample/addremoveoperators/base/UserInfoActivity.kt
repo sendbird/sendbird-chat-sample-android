@@ -16,8 +16,8 @@ import com.sendbird.chat.sample.addremoveoperators.util.SharedPreferenceUtils
 import com.sendbird.chat.sample.addremoveoperators.util.hideProgress
 import com.sendbird.chat.sample.addremoveoperators.util.showProgress
 import com.sendbird.chat.sample.addremoveoperators.util.showToast
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ActivityUserInfoBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ActivityUserInfoBinding
 
 class UserInfoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityUserInfoBinding

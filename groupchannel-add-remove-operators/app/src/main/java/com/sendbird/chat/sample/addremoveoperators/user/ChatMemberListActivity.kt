@@ -11,8 +11,8 @@ import com.sendbird.android.params.MemberListQueryParams
 import com.sendbird.android.user.Member
 import com.sendbird.chat.sample.addremoveoperators.util.Constants
 import com.sendbird.chat.sample.addremoveoperators.util.showToast
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ActivityChatMemberListBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ActivityChatMemberListBinding
 
 // This activity called when the user clicks the member list button in the GroupChannelChatActivity.
 class ChatMemberListActivity : AppCompatActivity() {

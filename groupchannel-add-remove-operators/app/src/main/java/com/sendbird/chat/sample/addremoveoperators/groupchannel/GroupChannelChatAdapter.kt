@@ -16,7 +16,7 @@ import com.sendbird.chat.sample.addremoveoperators.util.ListUtils
 import com.sendbird.chat.sample.addremoveoperators.util.equalDate
 import com.sendbird.chat.sample.addremoveoperators.util.equalTime
 import com.sendbird.chat.sample.addremoveoperators.util.toTime
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.*
+import com.sendbird.chat.sample.addremoveoperators.databinding.*
 
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,

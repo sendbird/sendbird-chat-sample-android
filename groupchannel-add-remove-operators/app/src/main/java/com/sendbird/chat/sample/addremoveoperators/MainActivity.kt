@@ -11,8 +11,8 @@ import com.sendbird.chat.sample.addremoveoperators.groupchannel.GroupChannelList
 import com.sendbird.chat.sample.addremoveoperators.util.Constants
 import com.sendbird.chat.sample.addremoveoperators.util.getAppName
 import com.sendbird.chat.sample.addremoveoperators.util.showLongToast
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ActivityMainBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ActivityMainBinding
 
 open class MainActivity : AppCompatActivity() {
     private fun getFragmentItems(): List<Fragment> = listOf(GroupChannelListFragment())

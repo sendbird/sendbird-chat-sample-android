@@ -9,8 +9,8 @@ import android.widget.FrameLayout
 import androidx.core.view.setPadding
 import coil.load
 import com.sendbird.chat.sample.addremoveoperators.util.dp
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ViewCircularImageBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ViewCircularImageBinding
 
 class CircularImageView : FrameLayout {
 

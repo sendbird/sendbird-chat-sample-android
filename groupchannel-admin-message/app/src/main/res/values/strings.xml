@@ -1,0 +1,46 @@
+<resources>
+    <string name="signup_title">Sendbird Chat Sample</string>
+    <string name="user_id">User Id</string>
+    <string name="sign_in">Sign In</string>
+    <string name="nickname">Nickname</string>
+    <string name="save">Save</string>
+    <string name="sign_out">Sign Out</string>
+
+    <string name="app_name">Sendbird Group Chat</string>
+
+    <string name="more">More</string>
+    <string name="delete_channel">Delete Channel</string>
+    <string name="leave_channel">Leave Channel</string>
+    <string name="members_list">Members list</string>
+    <string name="invite_members">Invite Members</string>
+    <string name="select_user">Select User</string>
+    <string name="create">Create</string>
+    <string name="select">Select</string>
+    <string name="send">Send</string>
+    <string name="delete">Delete</string>
+    <string name="copy">Copy</string>
+    <string name="leave">Leave</string>
+    <string name="cancel">Cancel</string>
+    <string name="update">Update</string>
+    <string name="retry">Retry</string>
+
+    <string name="update_channel_name">Update Channel Name</string>
+
+    <!--  msg  -->
+    <string name="enter_message_msg">Please enter your message</string>
+    <string name="select_user_msg">Please select user</string>
+    <string name="channel_delete_msg">Cannot be recovered</string>
+    <string name="channel_leave_msg">You need an invitation to re-enter</string>
+    <string name="channel_deleted_event_msg">This channel has been deleted.</string>
+    <string name="message_collection_init_msg">Message Collection is initializing.</string>
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_denied">Permission Denied</string>
+    <string name="user_id_empty_msg">Please enter your ID</string>
+    <string name="enter_nickname_msg">Please enter your nickname</string>
+
+    <!--  error  -->
+    <string name="file_transfer_error">error: File transfer failure</string>
+    <string name="channel_url_error">error: Channel url null</string>
+    <string name="channel_error">error: Channel null</string>
+    <string name="user_id_info_error">error: User info</string>
+</resources>

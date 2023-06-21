@@ -8,8 +8,8 @@ import android.widget.FrameLayout
 import coil.load
 import coil.size.Scale
 import coil.transform.RoundedCornersTransformation
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ViewChatBubbleImageSendBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ViewChatBubbleImageSendBinding
 import java.io.File
 
 class ChatBubbleImageSendView : FrameLayout {

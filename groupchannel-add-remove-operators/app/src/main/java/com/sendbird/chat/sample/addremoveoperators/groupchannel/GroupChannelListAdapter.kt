@@ -9,7 +9,7 @@ import com.sendbird.android.channel.query.GroupChannelListQueryOrder
 import com.sendbird.android.message.BaseMessage
 import com.sendbird.chat.sample.addremoveoperators.util.TextUtils
 import com.sendbird.chat.sample.addremoveoperators.util.toChatTime
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ListItemChannelBinding
+import com.sendbird.chat.sample.addremoveoperators.databinding.ListItemChannelBinding
 
 class GroupChannelListAdapter(private val listener: OnItemClickListener) :
     RecyclerView.Adapter<GroupChannelListAdapter.GroupChannelListViewHolder>() {

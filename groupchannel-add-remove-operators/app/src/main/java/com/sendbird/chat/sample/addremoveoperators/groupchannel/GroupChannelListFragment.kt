@@ -19,7 +19,7 @@ import com.sendbird.chat.sample.addremoveoperators.util.Constants
 import com.sendbird.chat.sample.addremoveoperators.user.SelectUserActivity
 import com.sendbird.chat.sample.addremoveoperators.base.BaseFragment
 import com.sendbird.chat.sample.addremoveoperators.util.showToast
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.FragmentGroupChannelListBinding
+import com.sendbird.chat.sample.addremoveoperators.databinding.FragmentGroupChannelListBinding
 
 class GroupChannelListFragment :
     BaseFragment<FragmentGroupChannelListBinding>(FragmentGroupChannelListBinding::inflate) {

@@ -35,8 +35,8 @@ import com.sendbird.chat.sample.addremoveoperators.util.showAlertDialog
 import com.sendbird.chat.sample.addremoveoperators.util.showInputDialog
 import com.sendbird.chat.sample.addremoveoperators.util.showListDialog
 import com.sendbird.chat.sample.addremoveoperators.util.showToast
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.R
-import com.sendbird.chat.sample.groupchannel.addremoveoperators.databinding.ActivityGroupChannelChatBinding
+import com.sendbird.chat.sample.addremoveoperators.R
+import com.sendbird.chat.sample.addremoveoperators.databinding.ActivityGroupChannelChatBinding
 import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
