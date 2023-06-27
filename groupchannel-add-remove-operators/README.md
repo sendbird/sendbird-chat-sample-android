@@ -1,6 +1,6 @@
 # Add or remove operators in a group channel
 
-This sample app demonstrates how to add and remove operators in a group channel using Sendbird Chat SDK for Android.
+This sample with UI components demonstrates how to register or remove operators in a group channel on Sendbird Chat SDK for Android. Operators are users who can moderate channels by muting or banning users as well as freezing channels. To learn more, see our [documentation on operators](https://sendbird.com/docs/chat/v4/android/channel/managing-operators/register-and-remove-operators).
 
 ## Requirements
 
