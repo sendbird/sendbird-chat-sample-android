@@ -26,7 +26,7 @@ If the current user is the operator, the operator role cannot be changed.
 If the current user is not the operator, the operator role can be changed.
 And after the operator role is changed, the `refreshMembers()` method is called to refresh the member list.
 
-[ChatMemberListActivity.kt](https://github.com/sendbird/sendbird-chat-sample-android/blob/02514ee6e46e598cd81f285b75174761b6b1c5d7/groupchannel-add-remove-operators/app/src/main/java/com/sendbird/chat/sample/groupchannel/addremoveoperators/user/ChatMemberListActivity.kt#L35)
+
 ``` kotlin
 private fun initRecyclerView() {
     // Create an adapter about change the operator status of the member
@@ -102,6 +102,9 @@ private fun refreshMember(member: Member, position: Int, isOperator: Boolean) {
 ```
 
 ## How to run
+
+Copy and paste the following code into Terminal or run it on an emulator to see what the sample looks like. 
+
 ``` bash
 ./gradlew :app:installDebug
 adb shell am start -n "com.sendbird.chat.sample.groupchannel.addremoveoperators/com.sendbird.chat.sample.groupchannel.addremoveoperators.base.SplashActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER --splashscreen-show-icon
