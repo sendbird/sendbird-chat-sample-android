@@ -16,7 +16,11 @@ This sample with UI components demonstrates how to register or remove operators 
 
 ## How it works
 
-`ChatMemberListActivity.kt` is called when the user clicks the member list button in the `GroupChannelChatActivity.kt`.
+When a user clicks the member list button in `GroupChannelChatActivity.kt`, the `changeMemberOperatorStatus()` method and [`ChatMemberListActivity.kt`](https://github.com/sendbird/sendbird-chat-sample-android/blob/02514ee6e46e598cd81f285b75174761b6b1c5d7/groupchannel-add-remove-operators/app/src/main/java/com/sendbird/chat/sample/groupchannel/addremoveoperators/user/ChatMemberListActivity.kt#L35) are called. 
+
+The `changeMemberOperatorStatus()` method creates an adapter and change a user's role into an operator. If the current user wasn't an operator, their status changes to an operator. If the user was already an operator, their status remains the same. After a user's role is changed, the `refreshMembers()` method is called to refresh the member list.
+
+As for the kit, `initRecyclerView()` is the first method to be called and the method sets the adapter to `RecyclerView`. 
 When the `ChatMemberListActivity.kt` is called, the `initRecyclerView()` method is called first.
 And the `initRecyclerView()` method sets the adapter to the RecyclerView.
 The adapter is created with the `changeMemberOperatorStatus()` method.
