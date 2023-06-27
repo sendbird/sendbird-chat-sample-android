@@ -1,8 +1,9 @@
-# Group Channel Add Remove Operators
+# Add or remove operators in a group channel
 
-This sample app demonstrates how to add and remove operators in a group channel.
+This sample app demonstrates how to add and remove operators in a group channel using Sendbird Chat SDK for Android.
 
 ## Requirements
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
@@ -13,7 +14,8 @@ This sample app demonstrates how to add and remove operators in a group channel.
     + gradle: 7.5
     + android gradle plugin: 7.4.2
 
-## Add Remove Operators
+## How it works
+
 `ChatMemberListActivity.kt` is called when the user clicks the member list button in the `GroupChannelChatActivity.kt`.
 When the `ChatMemberListActivity.kt` is called, the `initRecyclerView()` method is called first.
 And the `initRecyclerView()` method sets the adapter to the RecyclerView.
