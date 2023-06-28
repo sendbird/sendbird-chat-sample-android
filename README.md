@@ -1,6 +1,6 @@
 # Sendbird Chat SDK samples for Android
 
-This repository contains code sampels in Kotlin, showcasing the key functionalities provided by Sendbird Chat SDK for Android. Each sample has a dedicated readme file briefing . To learn more about the SDK for Android, visit our [documentation site](https://sendbird.com/docs/chat/v4/android/overview).
+This repository contains code samples in Kotlin, showcasing the key functionalities provided by Sendbird Chat SDK for Android. Each sample has a dedicated readme file briefing . To learn more about the SDK for Android, visit our [documentation site](https://sendbird.com/docs/chat/v4/android/overview).
 
 ## Prerequisites
 
