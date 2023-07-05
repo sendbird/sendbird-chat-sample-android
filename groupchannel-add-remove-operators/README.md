@@ -1,8 +1,9 @@
-# Group Channel Add Remove Operators
+# Add or remove operators in a group channel
 
-This sample app demonstrates how to add and remove operators in a group channel.
+This sample with UI components demonstrates how to register or remove operators in a group channel on Sendbird Chat SDK for Android. Operators are users who can moderate channels by muting or banning users as well as freezing channels. To learn more, see our [documentation on operators](https://sendbird.com/docs/chat/v4/android/channel/managing-operators/register-and-remove-operators).
 
-## Requirements
+## Prerequisites
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
@@ -13,8 +14,13 @@ This sample app demonstrates how to add and remove operators in a group channel.
     + gradle: 7.5
     + android gradle plugin: 7.4.2
 
-## Add Remove Operators
-`ChatMemberListActivity.kt` is called when the user clicks the member list button in the `GroupChannelChatActivity.kt`.
+## How it works
+
+When a user clicks the member list button in `GroupChannelChatActivity.kt`, the `changeMemberOperatorStatus()` method and [`ChatMemberListActivity.kt`](https://github.com/sendbird/sendbird-chat-sample-android/blob/02514ee6e46e598cd81f285b75174761b6b1c5d7/groupchannel-add-remove-operators/app/src/main/java/com/sendbird/chat/sample/groupchannel/addremoveoperators/user/ChatMemberListActivity.kt#L35) are called. 
+
+The `changeMemberOperatorStatus()` method creates an adapter and change a user's role into an operator. If the current user wasn't an operator, their status changes to an operator. If the user was already an operator, their status remains the same. After a user's role is changed, the `refreshMembers()` method is called to refresh the member list.
+
+As for the kit, `initRecyclerView()` is the first method to be called and the method sets the adapter to `RecyclerView`. 
 When the `ChatMemberListActivity.kt` is called, the `initRecyclerView()` method is called first.
 And the `initRecyclerView()` method sets the adapter to the RecyclerView.
 The adapter is created with the `changeMemberOperatorStatus()` method.
@@ -24,7 +30,7 @@ If the current user is the operator, the operator role cannot be changed.
 If the current user is not the operator, the operator role can be changed.
 And after the operator role is changed, the `refreshMembers()` method is called to refresh the member list.
 
-[ChatMemberListActivity.kt](https://github.com/sendbird/sendbird-chat-sample-android/blob/02514ee6e46e598cd81f285b75174761b6b1c5d7/groupchannel-add-remove-operators/app/src/main/java/com/sendbird/chat/sample/groupchannel/addremoveoperators/user/ChatMemberListActivity.kt#L35)
+
 ``` kotlin
 private fun initRecyclerView() {
     // Create an adapter about change the operator status of the member
@@ -100,6 +106,9 @@ private fun refreshMember(member: Member, position: Int, isOperator: Boolean) {
 ```
 
 ## How to run
+
+Copy and paste the following code into Terminal or run it on an emulator to see what the sample looks like. 
+
 ``` bash
 ./gradlew :app:installDebug
 adb shell am start -n "com.sendbird.chat.sample.groupchannel.addremoveoperators/com.sendbird.chat.sample.groupchannel.addremoveoperators.base.SplashActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER --splashscreen-show-icon
