@@ -105,6 +105,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
+        // When the message is added to the collection, the message is added to the adapter.
         adapter = GroupChannelChatAdapter({ baseMessage, view ->
             view.setOnCreateContextMenuListener { contextMenu, _, _ ->
                 if (SendbirdChat.currentUser != null && baseMessage.sender?.userId == SendbirdChat.currentUser!!.userId) {

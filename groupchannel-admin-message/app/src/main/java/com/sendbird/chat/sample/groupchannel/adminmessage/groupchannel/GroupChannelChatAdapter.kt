@@ -58,6 +58,9 @@ class GroupChannelChatAdapter(
     private val baseMessageList = mutableListOf<BaseMessage>()
     private val pendingMessageList = mutableListOf<BaseMessage>()
 
+    // onCreateViewHolder is a method that is called each time a view holder is created.
+    // Each time a view holder is created, it determines the type of view holder, creates the view holder, and returns the view holder.
+    // The method used to determine the type of view holder is the getItemViewType method.
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
         when (viewType) {
@@ -89,6 +92,7 @@ class GroupChannelChatAdapter(
                     false
                 )
             )
+            // When the message is an admin message, return the GroupChatAdminViewHolder.
             VIEW_TYPE_ADMIN -> return GroupChatAdminViewHolder(
                 ListItemChatAdminBinding.inflate(
                     LayoutInflater.from(parent.context),
@@ -106,6 +110,7 @@ class GroupChannelChatAdapter(
         }
     }
 
+    // onBindViewHolder is a method that is called each time a view holder is bound.
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         var showName = false
         var showDate = false
@@ -153,12 +158,19 @@ class GroupChannelChatAdapter(
             is GroupChatImageReceiveViewHolder -> {
                 holder.bind(getItem(position) as FileMessage, showName, showDate, showTime)
             }
+            // And when the message is an admin message, the GroupChatAdminViewHolder is bound.
+            // The GroupChatAdminViewHolder binds the message and the date.
             is GroupChatAdminViewHolder -> {
                 holder.bind(getItem(position), showDate)
             }
         }
     }
 
+
+    // In RecyclerView, getItemViewType is called when onCreateViewHolder is called.
+    // getItemViewType returns the ViewType of the current message.
+    // Depending on whether the message is a file or not, whether it was sent by the current user or not,
+    // and whether the message is an Admin message or not, it returns the ViewType.
     override fun getItemViewType(position: Int): Int {
         return if (getItem(position) is AdminMessage) {
             VIEW_TYPE_ADMIN
@@ -458,6 +470,7 @@ class GroupChannelChatAdapter(
         }
     }
 
+    // GroupChatAdminViewHolder is for handling admin message
     inner class GroupChatAdminViewHolder(private val binding: ListItemChatAdminBinding) :
         BaseViewHolder(binding) {
         fun bind(
