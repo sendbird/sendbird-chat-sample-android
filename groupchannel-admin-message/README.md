@@ -1,4 +1,4 @@
-# Group Channel Add Remove Operators
+# Group Channel Admin Message
 
 This sample app demonstrates how to handle Admin Message in a group channel.
 In the SDK, Admin messages cannot be sent, but only the part that handles the received messages. You can send it from the Dashboard.
