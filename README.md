@@ -26,10 +26,8 @@ Refer to the following list of code samples and their readme files.
 - ...
 - ...
 
-## Security tip
-
-// 현재 리드미에 잇는 내용 중 보안 관련 사항을 가져왔습니다. 이 링크(https://github.com/sd-katherinekim/sendbird-chat-sample-android/blob/main/README.md#considerations-in-real-world-app) 내용도 필요할지 알려주세요. & 현재 저희 대시보드에 Disabled옵션이 없는데요, Deny login 일까요?
+## Security
 
 When a new Sendbird application is created in [Sendbird Dashboard](https://dashbaord.sendbird.com), the default security settings are set permissive to simplify running samples and implementing your first code.
 
-When launching a production application, make sure to review the security settings beforehand in **Settings > Application > Security** on the dashbaord and set **Access token permission** to **Read Only** or **Deny login** so that unauthenticated users can't login as someone else. Also review the **Access Control** lists. Most apps will want to disable **"Allow retrieving user list"** as that could expose sensitivie information such as usage numbers.
+When launching a production application, make sure to review the security settings beforehand in **Settings > Application > Security** on the dashbaord and set **Access token permission** to **Deny login** because **Read & Write** is not secure and will allow a new user to be automatically created in the SDK if none exists. Ensure that users are authenticated with a Sendbird generated Session Token. Also review the **Access Control** lists. Most apps will want to disable **"Allow retrieving user list"** as that could expose sensitivie information such as usage numbers.
