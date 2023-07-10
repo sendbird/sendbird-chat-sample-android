@@ -1,6 +1,6 @@
-# Group Channel Ban And Unban User
+# Ban or unban users
 
-This sample app demonstrates how to ban and unban user in a group channel.
+This sample app demonstrates how to ban or unban user in a group channel on Sendbird Chat SDK for Android.
 
 ## Requirements
 
@@ -84,6 +84,10 @@ private fun unbanUser(member: User) {
 ```
 
 ## How to run
+
+Copy and paste the following code into Terminal or run it on an emulator to see what the sample looks like.
+
+
 ``` bash
 ./gradlew :app:installDebug
 adb shell am start -n "com.sendbird.chat.sample.groupchannel.ban/com.sendbird.chat.sample.groupchannel.ban.base.SplashActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER --splashscreen-show-icon
