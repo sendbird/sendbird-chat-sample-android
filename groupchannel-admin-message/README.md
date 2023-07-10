@@ -14,17 +14,14 @@ This sample with UI components demonstrates how to handle [Admin messages](https
     + gradle: 7.5
     + android gradle plugin: 7.4.2
 
-## Admin Message
+## How it works
 
-`GroupChannelChatActivity` is an Activity that manages the main screen for chatting. On this screen, it handles and displays messages being exchanged between users. To perform these functions, it utilizes an object called `messageCollection`.
+`GroupChannelChatActivity` is an Activity that manages messages sent by channel members and displays the chat view. To perform these functions, it utilizes an object called `messageCollection`.
 
 The `messageCollection` object collects new messages sent by users, and helps to sequentially sort and process these messages. These collected and sorted messages are then handled through the `GroupChannelChatAdapter`.
 
-`GroupChannelChatAdapter` operates as a RecyclerView Adapter. It creates views for each message and binds the message data to the corresponding view. This adapter is designed to handle various types of messages. It can handle a wide variety of messages including text messages, image messages, file messages, and admin messages. Among these, admin messages are handled by the `GroupChatAdminViewHolder` through the `onCreateViewHolder` method. By using different ViewHolders depending on the type of message, it can dynamically apply the appropriate layout for each message type.
-
 ``` kotlin
 //GroupChannelChatActivity.kt
-
 private fun initRecyclerView() {
   // When the message is added to the collection, the message is added to the adapter.
   adapter = GroupChannelChatAdapter({ baseMessage, view ->        
@@ -35,13 +32,14 @@ private fun initRecyclerView() {
 }
 ```
 
+`GroupChannelChatAdapter` operates as a `RecyclerView` adapter. It creates views for each message and binds the message data to the corresponding view. This adapter is designed to handle various types of messages. It can handle a wide variety of messages including text messages, image messages, file messages, and admin messages. Among these, admin messages are handled by the `GroupChatAdminViewHolder` through the `onCreateViewHolder` method. By using different `ViewHolders` by message type, it can dynamically apply the appropriate layout for each message type.
+
 ``` kotlin
 // GroupChannelChatAdapter.kt
-
 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
   when (viewType) {
     ..
-    // When the message is an admin message, return the GroupChatAdminViewHolder.
+    // When the message is an admin message, return GroupChatAdminViewHolder.
     VIEW_TYPE_ADMIN -> return GroupChatAdminViewHolder(
       ListItemChatAdminBinding.inflate(
         LayoutInflater.from(parent.context),
