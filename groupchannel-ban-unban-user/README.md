@@ -3,6 +3,7 @@
 This sample app demonstrates how to ban and unban user in a group channel.
 
 ## Requirements
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
