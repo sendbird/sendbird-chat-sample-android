@@ -32,7 +32,7 @@ private fun initRecyclerView() {
 }
 ```
 
-`GroupChannelChatAdapter` operates as a `RecyclerView` adapter. It creates views for each message and binds the message data to the corresponding view. This adapter is designed to handle various types of messages. It can handle a wide variety of messages including text messages, image messages, file messages, and admin messages. Among these, admin messages are handled by the `GroupChatAdminViewHolder` through the `onCreateViewHolder` method. By using different `ViewHolders` by message type, it can dynamically apply the appropriate layout for each message type.
+`GroupChannelChatAdapter` operates as a `RecyclerView` adapter. It creates views for each message and binds the message data to the corresponding view. This adapter is designed to handle various types of messages. It can handle a wide variety of messages including text messages, file messages, and admin messages. Among these, admin messages are handled by the `GroupChatAdminViewHolder` through the `onCreateViewHolder` method. By using different `ViewHolders` by message type, it can dynamically apply the appropriate layout for each message type.
 
 ``` kotlin
 // GroupChannelChatAdapter.kt
