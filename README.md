@@ -1,9 +1,9 @@
-# Sendbird Chat Sample Android
+# Sendbird Chat SDK samples for Android
 
-## Preview
-실행화면 이미지는 마지막에 작업
+This repository contains code samples in Kotlin, showcasing the key functionalities provided by Sendbird Chat SDK for Android. Each sample has a dedicated readme file briefing how the feature works on the code level. To learn more, see our [documentation for Android](https://sendbird.com/docs/chat/v4/android/overview).
 
-## Requirements
+## Prerequisites
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
@@ -14,14 +14,20 @@
     + gradle: 7.5
     + android gradle plugin: 7.4.2
 
-## Application ID에 대한 설명
-실행하려면 APP_ID가 필요하다 
-그런데 이번 quick start에서는 실행을 위해서 Sample APPID를 넣어놈
-추후에 본인의 APP을 만들어서 바꾸는게 좋을것 같다.
+## Sendbird Application ID
 
-### Sample List
-각각의 Sample의 실행방법 참고하세요.
+To streamline the implementation process, a sample Application ID has been provided for codes in this repository. However, you need a unique Sendbird Application ID to properly initialize the Chat SDK and enable its features in your production application. Sendbird Application ID can be found in the Overview page on [Sendbird Dashboard](https://dashbaord.sendbird.com). To learn more about how and when to use the Application ID, see our documentation on [initialization](https://sendbird.com/docs/chat/v4/android/getting-started/send-first-message#2-get-started-3-step-3-initialize-the-chat-sdk).
+
+## Code samples
+
+Refer to the following list of code samples and their readme files.
+
 - [Group Channel Add Remove Operators](./groupchannel-add-remove-operators/README.md)
-- ..
-- 
+- ...
+- ...
 
+## Security
+
+When a new Sendbird application is created in [Sendbird Dashboard](https://dashbaord.sendbird.com), the default security settings are set permissive to simplify running samples and implementing your first code.
+
+When launching a production application, make sure to review the security settings beforehand in **Settings > Application > Security** on the dashbaord and set **Access token permission** to **Deny login** because **Read & Write** is not secure and will allow a new user to be automatically created in the SDK if none exists. Ensure that users are authenticated with a Sendbird generated Session Token. Also review the **Access Control** lists. Most apps will want to disable **"Allow retrieving user list"** as that could expose sensitivie information such as usage numbers.
