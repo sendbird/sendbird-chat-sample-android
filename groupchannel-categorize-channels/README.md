@@ -1,6 +1,6 @@
 # Categorize group channels
 
-This sample app demonstrates how to categorize group channels in Sendbird Chat SDK.
+This sample app demonstrates how to categorize group channels in Sendbird Chat SDK using `customType`. 
 
 ## Requirements
 
@@ -16,10 +16,10 @@ This sample app demonstrates how to categorize group channels in Sendbird Chat S
 
 ## How it works
 
-You can create a channel with a custom type. The custom type is a string value that you can use to categorize channels.
+In Sendbird Chat SDK, group channels can have `customType`, which can be set in `GroupChannelCreateParams`. The custom type is a string value that you can use to categorize channels.
 
-SelectUserActivity.kt
 ``` kotlin
+// SelectUserActivity.kt
 private fun createChannel() {
   ...
     val params = GroupChannelCreateParams()
@@ -48,13 +48,13 @@ private fun createChannel() {
 }
 ```
 
-You can use the custom type to filter channels when you retrieve a list of channels.
+Then, you can use the custom type as a filter in `GroupChannelListQuery` when you retrieve a list of channels. Pass the `listQuery` to `GroupChannelCollectionCreateParams` to apply it to the group channel collection.
 
-GroupChannelListFragment.kt
 ``` kotlin
+// GroupChannelListFragment.kt
 private fun createCollection() {
-    // Create a GroupChannelListQuery with a GroupChannelListQueryParams.
-    // You can set custom types filter to retrieve only the channels of the custom types.
+    // Create a GroupChannelListQuery instance with GroupChannelListQueryParams.
+    // Set customTypesFilter to retrieve only the channels with the specified custom types.
     val listQuery = GroupChannel.createMyGroupChannelListQuery(
         GroupChannelListQueryParams(
             order = GroupChannelListQueryOrder.LATEST_LAST_MESSAGE,
@@ -62,9 +62,9 @@ private fun createCollection() {
         )
     )
 
-    // Create a GroupChannelCollection with a GroupChannelCollectionCreateParams.
+    // Create a GroupChannelCollection instance with GroupChannelCollectionCreateParams.
     val params = GroupChannelCollectionCreateParams(listQuery)
-    // Set a GroupChannelCollectionHandler to receive events related to the GroupChannelCollection.
+    // Set GroupChannelCollectionHandler to receive events related to the GroupChannelCollection.
     groupChannelCollection = SendbirdChat.createGroupChannelCollection(params).apply {
         groupChannelCollectionHandler = (object : GroupChannelCollectionHandler {
             override fun onChannelsAdded(
