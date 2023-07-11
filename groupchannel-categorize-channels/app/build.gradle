@@ -1,0 +1,66 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.sendbird.chat.sample.groupchannel.categorizechannels"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        viewBinding true
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/kotlin-stdlib.kotlin_module', 'META-INF/okio.kotlin_module', 'META-INF/kotlin-stdlib-common.kotlin_module']
+        }
+    }
+    namespace 'com.sendbird.chat.sample.groupchannel.categorizechannels'
+}
+
+dependencies {
+    implementation "androidx.core:core-ktx:$androidxCoreKtxVersion"
+    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation "com.google.android.material:material:$googleMaterialVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
+
+    //sendbird
+    implementation "com.sendbird.sdk:sendbird-chat:$sendbirdVersion"
+    //
+
+    //fragment
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
+    //
+
+    //Coil
+    implementation "io.coil-kt:coil:$coilVersion"
+    //
+
+    implementation "androidx.legacy:legacy-support-v4:$legacySupportVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxTestEspressoCoreVersion"
+}
