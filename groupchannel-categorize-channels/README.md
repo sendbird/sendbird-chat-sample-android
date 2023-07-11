@@ -1,8 +1,9 @@
-# Group Channel Categorize Channels
+# Categorize group channels
 
-This sample app demonstrates how to handle Categorize Channels in a group channel.
+This sample app demonstrates how to categorize group channels in Sendbird Chat SDK.
 
 ## Requirements
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
@@ -13,7 +14,7 @@ This sample app demonstrates how to handle Categorize Channels in a group channe
     + gradle: 7.5
     + android gradle plugin: 7.4.2
 
-## Categorize Channels
+## How it works
 
 You can create a channel with a custom type. The custom type is a string value that you can use to categorize channels.
 
