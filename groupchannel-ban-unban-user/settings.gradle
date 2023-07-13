@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Sendbird Chat"
+rootProject.name = "Group Chat Ban Unban User"
 include ':app'
