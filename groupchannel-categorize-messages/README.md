@@ -1,8 +1,9 @@
 # Categorize messages in a group channel
 
-This sample with UI components demonstrates how to categorize messages in a group channel on Sendbird Chat SDK for Android.
+This code sample demonstrates how to categorize messages in a group channel on Sendbird Chat SDK for Android.
 
 ## Prerequisites
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
