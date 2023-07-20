@@ -1,6 +1,6 @@
 # Freeze or unfreeze a group channel
 
-This code sample with UI components demonstrates how to freeze or unfreeze a group channel on Sendbird Chat SDK for Android.
+This code sample with UI components demonstrates how to freeze or unfreeze a group channel on Sendbird Chat SDK for Android. Freezing a group channel is part of moderation. When a channel is frozen, only the [operators](https://sendbird.com/docs/chat/v4/android/user/overview-user#2-user-types-3-operator) can send messages to the channel and users aren't allowed to chat.
 
 ## Prerequisites
 
@@ -16,11 +16,7 @@ This code sample with UI components demonstrates how to freeze or unfreeze a gro
 
 ## How it works
 
-You can freeze and unfreeze a group channel by calling the `freeze()` and `unfreeze()` methods of the `GroupChannel` class.
-The `freeze()` method freezes a group channel, and the `unfreeze()` method unfreezes a group channel.
-When a group channel is frozen, users cannot send messages in the channel.
-To freeze a group channel, you need to have the `Operator` role in the channel.
-To unfreeze a group channel, you need to have the `Operator` role in the channel or the `Operator` role in the application.
+You can freeze or unfreeze a group channel by calling the `freeze()` and `unfreeze()` methods of the `GroupChannel` class. To freeze a channel, first, you need a `Operator` role in the channel. When a group channel is frozen, only the channel operators can send a message while other users can't. To unfreeze the channel, you also need the `Operator` role in the channel or in the application.
 
 ``` kotlin
 // GroupChannelChatActivity.kt
