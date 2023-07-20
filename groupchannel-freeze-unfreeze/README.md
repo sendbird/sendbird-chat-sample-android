@@ -1,4 +1,4 @@
-# Freeze and Unfreeze in a group channel
+# Freeze or unfreeze a group channel
 
 This code sample with UI components demonstrates how to freeze and unfreeze in a group channel on Sendbird Chat SDK for Android.
 
