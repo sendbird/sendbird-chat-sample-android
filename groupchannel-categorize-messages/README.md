@@ -16,10 +16,7 @@ This code sample demonstrates how to categorize messages in a group channel on S
 
 ## How it works
 
-You can set a custom type to a message and filter messages by the custom type.
-The custom type is a string value that you can set to a message.
-You can set a custom type to a message when you send a message or update a message.
-You can filter messages by the custom type when you get messages from a channel.
+You can set a `customType` value in `string` to a message and use it as a filter when retrieving messages in a group channel. You can set the value when you send or update a message.
 
 GroupChannelChatActivity.kt
 ``` kotlin
