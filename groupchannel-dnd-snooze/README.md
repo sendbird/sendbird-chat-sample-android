@@ -1,8 +1,9 @@
 # DND And Snooze in a group channel
 
-This code sample with UI components demonstrates how to dnd or snooze in a group channel on Sendbird Chat SDK for Android.
+This code sample with UI components demonstrates how to use Do Not Disturb (DND) or Snooze functionalities in a group channel on Sendbird Chat SDK for Android. While the DND mode completely dismisses notifications from all applications, snoozing will let you mute notifications for a particular application and receive communication from everything else. You can set them up using `DNDFragmant.kt` and `SnoozeFragment.kt`, respectively.
 
 ## Prerequisites
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
@@ -14,11 +15,11 @@ This code sample with UI components demonstrates how to dnd or snooze in a group
     + android gradle plugin: 7.4.2
 
 ## How it works
-DND(Don not disturb) and Snooze are features that can be used to block notifications from a specific channel or group of channels for a certain period of time.
-This sample demonstrates how to use these features in a group channel.
 
-DNDFragment.kt
+Do Not Disturb (DND) and Snooze are one of the notification settings used to block notifications from a specific channel or a group of channels for a set period of time. 
+
 ``` kotlin
+// DNDFragment.kt
 private fun checkForDND() {
     SendbirdChat.getDoNotDisturb { isDndOn, startHour, startMin, endHour, endMin, timezone, e ->
         if (e != null) {
@@ -35,7 +36,7 @@ private fun checkForDND() {
 }
 
 private fun setDND() {
-    // Set DND by setting start and end time
+    // Set `startTime` and `endTime` to enable the DND mode.
     SendbirdChat.setDoNotDisturb(true, binding.startTime.hour, binding.startTime.minute, binding.endTime.hour, binding.endTime.minute, TimeZone.getDefault().id) { e ->
         if (e != null) {
             e.printStackTrace()
@@ -48,7 +49,7 @@ private fun setDND() {
 }
 
 private fun cancelDND() {
-    // Cancel DND by setting start and end time to 0
+    // Cancel the DND mode by setting `startTime` and `endTime` to 0.
     SendbirdChat.setDoNotDisturb(false, 0, 0, 0, 0, TimeZone.getDefault().id) { e ->
         if (e != null) {
             e.printStackTrace()
@@ -61,8 +62,10 @@ private fun cancelDND() {
 }
 ```
 
-SnoozeFragment.kt
+You can also snooze notifications for a set period of time by setting its `startTs` and `endTs`.
+
 ``` kotlin
+// SnoozeFragment.kt
 private fun checkForSnooze() {
     SendbirdChat.getSnoozePeriod { isSnoozeOn, startTs, endTs, e ->
         if (e != null) {
