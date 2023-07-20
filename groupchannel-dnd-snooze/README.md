@@ -1,6 +1,6 @@
 # DND And Snooze in a group channel
 
-This sample with UI components demonstrates how to dnd or snooze in a group channel on Sendbird Chat SDK for Android.
+This sample with UI components demonstrates how to dnd or snooze in a group channel on Sendbird Chat SDK for Android. 
 
 ## Prerequisites
 + Android Studio
