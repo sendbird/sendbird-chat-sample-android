@@ -1,6 +1,6 @@
 # DND And Snooze in a group channel
 
-This code sample with UI components demonstrates how to use Do Not Disturb (DND) or Snooze functionalities in a group channel on Sendbird Chat SDK for Android. While the DND mode completely dismisses notifications from all applications, snoozing will let you mute notifications for a particular application and receive communication from everything else. You can set them up using `DNDFragmant.kt` and `SnoozeFragment.kt`, respectively.
+This code sample with UI components demonstrates how to use Do Not Disturb (DND) or Snooze functionalities in a group channel on Sendbird Chat SDK for Android. While the DND mode mutes notifications from the SDK for a set period and repeats on a daily basis, snoozing will let you block notificatoins for a set period and does not repeat. You can set them up using `DNDFragmant.kt` and `SnoozeFragment.kt`, respectively.
 
 ## Prerequisites
 
