@@ -1,8 +1,9 @@
-# Hide and Archive in a group channel
+# Hide a group channel
 
-This sample with UI components demonstrates how to hide and archive in a group channel on Sendbird Chat SDK for Android.
+This code sample with UI components demonstrates how to hide a group channel on Sendbird Chat SDK for Android. The SDK provides an additional set of functionalities such as autohide, unhide, and archive. To learn more, see [our documentation](https://sendbird.com/docs/chat/v4/android/channel/managing-channels/hide-or-archive-a-group-channel#1-hide-or-archive-a-group-channel) on the feature.
 
 ## Prerequisites
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
@@ -15,12 +16,14 @@ This sample with UI components demonstrates how to hide and archive in a group c
 
 ## How it works
 
-You can get a `hide` and `archive` feature in a group channel by using `GroupChannelListQuery` with `hiddenChannelFilter`.
+In `GroupChannelListFragment.kt`, use the `hide` method in the `groupChannel` class to have the inactive group channels hidden or archived from the list. 
+
+by using `GroupChannelListQuery` with `hiddenChannelFilter`.
 You can hide and archive a group channel by using `GroupChannel.hide(hidePreviousMessages, allowAutoUnhide)` method.
 
-GroupChannelListFragment.kt
-``` kotlin
 
+``` kotlin
+// GroupChannelListFragment.kt
 private fun createCollection() {
     var filter = HiddenChannelFilter.UNHIDDEN
     if(showingMode == "ARCHIVED") {
@@ -76,7 +79,7 @@ private fun hideOrArchiveChannel(channel: GroupChannel, hideChannel: Boolean) {
     }
 }
 
-private fun unHideChannel(channel: GroupChannel) {
+private fun unhideChannel(channel: GroupChannel) {
     channel.unhide {
         if (it != null) {
             it.printStackTrace()
