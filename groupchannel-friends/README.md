@@ -1,6 +1,6 @@
 # Friends in a group channel
 
-This code sample with UI components demonstrates how to add, retrieve, or remove friends in a group channel on Sendbird Chat SDK for Android.
+This code sample with UI components demonstrates how to add, retrieve, or remove friends in a group channel on Sendbird Chat SDK for Android. In a group channel, the `friend` functionality serves as a tool for the current user to mark other channel members as their favorite.
 
 ## Prerequisites
 
@@ -16,13 +16,12 @@ This code sample with UI components demonstrates how to add, retrieve, or remove
 
 ## How it works
 
-In `ChatMemberListActivity.kt`, a channel member can get a list of their friends, add another member as their friend, or even unfriend them. 
+In `ChatMemberListActivity.kt`, a channel member can get a list of their friends, mark another member as their friend, or even remove them from the friend list. 
 
-To get a list of the current user's friends, call the `GroupChannel.getFriends()` method. The user can add friends to a group channel(??) by using `GroupChannel.addFriends()` method.
-When removing friends from a group channel, use the `GroupChannel.removeFriends()` method.
+To get a list of the current user's friends in the channel, call the `GroupChannel.getFriends()` method. The user can add friends to the list by using `GroupChannel.addFriends()` method. When removing friends from the list, use the `GroupChannel.removeFriends()` method.
 
-ChatMemberListActivity.kt
 ``` kotlin
+// ChatMemberListActivity.kt
 val query = SendbirdChat.createFriendListQuery(FriendListQueryParams())
 val users = mutableListOf<User>()
 fetchAllFriends(query, users) {
