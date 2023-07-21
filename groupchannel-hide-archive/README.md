@@ -1,6 +1,7 @@
 # Hide a group channel
 
-This code sample with UI components demonstrates how to hide a group channel on Sendbird Chat SDK for Android. The SDK provides an additional set of functionalities such as autohide, unhide, and archive. To learn more, see [our documentation](https://sendbird.com/docs/chat/v4/android/channel/managing-channels/hide-or-archive-a-group-channel#1-hide-or-archive-a-group-channel) on the feature.
+This code sample with UI components demonstrates how to hide a group channel on Sendbird Chat SDK for Android. The SDK provides an additional set of functionalities such as unhide, auto-unhide, 
+and archive. To learn more, see [our documentation](https://sendbird.com/docs/chat/v4/android/channel/managing-channels/hide-or-archive-a-group-channel#1-hide-or-archive-a-group-channel) on the feature.
 
 ## Prerequisites
 
@@ -16,7 +17,7 @@ This code sample with UI components demonstrates how to hide a group channel on 
 
 ## How it works
 
-In `GroupChannelListFragment.kt`, use the `hide` method in the `groupChannel` class to have the inactive group channels hidden or archived from the list. 
+In `GroupChannelListFragment.kt`, use the `hide` method in the `groupChannel` class to have the inactive group channels hidden or archived from the list. When hiding a group channel, you can also set it to automatically reappear when a new message arrives in the channel.
 
 by using `GroupChannelListQuery` with `hiddenChannelFilter`.
 You can hide and archive a group channel by using `GroupChannel.hide(hidePreviousMessages, allowAutoUnhide)` method.
