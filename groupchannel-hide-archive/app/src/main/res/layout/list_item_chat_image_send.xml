@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.sendbird.chat.sample.groupchannel.friends.view.DateTagView
+    <com.sendbird.chat.sample.groupchannel.hide_archive.view.DateTagView
         android:id="@+id/date_tag_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/chat_bubble_image_send"
         app:layout_constraintEnd_toStartOf="@+id/chat_bubble_image_send" />
 
-    <com.sendbird.chat.sample.groupchannel.friends.view.ChatErrorButton
+    <com.sendbird.chat.sample.groupchannel.hide_archive.view.ChatErrorButton
         android:id="@+id/chat_image_error_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.sendbird.chat.sample.groupchannel.friends.view.ChatBubbleImageSendView
+    <com.sendbird.chat.sample.groupchannel.hide_archive.view.ChatBubbleImageSendView
         android:id="@+id/chat_bubble_image_send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

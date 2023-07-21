@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.sendbird.chat.sample.groupchannel.friends.view.CircularImageView
+    <com.sendbird.chat.sample.groupchannel.hide_archive.view.CircularImageView
         android:id="@+id/circular_imageview_profile"
         android:layout_width="150dp"
         android:layout_height="150dp"
@@ -21,7 +21,7 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <com.sendbird.chat.sample.groupchannel.friends.view.CircularImageView
+    <com.sendbird.chat.sample.groupchannel.hide_archive.view.CircularImageView
         android:id="@+id/circular_imageview_edit_profile"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -31,7 +31,7 @@
         app:layout_constraintEnd_toEndOf="@+id/circular_imageview_profile"
         app:layout_constraintTop_toTopOf="@+id/circular_imageview_profile" />
 
-    <com.sendbird.chat.sample.groupchannel.friends.view.TagEditText
+    <com.sendbird.chat.sample.groupchannel.hide_archive.view.TagEditText
         android:id="@+id/tag_edittext_nickname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
         app:layout_constraintVertical_chainStyle="packed"
         app:text="@string/nickname" />
 
-    <com.sendbird.chat.sample.groupchannel.friends.view.PurpleButton
+    <com.sendbird.chat.sample.groupchannel.hide_archive.view.PurpleButton
         android:id="@+id/purple_button_save"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
