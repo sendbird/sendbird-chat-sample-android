@@ -16,22 +16,12 @@ This code sample with UI components demonstrates how to freeze or unfreeze a gro
 
 ## How it works
 
-You can freeze or unfreeze a group channel by calling the `freeze()` and `unfreeze()` methods of the `GroupChannel` class. To freeze a channel, first, you need a `Operator` role in the channel. When a group channel is frozen, only the channel operators can send a message while other users can't. To unfreeze the channel, you also need the `Operator` role in the channel or in the application.
+You can freeze or unfreeze a group channel by calling the `freeze()` and `unfreeze()` methods of the `GroupChannel` class. 
+
+To freeze a channel, first, you need a `Operator` role in the channel. When a group channel is frozen, only the channel operators can send a message while other users can't. To unfreeze the channel, you also need an operator in the channel.
 
 ``` kotlin
 // GroupChannelChatActivity.kt
-private fun unfreezeChannel() {
-    currentGroupChannel?.unfreeze {
-        if (it != null) {
-            showToast("Unfreeze failed: ${it.message}")
-            return@unfreeze
-        }
-        showToast("Channel unfrozen")
-        setChannelTitle()
-        invalidateOptionsMenu()
-    }
-}
-
 private fun freezeChannel() {
     currentGroupChannel?.freeze {
         if (it != null) {
@@ -39,6 +29,18 @@ private fun freezeChannel() {
             return@freeze
         }
         showToast("Channel frozen")
+        setChannelTitle()
+        invalidateOptionsMenu()
+    }
+}
+
+private fun unfreezeChannel() {
+    currentGroupChannel?.unfreeze {
+        if (it != null) {
+            showToast("Unfreeze failed: ${it.message}")
+            return@unfreeze
+        }
+        showToast("Channel unfrozen")
         setChannelTitle()
         invalidateOptionsMenu()
     }
