@@ -22,6 +22,7 @@ To get a list of the current user's friends in the channel, call the `GroupChann
 
 ``` kotlin
 // ChatMemberListActivity.kt
+private fun getFriendsFromQuery() { 
 val query = SendbirdChat.createFriendListQuery(FriendListQueryParams())
 val users = mutableListOf<User>()
 fetchAllFriends(query, users) {
