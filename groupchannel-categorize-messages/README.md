@@ -16,7 +16,7 @@ This code sample with UI components demonstrates how to categorize messages in a
 
 ## How it works
 
-You can set a `customType` value in `string` to a message and use it as a filter when retrieving messages in a group channel. You can set the value when you send or update a message.
+You can set a `customType` value in `string` to a message in `GroupChannelChatActivity.kt`. This can be done either when sending or updating a message.
 
 ``` kotlin
 // GroupChannelChatActivity.kt
