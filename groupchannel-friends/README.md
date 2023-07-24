@@ -18,10 +18,13 @@ This code sample with UI components demonstrates how to add, retrieve, or remove
 
 In `ChatMemberListActivity.kt`, a channel member can get a list of their friends, mark another member as their friend, or even remove them from the friend list. 
 
-To get a list of the current user's friends in the channel, call the `GroupChannel.getFriends()` method. The user can add friends to the list by using `GroupChannel.addFriends()` method. When removing friends from the list, use the `GroupChannel.removeFriends()` method.
+To get a list of the current user's friends in the channel, create a list query through the `GroupChannel.createFriendListQuery()` method fisrt. Then `getFriendsFromQuery()` retrieves the list of channel members that the current user marked as a friend. 
+
+The user can add friends to the list by using `GroupChannel.addFriends()` method. When removing friends from the list, use the `GroupChannel.removeFriends()` method.
 
 ``` kotlin
 // ChatMemberListActivity.kt
+// Get a list of friends.
 private fun getFriendsFromQuery() { 
 val query = SendbirdChat.createFriendListQuery(FriendListQueryParams())
 val users = mutableListOf<User>()
@@ -42,6 +45,7 @@ val users = mutableListOf<User>()
     }
 }
 
+// Add a user as a friend to the current user's friend list.
 private fun addFriend(user: User) {
     SendbirdChat.addFriends(listOf(user.userId)) { _, e ->
         if (e != null) {
@@ -53,6 +57,7 @@ private fun addFriend(user: User) {
     }
 }
 
+// Remove a friend from the friend list.
 private fun deleteFriend(friend: User) {
     SendbirdChat.deleteFriend(friend.userId) handler@{ e ->
         if (e != null) {
