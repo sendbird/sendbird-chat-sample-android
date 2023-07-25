@@ -7,7 +7,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.sendbird.chat.sample.groupchannel.friends"
+        applicationId "com.sendbird.chat.sample.groupchannel.hide_archive"
         minSdk 26
         targetSdk 34
         versionCode 1
@@ -37,7 +37,7 @@ android {
             excludes += ['META-INF/kotlin-stdlib.kotlin_module', 'META-INF/okio.kotlin_module', 'META-INF/kotlin-stdlib-common.kotlin_module']
         }
     }
-    namespace 'com.sendbird.chat.sample.groupchannel.friends'
+    namespace 'com.sendbird.chat.sample.groupchannel.hide_archive'
 }
 
 dependencies {

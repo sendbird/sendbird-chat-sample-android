@@ -49,7 +49,7 @@
             android:exported="false"
             android:screenOrientation="fullSensor" />
         <activity
-            android:name="com.sendbird.chat.sample.groupchannel.friends.base.SplashActivity"
+            android:name="com.sendbird.chat.sample.groupchannel.hide_archive.base.SplashActivity"
             android:exported="true"
             android:screenOrientation="fullSensor"
             android:theme="@style/SplashTheme">

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.sendbird.chat.sample.groupchannel.friends.view.ChatChannelItemView
+    <com.sendbird.chat.sample.groupchannel.hide_archive.view.ChatChannelItemView
         android:id="@+id/chat_channel_list_item_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
