@@ -1,6 +1,6 @@
-# DND And Snooze in a group channel
+# Do Not Disturb or snooze mode in a group channel
 
-This code sample with UI components demonstrates how to use [Do Not Disturb (DND) or Snooze](https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/configure-push-notification-preferences) functionalities in a group channel on Sendbird Chat SDK for Android. While the DND mode mutes notifications from the SDK for a set period and repeats on a daily basis, snoozing will let you block notificatoins for a set period and does not repeat. 
+This code sample with UI components demonstrates how to use [Do Not Disturb (DND) or snooze](https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/configure-push-notification-preferences) functionalities in a group channel on Sendbird Chat SDK for Android. While the DND mode mutes notifications from the SDK for a set period and repeats on a daily basis, snoozing will let you block notificatoins for a set period and does not repeat. 
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ This code sample with UI components demonstrates how to use [Do Not Disturb (DND
 
 ## How it works
 
-Do Not Disturb (DND) and Snooze are one of the notification settings used to block notifications from a specific channel or a group of channels for a set period of time. 
+Do Not Disturb (DND) and snooze are one of the notification settings used to block notifications from a specific channel or a group of channels for a set period of time. 
 
 Set the duration for DND in `DNDFragmant.kt`.
 
