@@ -1,6 +1,6 @@
 # Categorize group channels
 
-This sample app demonstrates how to categorize group channels in Sendbird Chat SDK using `customType`. 
+This sample app demonstrates how to categorize group channels in Sendbird Chat SDK using `customType`. You can use the `customType` filter when getting a list of group channels.
 
 ## Requirements
 
