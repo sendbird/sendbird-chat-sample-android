@@ -1,8 +1,9 @@
 # Categorize messages in a group channel
 
-This sample with UI components demonstrates how to categorize messages in a group channel on Sendbird Chat SDK for Android.
+This code sample with UI components demonstrates how to categorize messages in a group channel on Sendbird Chat SDK for Android.
 
 ## Prerequisites
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
@@ -15,14 +16,11 @@ This sample with UI components demonstrates how to categorize messages in a grou
 
 ## How it works
 
-You can set a custom type to a message and filter messages by the custom type.
-The custom type is a string value that you can set to a message.
-You can set a custom type to a message when you send a message or update a message.
-You can filter messages by the custom type when you get messages from a channel.
+You can set a `customType` value in `string` to a message in `GroupChannelChatActivity.kt`. This can be done either when sending or updating a message.
 
-GroupChannelChatActivity.kt
 ``` kotlin
-// Update message to set custom type
+// GroupChannelChatActivity.kt
+// Update a message with a `customType` value.
 private fun updateMessageCustomType(message: BaseMessage) {
     when (message) {
         is FileMessage -> {
@@ -53,9 +51,11 @@ private fun updateMessageCustomType(message: BaseMessage) {
 }
 ```
 
-GroupChannelCategorizeMessagesActivity.kt
+Also, use the `customType` value as a filter when getting messages in a group channel.
+
 ``` kotlin
-// Search messages by custom type
+// GroupChannelCategorizeMessagesActivity.kt
+// Search messages by custom type.
 private fun getCategorizeMessages(channel: GroupChannel) {
     val params = PreviousMessageListQueryParams(
         customTypesFilter = listOf(
@@ -78,6 +78,9 @@ private fun getCategorizeMessages(channel: GroupChannel) {
 ```
 
 ## How to run
+
+Copy and paste the following code into Terminal or run it on an emulator to see what the sample looks like.
+
 ``` bash
 ./gradlew :app:installDebug
 adb shell am start -n "com.sendbird.chat.sample.groupchannel.categorizemessages/com.sendbird.chat.sample.groupchannel.categorizemessages.base.SplashActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER --splashscreen-show-icon
