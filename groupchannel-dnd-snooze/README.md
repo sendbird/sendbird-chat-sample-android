@@ -64,7 +64,7 @@ private fun cancelDND() {
 }
 ```
 
-You can also snooze notifications for a set period of time by setting its `startTs` and `endTs`.
+In `SnoozeFragment.kt`, snooze notifications for a set period of time by setting its `startTs` and `endTs`.
 
 ``` kotlin
 // SnoozeFragment.kt
