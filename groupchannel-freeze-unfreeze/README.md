@@ -1,8 +1,9 @@
-# Freeze and Unfreeze in a group channel
+# Freeze or unfreeze a group channel
 
-This sample with UI components demonstrates how to freeze and unfreeze in a group channel on Sendbird Chat SDK for Android.
+This code sample with UI components demonstrates how to freeze or unfreeze a group channel on Sendbird Chat SDK for Android. Freezing a group channel is part of moderation. When a channel is frozen, only the [operators](https://sendbird.com/docs/chat/v4/android/user/overview-user#2-user-types-3-operator) can send messages to the channel and users aren't allowed to chat.
 
 ## Prerequisites
+
 + Android Studio
   + Android Studio Electric Eel | 2022.1.1
 + Android SDK
@@ -14,26 +15,13 @@ This sample with UI components demonstrates how to freeze and unfreeze in a grou
     + android gradle plugin: 7.4.2
 
 ## How it works
-You can freeze and unfreeze a group channel by calling the `freeze()` and `unfreeze()` methods of the `GroupChannel` class.
-The `freeze()` method freezes a group channel, and the `unfreeze()` method unfreezes a group channel.
-When a group channel is frozen, users cannot send messages in the channel.
-To freeze a group channel, you need to have the `Operator` role in the channel.
-To unfreeze a group channel, you need to have the `Operator` role in the channel or the `Operator` role in the application.
 
-GroupChannelChatActivity.kt
+You can freeze or unfreeze a group channel in `GroupChannelChatActivity.kt` by calling the `freeze()` and `unfreeze()` methods of the `GroupChannel` class. 
+
+To freeze a channel, you need a `Operator` role in the channel. Therefore the current user will be assigned as an operator when creating a group channel in the `SelectUserActivity.kt` activity. When a group channel is frozen, only channel operator can send a message while other users can't. To unfreeze the channel, you also need the operator in the channel. To learn more about what operators can do, see [our documentation](https://sendbird.com/docs/chat/sdk/v4/android/user/overview-user#2-user-types-3-operator) on operators.
+
 ``` kotlin
-private fun unfreezeChannel() {
-    currentGroupChannel?.unfreeze {
-        if (it != null) {
-            showToast("Unfreeze failed: ${it.message}")
-            return@unfreeze
-        }
-        showToast("Channel unfrozen")
-        setChannelTitle()
-        invalidateOptionsMenu()
-    }
-}
-
+// GroupChannelChatActivity.kt
 private fun freezeChannel() {
     currentGroupChannel?.freeze {
         if (it != null) {
@@ -45,9 +33,24 @@ private fun freezeChannel() {
         invalidateOptionsMenu()
     }
 }
+
+private fun unfreezeChannel() {
+    currentGroupChannel?.unfreeze {
+        if (it != null) {
+            showToast("Unfreeze failed: ${it.message}")
+            return@unfreeze
+        }
+        showToast("Channel unfrozen")
+        setChannelTitle()
+        invalidateOptionsMenu()
+    }
+}
 ```
 
 ## How to run
+
+Copy and paste the following code into Terminal or run it on an emulator to see what the sample looks like.
+
 ``` bash
 ./gradlew :app:installDebug
 adb shell am start -n "com.sendbird.chat.sample.groupchannel.freeze/com.sendbird.chat.sample.groupchannel.freeze.base.SplashActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
