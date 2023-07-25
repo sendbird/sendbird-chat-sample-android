@@ -28,21 +28,14 @@ The user can add friends to the list by using `GroupChannel.addFriends()` method
 private fun getFriendsFromQuery() { 
 val query = SendbirdChat.createFriendListQuery(FriendListQueryParams())
 val users = mutableListOf<User>()
-  fetchAllFriends(query, users) { 
-    adapter.setFriends(users) 
-    if (showFriends) { 
-      adapter.submitList(users) 
-    } else { 
-      adapter.notifyDataSetChanged() 
+    fetchAllFriends(query, users) { 
+        adapter.setFriends(users) 
+        if (showFriends) { 
+            adapter.submitList(users) 
+        } else { 
+            adapter.notifyDataSetChanged() 
+        } 
     } 
-  } 
-}
-    adapter.setFriends(users)
-    if (showFriends) {
-      adapter.submitList(users)
-    } else {
-      adapter.notifyDataSetChanged()
-    }
 }
 
 // Add a user as a friend to the current user's friend list.
