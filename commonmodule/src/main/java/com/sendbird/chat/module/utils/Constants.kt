@@ -12,9 +12,4 @@ object Constants {
     const val CHANNEL_HANDLER_ID = "channel_handler_id"
 
     const val CONNECTION_HANDLER_ID = "connection_handler_id"
-
-    const val PERMISSION_REQUEST_CODE = 10001
-
-    const val DATA_TYPE_ONLY_IMAGE = "image/*"
-    const val DATA_TYPE_IMAGE_AND_VIDEO = "image/* video/*"
 }

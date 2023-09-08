@@ -1,11 +1,10 @@
 package com.sendbird.chat.module.ui.base
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.sendbird.android.SendbirdChat
@@ -20,14 +19,11 @@ class BaseUserInfoActivity : AppCompatActivity() {
     private var userNickname: String? = null
     private var profileUri: Uri? = null
 
-    private val startForResult =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
+    private val pickMedia =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             SendbirdChat.autoBackgroundDetection = true
-            if (data.resultCode == RESULT_OK) {
-                val uri = data.data?.data
-                profileUri = uri
-                binding.circularImageviewProfile.setImageUri(uri)
-            }
+            profileUri = uri
+            binding.circularImageviewProfile.setImageUri(uri)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +43,7 @@ class BaseUserInfoActivity : AppCompatActivity() {
 
         binding.circularImageviewEditProfile.setOnClickListener {
             SendbirdChat.autoBackgroundDetection = false
-            FileUtils.selectFile(Constants.DATA_TYPE_ONLY_IMAGE, startForResult, this)
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
         binding.purpleButtonSave.setOnClickListener {
             val nickname = binding.tagEdittextNickname.getText()
@@ -133,29 +129,4 @@ class BaseUserInfoActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            Constants.PERMISSION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    showToast(getString(R.string.permission_granted))
-                    SendbirdChat.autoBackgroundDetection = false
-                    FileUtils.selectFile(Constants.DATA_TYPE_ONLY_IMAGE, startForResult, this)
-                } else {
-                    if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                        requestPermissions(
-                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                            Constants.PERMISSION_REQUEST_CODE
-                        )
-                    } else {
-                        showToast(getString(R.string.permission_denied))
-                    }
-                }
-            }
-        }
-    }
-
 }

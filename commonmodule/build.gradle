@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         minSdk 26
@@ -42,6 +42,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
     implementation "com.google.android.material:material:$googleMaterialVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
+    implementation "androidx.activity:activity:$androidxCoreKtxVersion"
 
     //sendbird
     implementation "com.sendbird.sdk:sendbird-chat:$sendbirdVersion"

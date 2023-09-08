@@ -33,15 +33,16 @@ class BaseSplashActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         } else {
-            SendbirdChat.connect(userId) { _, e ->
-                if (e != null) {
-                    showToast("$e")
+            SendbirdChat.connect(userId) { user, e ->
+                if (user != null) {
+                    val intent = Intent("$packageName.MAIN")
+                    startActivity(intent)
+                } else {
+                    if (e != null) {
+                        showToast("$e")
+                    }
                     finish()
-                    return@connect
                 }
-                val intent = Intent("$packageName.MAIN")
-                startActivity(intent)
-                finish()
             }
         }
     }
