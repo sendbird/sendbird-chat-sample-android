@@ -1,12 +1,11 @@
 package com.sendbird.chat.sample.groupchannel.admin.ui.groupchannel
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +39,12 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private var messageCollection: MessageCollection? = null
     private var channelTSHashMap = ConcurrentHashMap<String, Long>()
     private var isCollectionInitialized = false
+
+    private val pickMedia =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            SendbirdChat.autoBackgroundDetection = true
+            uri?.let { sendFileMessage(it) }
+        }
 
     private val startForResultFile =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
@@ -86,11 +91,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
             override fun onFileMessageSend() {
                 SendbirdChat.autoBackgroundDetection = false
-                FileUtils.selectFile(
-                    Constants.DATA_TYPE_IMAGE_AND_VIDEO,
-                    startForResultFile,
-                    this@GroupChannelChatActivity
-                )
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }
         })
     }
@@ -597,33 +598,5 @@ class GroupChannelChatActivity : AppCompatActivity() {
             }
         }
 
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            Constants.PERMISSION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    showToast(getString(R.string.permission_granted))
-                    SendbirdChat.autoBackgroundDetection = false
-                    FileUtils.selectFile(
-                        Constants.DATA_TYPE_IMAGE_AND_VIDEO,
-                        startForResultFile,
-                        this
-                    )
-                } else {
-                    if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                        requestPermissions(
-                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                            Constants.PERMISSION_REQUEST_CODE
-                        )
-                    } else {
-                        showToast(getString(R.string.permission_denied))
-                    }
-                }
-            }
-        }
     }
 }

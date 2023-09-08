@@ -1,19 +1,11 @@
 package com.sendbird.chat.module.utils
 
-import android.Manifest
-import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
 import android.webkit.MimeTypeMap
-import androidx.activity.result.ActivityResultLauncher
-import androidx.core.app.ActivityCompat.requestPermissions
-import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.FileDescriptor
 import java.io.FileInputStream
@@ -21,57 +13,6 @@ import java.io.FileOutputStream
 
 
 object FileUtils {
-
-    fun selectFile(
-        type: String,
-        startForResult: ActivityResultLauncher<Intent>,
-        context: Context
-    ) {
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestStoragePermission(context)
-        } else {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, type)
-            startForResult.launch(intent)
-        }
-    }
-
-    fun selectFile(startForResult: ActivityResultLauncher<Intent>, context: Context) {
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestStoragePermission(context)
-        } else {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "*/*"
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
-            startForResult.launch(intent)
-        }
-    }
-
-    private fun requestStoragePermission(context: Context) {
-        context.showAlertDialog(
-            "Permission",
-            "Storage access permissions are required to upload/download files.",
-            "Accept",
-            "Cancel",
-            {
-                requestPermissions(
-                    context as Activity,
-                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    10001
-                )
-            },
-            {}
-        )
-    }
 
     data class FileResult(val file: File, val size: Int, val mime: String?, val name: String)
 

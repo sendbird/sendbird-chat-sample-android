@@ -1,5 +1,6 @@
 package com.sendbird.chat.sample.groupchannel.localcaching.ui.groupchannel
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import com.sendbird.chat.module.utils.equalDate
 import com.sendbird.chat.module.utils.equalTime
 import com.sendbird.chat.module.utils.toTime
 import com.sendbird.chat.sample.groupchannel.localcaching.databinding.*
+import java.util.logging.Logger
 
 class GroupChannelChatAdapter(
     private val longClickListener: OnItemLongClickListener,
@@ -395,6 +397,7 @@ class GroupChannelChatAdapter(
             showTime: Boolean
         ) {
             if (message.sendingStatus == SendingStatus.SUCCEEDED) {
+                Log.e("==", "url: ${message.url}, mime type: ${message.type}")
                 binding.chatBubbleImageSend.setImageUrl(message.url, message.plainUrl)
                 binding.progressImageSend.visibility = View.GONE
                 binding.chatImageErrorButton.visibility = View.GONE
@@ -411,7 +414,13 @@ class GroupChannelChatAdapter(
                     binding.textviewTime.visibility = View.GONE
                 }
             } else {
-                binding.chatBubbleImageSend.setImageFile(message.messageCreateParams?.file)
+                Log.e("==", "file: ${message.messageCreateParams?.file}, file url: ${message.messageCreateParams?.fileUrl}")
+                message.messageCreateParams?.file?.let {
+                    binding.chatBubbleImageSend.setImageFile(it)
+                } ?: message.messageCreateParams?.fileUrl?.let {
+                    binding.chatBubbleImageSend.setImageUrl(it, it)
+                }
+
                 binding.dateTagView.visibility = View.GONE
                 binding.textviewTime.visibility = View.GONE
                 if (message.sendingStatus == SendingStatus.PENDING) {
