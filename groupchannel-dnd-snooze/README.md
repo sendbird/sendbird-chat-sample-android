@@ -20,8 +20,8 @@ Do Not Disturb (DND) and snooze are part of the notification settings used to bl
 
 Set the duration for DND in `DNDFragmant.kt`.
 
+[DNDFragment.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/dndsnooze/time/DNDFragment.kt#L33-L92)
 ``` kotlin
-// DNDFragment.kt
 private fun checkForDND() {
     SendbirdChat.getDoNotDisturb { isDndOn, startHour, startMin, endHour, endMin, timezone, e ->
         if (e != null) {
@@ -66,8 +66,8 @@ private fun cancelDND() {
 
 In `SnoozeFragment.kt`, snooze notifications for a set period of time by setting its `startTs` and `endTs`.
 
+[SnoozeFragment.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/dndsnooze/time/SnoozeFragment.kt#L33-L101)
 ``` kotlin
-// SnoozeFragment.kt
 private fun checkForSnooze() {
     SendbirdChat.getSnoozePeriod { isSnoozeOn, startTs, endTs, e ->
         if (e != null) {

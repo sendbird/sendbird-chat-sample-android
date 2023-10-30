@@ -30,7 +30,7 @@ If the current user is the operator, the operator role cannot be changed.
 If the current user is not the operator, the operator role can be changed.
 And after the operator role is changed, the `refreshMembers()` method is called to refresh the member list.
 
-
+[ChatMemberListActivity.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/addremoveoperators/user/ChatMemberListActivity.kt#L56-L65)
 ``` kotlin
 private fun initRecyclerView() {
     // Create an adapter about change the operator status of the member

@@ -18,8 +18,8 @@ This code sample with UI components demonstrates how to cancel an in-progress fi
 
 You can cancel an in-progress file upload in a group channel by calling the `cancelFileMessageUpload` method of the `GroupChannel` class. This can be done in  `GroupChannelChatActivity.kt`.
 
+[GroupChannelChatActivity.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/file/groupchannel/GroupChannelChatActivity.kt#L175-L183)
 ``` kotlin
-// GroupChannelChatActivity.kt
 private fun cancelSendingFile() {
     val fileMessage = fileMessage ?: return
     val channel = currentGroupChannel ?: return

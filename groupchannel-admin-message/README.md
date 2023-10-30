@@ -34,8 +34,8 @@ private fun initRecyclerView() {
 
 `GroupChannelChatAdapter` operates as a `RecyclerView` adapter. It creates a distinct view for each message type and binds the message data to the corresponding view. This adapter is designed to handle [various types of messages](https://sendbird.com/docs/chat/v3/platform-api/message/message-overview#2-message-types), including text messages, file messages, and admin messages. Among these, admin messages are handled by the `GroupChatAdminViewHolder` through the `onCreateViewHolder` method. By using different `ViewHolders` by message type, it can dynamically apply the appropriate layout for each message type.
 
+[GroupChannelChatAdapter.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/adminmessage/groupchannel/GroupChannelChatAdapter.kt#L95-L101)
 ``` kotlin
-// GroupChannelChatAdapter.kt
 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
   when (viewType) {
     ..

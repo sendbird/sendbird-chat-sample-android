@@ -22,37 +22,8 @@ In the context menu created by the `createMenuForMember()` function, you can fin
 
 If you select "Unban" from the context menu, the `unbanUser()` function is called. This function uses the `GroupChannel.unbanUser()` method from the SDK to lift the ban from the selected user. If the operation is successful, it refreshes the list to show the current state of active users.
 
+[ChatMemberListActivity.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/ban/user/ChatMemberListActivity.kt#L100-L125)
 ```kotlin
-private fun initRecyclerView() {
-  // Create an adapter when a user clicks on a channel member.
-  // Then a menu shows items to ban or unban the member.
-  adapter = ChatMemberListAdapter { member, view, _ ->
-    createMenuForMember(member, view)
-  }
-  ...
-}
-
-// Create a menu with a long-tab on a channel member.
-// When a user clicks on one of the menu items,
-// they can ban or unban the member by calling GroupChannel.banUser() or GroupChannel.unbanUser().
-private fun createMenuForMember(member: User, view: View) {
-    view.setOnCreateContextMenuListener { contextMenu, _, _ ->
-        if (areBannedUsersDisplayed) {
-            val menu = contextMenu.add(Menu.NONE, 0, 0, "UnBan")
-            menu.setOnMenuItemClickListener {
-                unbanUser(member)
-                return@setOnMenuItemClickListener true
-            }
-        } else {
-            val menu = contextMenu.add(Menu.NONE, 0, 0, "Ban")
-            menu.setOnMenuItemClickListener {
-                banUser(member)
-                return@setOnMenuItemClickListener true
-            }
-        }
-    }
-}
-
 // Ban the user for a set period of time.
 private fun banUser(member: User, periodToBan: Int = -1) {
     val groupChannel = currentChannel ?: return

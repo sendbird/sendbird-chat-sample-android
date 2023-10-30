@@ -21,9 +21,8 @@ In `GroupChannelListFragment.kt`, use the `GroupChannel.hide(hidePreviousMessage
 
 You can also use the `HiddenState` value as a filter when creating a channel list view with [`GroupChannelCollection`](https://sendbird.com/docs/chat/v4/android/local-caching/using-group-channel-collection/group-channel-collection). First, create a `groupChannelCollection` instance and determine which group channels to include in the collection using the `HiddenChannelFilter` filter. Then, set the filter to `hiddenChannelFilter` in `GroupChannelListQueryParams` to create a group channel list query. 
 
-
+[GroupChannelListFragment.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/hide_archive/groupchannel/GroupChannelListFragment.kt#L155-L217)
 ``` kotlin
-// GroupChannelListFragment.kt
 private fun createCollection() {
     var filter = HiddenChannelFilter.UNHIDDEN
     if(showingMode == "ARCHIVED") {

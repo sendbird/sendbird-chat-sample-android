@@ -18,8 +18,8 @@ This code sample with UI components demonstrates how to categorize messages in a
 
 You can set a `customType` value in `string` to a message in `GroupChannelChatActivity.kt`. This can be done either when sending or updating a message.
 
+[GroupChannelChatActivity.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/categorizemessages/groupchannel/GroupChannelChatActivity.kt#L311-L339)
 ``` kotlin
-// GroupChannelChatActivity.kt
 // Update a message with a `customType` value.
 private fun updateMessageCustomType(message: BaseMessage) {
     when (message) {
@@ -53,8 +53,8 @@ private fun updateMessageCustomType(message: BaseMessage) {
 
 Also, use the `customType` value as a filter when getting messages in a group channel.
 
+[GroupChannelCategorizeMessagesActivity.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/categorizemessages/categorize/GroupChannelCategorizeMessagesActivity.kt#L74-L93)
 ``` kotlin
-// GroupChannelCategorizeMessagesActivity.kt
 // Search messages by custom type.
 private fun getCategorizeMessages(channel: GroupChannel) {
     val params = PreviousMessageListQueryParams(

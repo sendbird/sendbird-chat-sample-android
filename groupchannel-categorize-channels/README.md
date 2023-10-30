@@ -18,8 +18,8 @@ This sample app demonstrates how to categorize group channels in Sendbird Chat S
 
 In Sendbird Chat SDK, group channels can have `customType`, which can be set in `GroupChannelCreateParams`. The custom type is a string value that you can use to categorize channels.
 
+[SelectUserActivity.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/categorizechannels/user/SelectUserActivity.kt#L131-L152)
 ``` kotlin
-// SelectUserActivity.kt
 private fun createChannel() {
   ...
     val params = GroupChannelCreateParams()
@@ -50,8 +50,8 @@ private fun createChannel() {
 
 Then, you can use the custom type as a filter in `GroupChannelListQuery` when you retrieve a list of channels. Pass the `listQuery` to `GroupChannelCollectionCreateParams` to apply it to the group channel collection.
 
+[GroupChannelListFragment.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/categorizechannels/groupchannel/GroupChannelListFragment.kt#L91-L129)
 ``` kotlin
-// GroupChannelListFragment.kt
 private fun createCollection() {
     // Create a GroupChannelListQuery instance with GroupChannelListQueryParams.
     // Set customTypesFilter to retrieve only the channels with the specified custom types.

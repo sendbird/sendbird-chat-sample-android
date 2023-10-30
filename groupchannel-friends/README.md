@@ -22,8 +22,8 @@ To get a list of the current user's friends in the channel, create a list query 
 
 The user can add friends to the list by using `GroupChannel.addFriends()` method. When removing friends from the list, use the `GroupChannel.removeFriends()` method.
 
+[ChatMemberListActivity.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/friends/user/ChatMemberListActivity.kt#L80-L164)
 ``` kotlin
-// ChatMemberListActivity.kt
 // Get a list of friends.
 private fun getFriendsFromQuery() { 
 val query = SendbirdChat.createFriendListQuery(FriendListQueryParams())
