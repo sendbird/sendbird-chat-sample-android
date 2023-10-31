@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
@@ -153,6 +154,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }, {
             if (it.sendingStatus == SendingStatus.PENDING) {
                 cancelSendingFile()
+                showToast("File upload canceled")
             }
         })
         binding.recyclerviewChat.itemAnimator = null
@@ -481,6 +483,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 mimeType = fileInfo.mime
             }
             recyclerObserver.scrollToBottom(true)
+            showToast("File upload started")
             fileMessage = channel.sendFileMessage(params, object : FileMessageWithProgressHandler {
                 override fun onResult(message: FileMessage?, e: SendbirdException?) {
                     e?.printStackTrace()
@@ -493,7 +496,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     totalBytesToSend: Int
                 ) {
                     val percent = (totalBytesSent * 100) / totalBytesToSend
-                    showToast("File progress: $percent")
+                    Log.d("FileMessageWithProgressHandler", "percent: $percent")
                 }
             })
             if (collection.hasNext) {
