@@ -2,6 +2,8 @@
 
 This sample app demonstrates how to categorize group channels in Sendbird Chat SDK using `customType`. You can use the `customType` filter when getting a list of group channels.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/bb279bec-e98f-4983-b059-d8f22f0e97a1)
+
 ## Requirements
 
 + Android Studio
