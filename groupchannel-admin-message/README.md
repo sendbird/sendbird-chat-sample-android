@@ -2,6 +2,9 @@
 
 This sample with UI components demonstrates how to handle [Admin messages](https://sendbird.com/docs/chat/v3/platform-api/message/message-overview#2-message-types) in a group channel on Sendbird Chat SDK for Android. Admin messages can be sent through [Sendbird Dashboard](https://dashboard.sendbird.com) or a [Platform API request](https://sendbird.com/docs/chat/v3/platform-api/message/messaging-basics/send-a-message#1-send-a-message), not on the SDK. 
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/197a4ddb-ba78-4b86-82ab-87527721fbff)
+
+
 ## Requirements
 
 + Android Studio
