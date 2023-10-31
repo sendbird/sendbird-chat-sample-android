@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to categorize messages in a group channel using `customType` on Sendbird Chat SDK for Android. You can use the `customType` value as a filter when getting messages.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/8814a699-d7c2-4f33-9b9e-0470aa093ebf)
+
 ## Prerequisites
 
 + Android Studio
