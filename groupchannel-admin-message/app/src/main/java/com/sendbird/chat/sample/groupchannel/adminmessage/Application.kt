@@ -11,7 +11,7 @@ import com.sendbird.android.params.InitParams
 import com.sendbird.chat.sample.groupchannel.adminmessage.util.SharedPreferenceUtils
 import com.sendbird.chat.sample.groupchannel.adminmessage.util.changeValue
 
-const val SENDBIRD_APP_ID = "DE295D7F-DCE0-4D86-8F22-D551FD00ADCC" // US-1 Demo
+const val SENDBIRD_APP_ID = "43A36A3F-6248-4CDE-84F8-DC91436DECF8" // US-1 Demo
 
 open class BaseApplication : Application() {
     protected val initMutableLiveData: MutableLiveData<Boolean> =
