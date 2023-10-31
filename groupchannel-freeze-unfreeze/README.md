@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to freeze or unfreeze a group channel on Sendbird Chat SDK for Android. Freezing a group channel is part of moderation. When a channel is frozen, only the [operators](https://sendbird.com/docs/chat/v4/android/user/overview-user#2-user-types-3-operator) can send messages to the channel and users aren't allowed to chat.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/f0fd3a91-0140-4131-bb52-ec9dfb6c34c1)
+
 ## Prerequisites
 
 + Android Studio
