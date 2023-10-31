@@ -81,7 +81,7 @@ class SnoozeFragment : DialogFragment() {
                 showToast("Failed to do operation")
                 return@setSnoozePeriod
             }
-            showToast("DND setup")
+            showToast("Snooze setup")
             dismiss()
         }
 
