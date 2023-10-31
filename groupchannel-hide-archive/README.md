@@ -3,6 +3,8 @@
 This code sample with UI components demonstrates how to hide a group channel on Sendbird Chat SDK for Android. The SDK provides an additional set of functionalities such as unhide, auto-unhide, 
 and archive. To learn more, see [our documentation](https://sendbird.com/docs/chat/v4/android/channel/managing-channels/hide-or-archive-a-group-channel#1-hide-or-archive-a-group-channel) on the feature.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/307918c0-1bdf-413e-9dc9-bd5870aefd61)
+
 ## Prerequisites
 
 + Android Studio
