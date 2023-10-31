@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to add, retrieve, or remove friends in a group channel on Sendbird Chat SDK for Android. In a group channel, the `friend` functionality serves as a tool for the current user to mark other channel members as their favorite.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/54d130ce-bc61-4443-bc24-e8f47c682ff4)
+
 ## Prerequisites
 
 + Android Studio
