@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="hint" format="reference|string" />
+    <attr name="text" format="reference|string" />
+
+    <declare-styleable name="TagEditText">
+        <attr name="android:inputType" />
+        <attr name="text" />
+        <attr name="hint" />
+    </declare-styleable>
+
+    <declare-styleable name="CircularImageView">
+        <attr name="android:src" />
+        <attr name="image_padding" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="ChatChannelItemView">
+        <attr name="title" format="reference|string" />
+        <attr name="contents" format="reference|string" />
+    </declare-styleable>
+
+    <declare-styleable name="ChatInputView">
+        <attr name="button_text" format="reference|string" />
+        <attr name="hint" />
+    </declare-styleable>
+
+    <declare-styleable name="ChatBubbleSendView">
+        <attr name="text" />
+    </declare-styleable>
+
+    <declare-styleable name="ChatBubbleImageSendView">
+        <attr name="android:src" />
+    </declare-styleable>
+
+    <declare-styleable name="ChatBubbleReceiveView">
+        <attr name="text" />
+    </declare-styleable>
+
+    <declare-styleable name="ChatBubbleAdminView">
+        <attr name="text" />
+    </declare-styleable>
+
+    <declare-styleable name="ChatBubbleImageReceiveView">
+        <attr name="android:src" />
+    </declare-styleable>
+
+    <declare-styleable name="PurpleButton">
+        <attr name="text" />
+    </declare-styleable>
+
+    <declare-styleable name="AddParticipantView" />
+
+    <declare-styleable name="ChatErrorButton" />
+
+    <declare-styleable name="DateTagView" />
+
+</resources>

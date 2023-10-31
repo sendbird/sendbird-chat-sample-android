@@ -1,177 +1,42 @@
-# Sendbird Chat sample for Android
+# Sendbird Chat SDK samples for Android
 
-## Overview
+This repository contains code samples in Kotlin, showcasing the key functionalities provided by Sendbird Chat SDK for Android. Each sample has a dedicated readme file briefing how the feature works on the code level. To learn more, see our [documentation for Android](https://sendbird.com/docs/chat/v4/android/overview).
 
-This repository provides feature-level Chat samples with Kotlin to demonstrate how to use the [Sendbird Chat SDK](https://sendbird.com/docs/chat).
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/cbdf802a-d0ee-4576-a0d5-6f92a1a3fce0)
 
-## 🔒 Security tip
-When a new Sendbird application is created in the dashboard the default security settings are set permissive to simplify running samples and implementing your first code.
+## Prerequisites
 
-Before launching make sure to review the security tab under ⚙️ Settings -> Security, and set Access token permission to Read Only or Disabled so that unauthenticated users can not login as someone else. And review the Access Control lists. Most apps will want to disable "Allow retrieving user list" as that could expose usage numbers and other information.
-
-## Requirements
-
-Android Studio 2.0+
-
-## Running the app
-
-Open this project in Android Studio and select 'run configurations' to view a dropdown of feature-level Chat samples to choose from.
-
-Once a sample is chosen, create a device and run the app on an Android device or Android emulator.
-
-### Language
-
-+ Kotlin
-
-### Version
-
++ Android Studio
+  + Android Studio Electric Eel | 2022.1.1
 + Android SDK
-    + compileSdk: 32
+    + compileSdk: 34
     + minSdk: 26
-    + targetSdk: 32
+    + targetSdk: 34
 + Gradle Version
-    + gradle: 7.2
-    + android gradle plugin: 4.2.0
+    + gradle: 7.5
+    + android gradle plugin: 7.4.2
 
-## Project structure
+## Sendbird Application ID
 
-```
-.
-├── commonmodule
-│   ├── ui
-│   │   ├── CustomViews
-│   │   └── base
-│   │        ├── BaseApplication
-│   │        ├── BaseActivity
-│   │        └── BaseFragment
-│   └── utils
-│       ├── Utils
-│       └── Extension
-├── groupchannel-basic
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-typingindicator
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-readnessage
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-unreadmessages
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-onlinemembers
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-membersandoperators
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-banned-and-muted-users
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-groupchannel-add-remove-operators
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-mention-members
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-report-user-message-channel
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-freeze-unfreeze
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-mute-user
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-admin-message
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-ban-unban-user
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-mark-message-read
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-push-notifications
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── groupchannel-update-message-operator
-│   ├── groupchannel
-│   ├── main
-│   └── user
-├── openchannel-basic
-│   ├── openchannel
-│   └── main
-├── openchannel-user-online
-│   ├── openchannel
-│   └── main
-├── openchannel-update-message
-│   ├── openchannel
-│   └── main
-├── openchannel-delete-message
-│   ├── openchannel
-│   └── main
-├── openchannel-copy-message
-│   ├── openchannel
-│   └── main
-├── openchannel-mention-user
-│   ├── openchannel
-│   └── main
-├── openchannel-report-message-user-channel
-│   ├── openchannel
-│   └── main
-├── openchannel-admin-message
-│   ├── openchannel
-│   └── main
-└── openchannel-feature-a
-...
+To streamline the implementation process, a sample Application ID has been provided for codes in this repository. However, you need a unique Sendbird Application ID to properly initialize the Chat SDK and enable its features in your production application. Sendbird Application ID can be found in the Overview page on [Sendbird Dashboard](https://dashbaord.sendbird.com). To learn more about how and when to use the Application ID, see our documentation on [initialization](https://sendbird.com/docs/chat/v4/android/getting-started/send-first-message#2-get-started-3-step-3-initialize-the-chat-sdk).
 
-```
+## Code samples
 
-### [CommonModule](https://github.com/sendbird/sendbird-chat-sample-android/tree/main/commonmodule)
+Refer to the following list of code samples and their readme files.
 
-- [ui](https://github.com/sendbird/sendbird-chat-sample-android/tree/main/commonmodule/src/main/java/com/sendbird/chat/module/ui)
-    - Created for frequently used views.
-    - Created activities commonly used such as Sign-Up, Splash, and UserInfo.
-- [utils](https://github.com/sendbird/examples-chat-ios/tree/main/CommonModule/CommonModule/View)
-    - Commonly used functions in Basic, Feature App
+- [Group Channel Add Remove Operators](./groupchannel-add-remove-operators/README.md)
+- [Group Channel Admin Message](./groupchannel-admin-message/README.md)
+- [Group Channel Ban Unban User](./groupchannel-ban-unban-user/README.md)
+- [Group Channel Categorize Channels](./groupchannel-categorize-channels/README.md)
+- [Group Channel Categorize Messages](./groupchannel-categorize-messages/README.md)
+- [Group Channel Dnd Snooze](./groupchannel-dnd-snooze/README.md)
+- [Group Channel File Progress Cancel](./groupchannel-file-progress-cancel/README.md)
+- [Group Channel Freeze Unfreeze](./groupchannel-freeze-unfreeze/README.md)
+- [Group Channel Friends](./groupchannel-friends/README.md)
+- [Group Channel Hide Archive](./groupchannel-hide-archive/README.md)
 
-### BasicSample
+## Security
 
-- groupchannel-basic
-- openchannel-basic
+When a new Sendbird application is created in [Sendbird Dashboard](https://dashbaord.sendbird.com), the default security settings are set permissive to simplify running samples and implementing your first code.
 
-### FeatureSample
-
-- groupchannel-typingindicator
-- groupchannel-unreadmessages
-- groupchannel-readmessage
-- groupchannel-onlinemembers
-- groupchannel-membersandoperators
-- groupchannel-banned-and-muted-users
-- groupchannel-user-online
-- groupchannel-mention-members
-- openchannel-user-online
-- openchannel-delete-message
-- openchannel-update-message
-- openchannel-copy-message
-...
-
-## Considerations in real world app
- - In this sample repo users are connecting to sendbird using a user ID (Sendbird Dashboard --> Security --> Read & Write). Read & Write is not secure and will create a new user automatically from the SDK if none exists. In production be sure to change the Sendbird Dashboard security settings to Deny login, and [authenticate users](https://sendbird.com/docs/chat/v4/android/guides/authentication#2-connect-to-sendbird-server-with-a-user-id-and-a-token) with a Sendbird generated Session Token.
+When launching a production application, make sure to review the security settings beforehand in **Settings > Application > Security** on the dashbaord and set **Access token permission** to **Deny login** because **Read & Write** is not secure and will allow a new user to be automatically created in the SDK if none exists. Ensure that users are authenticated with a Sendbird generated Session Token. Also review the **Access Control** lists. Most apps will want to disable **"Allow retrieving user list"** as that could expose sensitivie information such as usage numbers.
