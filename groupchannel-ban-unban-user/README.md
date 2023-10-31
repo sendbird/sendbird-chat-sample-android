@@ -2,6 +2,8 @@
 
 This sample app demonstrates how to ban or unban user in a group channel on Sendbird Chat SDK for Android.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/b8fdddf4-8009-49bd-8500-704c7d8414cf)
+
 ## Requirements
 
 + Android Studio
