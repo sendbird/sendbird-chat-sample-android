@@ -120,6 +120,7 @@ class SelectUserActivity : AppCompatActivity() {
         val params = GroupChannelCreateParams()
             .apply {
                 userIds = adapter.selectUserIdSet.toList()
+                operators = SendbirdChat.currentUser?.let { listOf(it) } ?: emptyList()
             }
         GroupChannel.createChannel(params) createChannelLabel@{ groupChannel, e ->
             if (e != null) {
