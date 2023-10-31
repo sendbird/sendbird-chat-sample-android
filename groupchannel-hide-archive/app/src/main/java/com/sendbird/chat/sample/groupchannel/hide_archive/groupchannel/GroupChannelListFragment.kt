@@ -102,26 +102,35 @@ class GroupChannelListFragment :
             startActivity(intent)
         }) { view, groupChannel ->
             view.setOnCreateContextMenuListener { contextMenu, _, _ ->
-                if (groupChannel.hiddenState == HiddenState.HIDDEN_PREVENT_AUTO_UNHIDE) {
-                    val unArchive = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.unarchive))
-                    unArchive.setOnMenuItemClickListener {
-                        unhideChannel(channel = groupChannel)
-                        return@setOnMenuItemClickListener true
+                when(groupChannel.hiddenState){
+                    HiddenState.HIDDEN_PREVENT_AUTO_UNHIDE -> {
+                        val unArchive = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.unarchive))
+                        unArchive.setOnMenuItemClickListener {
+                            unhideChannel(channel = groupChannel)
+                            return@setOnMenuItemClickListener true
+                        }
                     }
-                } else {
-                    val hideMenu = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.hide))
-                    hideMenu.setOnMenuItemClickListener {
-                        hideOrArchiveChannel(channel = groupChannel, hideChannel = true)
-                        return@setOnMenuItemClickListener true
+                    HiddenState.HIDDEN_ALLOW_AUTO_UNHIDE -> {
+                        val unArchive = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.unhide))
+                        unArchive.setOnMenuItemClickListener {
+                            unhideChannel(channel = groupChannel)
+                            return@setOnMenuItemClickListener true
+                        }
                     }
-                    val archiveChannel =
-                        contextMenu.add(Menu.NONE, 1, 1, getString(R.string.archive))
-                    archiveChannel.setOnMenuItemClickListener {
-                        hideOrArchiveChannel(channel = groupChannel, hideChannel = false)
-                        return@setOnMenuItemClickListener true
+                    else -> {
+                        val hideMenu = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.hide))
+                        hideMenu.setOnMenuItemClickListener {
+                            hideOrArchiveChannel(channel = groupChannel, hideChannel = true)
+                            return@setOnMenuItemClickListener true
+                        }
+                        val archiveChannel =
+                            contextMenu.add(Menu.NONE, 1, 1, getString(R.string.archive))
+                        archiveChannel.setOnMenuItemClickListener {
+                            hideOrArchiveChannel(channel = groupChannel, hideChannel = false)
+                            return@setOnMenuItemClickListener true
+                        }
                     }
                 }
-
             }
         }
         binding.recyclerviewChannel.layoutManager = linearLayoutManager

@@ -51,4 +51,5 @@
     <string name="hidden_channel">Hidden channels</string>
     <string name="normal_channel">Normal channels</string>
     <string name="unarchive">Unarchive</string>
+    <string name="unhide">Unhide</string>
 </resources>

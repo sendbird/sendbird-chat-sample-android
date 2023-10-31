@@ -21,8 +21,42 @@ In `GroupChannelListFragment.kt`, use the `GroupChannel.hide(hidePreviousMessage
 
 You can also use the `HiddenState` value as a filter when creating a channel list view with [`GroupChannelCollection`](https://sendbird.com/docs/chat/v4/android/local-caching/using-group-channel-collection/group-channel-collection). First, create a `groupChannelCollection` instance and determine which group channels to include in the collection using the `HiddenChannelFilter` filter. Then, set the filter to `hiddenChannelFilter` in `GroupChannelListQueryParams` to create a group channel list query. 
 
-[GroupChannelListFragment.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/hide_archive/groupchannel/GroupChannelListFragment.kt#L155-L217)
+[GroupChannelListFragment.kt](./app/src/main/java/com/sendbird/chat/sample/groupchannel/hide_archive/groupchannel/GroupChannelListFragment.kt#L97-L217)
 ``` kotlin
+view.setOnCreateContextMenuListener { contextMenu, _, _ ->
+    when(groupChannel.hiddenState){
+        HiddenState.HIDDEN_PREVENT_AUTO_UNHIDE -> {
+            val unArchive = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.unarchive))
+            unArchive.setOnMenuItemClickListener {
+                unhideChannel(channel = groupChannel)
+                return@setOnMenuItemClickListener true
+            }
+        }
+        HiddenState.HIDDEN_ALLOW_AUTO_UNHIDE -> {
+            val unArchive = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.unhide))
+            unArchive.setOnMenuItemClickListener {
+                unhideChannel(channel = groupChannel)
+                return@setOnMenuItemClickListener true
+            }
+        }
+        else -> {
+            val hideMenu = contextMenu.add(Menu.NONE, 0, 0, getString(R.string.hide))
+            hideMenu.setOnMenuItemClickListener {
+                hideOrArchiveChannel(channel = groupChannel, hideChannel = true)
+                return@setOnMenuItemClickListener true
+            }
+            val archiveChannel =
+                contextMenu.add(Menu.NONE, 1, 1, getString(R.string.archive))
+            archiveChannel.setOnMenuItemClickListener {
+                hideOrArchiveChannel(channel = groupChannel, hideChannel = false)
+                return@setOnMenuItemClickListener true
+            }
+        }
+    }
+}
+
+...
+
 private fun createCollection() {
     var filter = HiddenChannelFilter.UNHIDDEN
     if(showingMode == "ARCHIVED") {
