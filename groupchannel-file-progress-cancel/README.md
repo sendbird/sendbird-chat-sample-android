@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to cancel an in-progress file upload in a group channel on Sendbird Chat SDK for Android.
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/bc1e0dc3-d57f-4bd1-881d-cc5b6215975e)
+
 ## Prerequisites
 
 + Android Studio
