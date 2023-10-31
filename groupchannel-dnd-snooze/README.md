@@ -2,6 +2,8 @@
 
 This code sample with UI components demonstrates how to use [Do Not Disturb (DND) and snooze](https://sendbird.com/docs/chat/sdk/v4/android/push-notifications/managing-push-notifications/configure-push-notification-preferences) functionalities in a group channel on Sendbird Chat SDK for Android. While the DND mode mutes notifications from the SDK for a set period and repeats on a daily basis, snoozing blocks notificatoins for a set period and does not repeat. 
 
+![final_output](https://github.com/sendbird/sendbird-chat-sample-android/assets/104121286/a6214c27-610d-4ae7-b201-f734c053339c)
+
 ## Prerequisites
 
 + Android Studio
