@@ -19,8 +19,8 @@ import com.sendbird.android.collection.MessageCollection
 import com.sendbird.android.collection.MessageCollectionInitPolicy
 import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.handler.MessageCollectionHandler
+import com.sendbird.android.ktx.MessageCollectionInitResult
 import com.sendbird.android.ktx.SendbirdResult
-import com.sendbird.android.ktx.extension.collection.MessageCollectionInitResult
 import com.sendbird.android.ktx.extension.collection.initialize
 import com.sendbird.android.ktx.extension.collection.loadNext
 import com.sendbird.android.ktx.extension.collection.loadPrevious
@@ -238,7 +238,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 .onEach {
                     when (val result = it.result) {
                         is SendbirdResult.Success -> {
-                            if (it is MessageCollectionInitResult.CacheResult) {
+                            if (it is MessageCollectionInitResult.CachedResult) {
                                 adapter.changeMessages(result.value)
                                 adapter.addPendingMessages(this@apply.pendingMessages)
                             } else {
