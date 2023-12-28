@@ -3,6 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        mavenLocal()
     }
 }
 dependencyResolutionManagement {
@@ -12,6 +13,7 @@ dependencyResolutionManagement {
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
         maven { url "https://repo.sendbird.com/public/maven" }
+        mavenLocal()
     }
 }
 
@@ -77,3 +79,4 @@ include ':groupchannel-scheduled-message'
 include ':groupchannel-polls'
 include ':groupchannel-pinnedmessage'
 include ':commonmodule'
+include ':groupchannel-local-caching-ktx'

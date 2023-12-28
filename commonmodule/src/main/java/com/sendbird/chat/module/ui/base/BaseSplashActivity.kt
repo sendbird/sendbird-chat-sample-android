@@ -9,7 +9,7 @@ import com.sendbird.android.SendbirdChat
 import com.sendbird.chat.module.utils.SharedPreferenceUtils
 import com.sendbird.chat.module.utils.showToast
 
-class BaseSplashActivity : AppCompatActivity() {
+open class BaseSplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +26,7 @@ class BaseSplashActivity : AppCompatActivity() {
         }, 1000)
     }
 
-    private fun checkUserId() {
+    open fun checkUserId() {
         val userId = SharedPreferenceUtils.userId
         if (userId.isNullOrBlank()) {
             val intent = Intent(this, BaseSignUpActivity::class.java)

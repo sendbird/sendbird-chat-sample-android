@@ -1,19 +1,19 @@
 plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
     compileSdk 32
 
     defaultConfig {
+        applicationId "com.sendbird.chat.sample.groupchannel.localcaching"
         minSdk 26
         targetSdk 32
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -29,11 +29,13 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    viewBinding {
-        enabled = true
-    }
     buildFeatures {
         viewBinding true
+    }
+    packagingOptions {
+        exclude 'META-INF/kotlin-stdlib.kotlin_module'
+        exclude 'META-INF/okio.kotlin_module'
+        exclude 'META-INF/kotlin-stdlib-common.kotlin_module'
     }
 }
 
@@ -44,13 +46,20 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
 
     //sendbird
-    //implementation "com.sendbird.sdk:sendbird-chat:$sendbirdVersion"
     implementation "com.sendbird.sdk:sendbird-chat-local:$sendbirdVersion"
+    implementation ("com.sendbird.sdk:sendbird-chat-ktx-local:1.0.0-beta")
+    //
+
+    //fragment
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     //
 
     //Coil
-    api "io.coil-kt:coil:$coilVersion"
+    implementation "io.coil-kt:coil:$coilVersion"
     //
+
+    implementation "androidx.legacy:legacy-support-v4:$legacySupportVersion"
+    implementation project(path: ':commonmodule')
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
