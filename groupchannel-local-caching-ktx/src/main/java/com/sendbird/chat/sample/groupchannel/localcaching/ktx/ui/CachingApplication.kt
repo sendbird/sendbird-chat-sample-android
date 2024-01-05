@@ -9,6 +9,7 @@ import com.sendbird.chat.module.ui.base.BaseApplication
 import com.sendbird.chat.module.ui.base.SENDBIRD_APP_ID
 import com.sendbird.chat.module.utils.changeValue
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -25,10 +26,9 @@ class CachingApplication : BaseApplication() {
                     is InitResult.Success -> {
                         initMutableLiveData.changeValue(true)
                     }
-                    is InitResult.Failed -> {
-                        initMutableLiveData.changeValue(true)
-                    }
                 }
+            }.catch {
+                initMutableLiveData.changeValue(true)
             }.launchIn(MainScope())
     }
 }

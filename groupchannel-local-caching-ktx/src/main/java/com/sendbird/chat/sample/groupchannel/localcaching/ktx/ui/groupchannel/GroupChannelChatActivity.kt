@@ -20,7 +20,17 @@ import com.sendbird.android.collection.MessageCollectionInitPolicy
 import com.sendbird.android.collection.MessageContext
 import com.sendbird.android.handler.MessageCollectionHandler
 import com.sendbird.android.ktx.MessageCollectionInitResult
-import com.sendbird.android.ktx.SendbirdResult
+import com.sendbird.android.ktx.extension.channel.delete
+import com.sendbird.android.ktx.extension.channel.deleteMessage
+import com.sendbird.android.ktx.extension.channel.getChannel
+import com.sendbird.android.ktx.extension.channel.invite
+import com.sendbird.android.ktx.extension.channel.leave
+import com.sendbird.android.ktx.extension.channel.markAsRead
+import com.sendbird.android.ktx.extension.channel.resendMessage
+import com.sendbird.android.ktx.extension.channel.sendFileMessage
+import com.sendbird.android.ktx.extension.channel.sendUserMessage
+import com.sendbird.android.ktx.extension.channel.updateChannel
+import com.sendbird.android.ktx.extension.channel.updateUserMessage
 import com.sendbird.android.ktx.extension.collection.initialize
 import com.sendbird.android.ktx.extension.collection.loadNext
 import com.sendbird.android.ktx.extension.collection.loadPrevious
@@ -50,6 +60,8 @@ import com.sendbird.chat.sample.groupchannel.localcaching.ktx.R
 import com.sendbird.chat.sample.groupchannel.localcaching.ktx.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.localcaching.ktx.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.localcaching.ktx.ui.user.SelectUserActivity
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -66,6 +78,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private var messageCollection: MessageCollection? = null
     private var channelTSHashMap = ConcurrentHashMap<String, Long>()
     private var isCollectionInitialized = false
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        showToast(throwable.message ?: "")
+    }
 
     private val startForResultFile =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
@@ -187,18 +202,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
             showToast(getString(R.string.channel_url_error))
             return
         }
-        GroupChannel.getChannel(
-            channelUrl
-        ) getChannelLabel@{ groupChannel, e ->
-            if (e != null) {
-                showToast("${e.message}")
-                return@getChannelLabel
-            }
-            if (groupChannel != null) {
-                currentGroupChannel = groupChannel
-                setChannelTitle()
-                createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
-            }
+
+        lifecycleScope.launch(exceptionHandler) {
+            currentGroupChannel = GroupChannel.getChannel(channelUrl)
+            setChannelTitle()
+            createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
         }
     }
 
@@ -236,22 +244,19 @@ class GroupChannelChatActivity : AppCompatActivity() {
         messageCollection = SendbirdChat.createMessageCollection(messageCollectionCreateParams).apply {
             initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
                 .onEach {
-                    when (val result = it.result) {
-                        is SendbirdResult.Success -> {
-                            if (it is MessageCollectionInitResult.CachedResult) {
-                                adapter.changeMessages(result.value)
-                                adapter.addPendingMessages(this@apply.pendingMessages)
-                            } else {
-                                adapter.changeMessages(result.value, false)
-                            }
+                    when (it) {
+                        is MessageCollectionInitResult.CachedResult -> {
+                            adapter.changeMessages(it.result)
+                            adapter.addPendingMessages(this@apply.pendingMessages)
                         }
-
-                        is SendbirdResult.Failure -> {
-                            showToast("${result.exception.message}")
+                        is MessageCollectionInitResult.ApiResult -> {
+                            adapter.changeMessages(it.result, false)
+                            markAsRead()
                         }
                     }
+                }.catch {
+                    showToast("${it.message}")
                 }.onCompletion {
-                    markAsRead()
                     isCollectionInitialized = true
                 }.launchIn(lifecycleScope)
         }
@@ -275,24 +280,17 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private fun loadNextMessageItems() {
         val collection = messageCollection ?: return
         if (collection.hasNext) {
-            lifecycleScope.launch {
-                runCatching {
-                    collection.loadNext()
-                }.onSuccess {
-                    adapter.addNextMessages(it)
-                    markAsRead()
-                }.onFailure {
-                    showToast("${it.message}")
-                }
+            lifecycleScope.launch(exceptionHandler) {
+                val result = collection.loadNext()
+                adapter.addNextMessages(result)
+                markAsRead()
             }
         }
     }
 
     private fun deleteMessage(baseMessage: BaseMessage) {
-        currentGroupChannel?.deleteMessage(baseMessage) {
-            if (it != null) {
-                showToast("${it.message}")
-            }
+        lifecycleScope.launch(exceptionHandler) {
+            currentGroupChannel?.deleteMessage(baseMessage)
         }
     }
 
@@ -301,15 +299,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
             showToast(R.string.enter_message_msg)
             return
         }
-        val params = UserMessageUpdateParams().apply {
-            message = msg
-        }
-        currentGroupChannel?.updateUserMessage(
-            baseMessage.messageId, params
-        ) { _, e ->
-            if (e != null) {
-                showToast("${e.message}")
-            }
+
+        lifecycleScope.launch(exceptionHandler) {
+            currentGroupChannel?.updateUserMessage(baseMessage.messageId, UserMessageUpdateParams(msg))
         }
     }
 
@@ -372,21 +364,15 @@ class GroupChannelChatActivity : AppCompatActivity() {
     }
 
     private fun deleteChannel() {
-        currentGroupChannel?.delete {
-            if (it != null) {
-                showToast("${it.message}")
-                return@delete
-            }
+        lifecycleScope.launch(exceptionHandler) {
+            currentGroupChannel?.delete()
             finish()
         }
     }
 
     private fun leaveChannel() {
-        currentGroupChannel?.leave {
-            if (it != null) {
-                showToast("${it.message}")
-                return@leave
-            }
+        lifecycleScope.launch(exceptionHandler) {
+            currentGroupChannel?.leave()
             finish()
         }
     }
@@ -406,10 +392,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private fun inviteUser(selectIds: List<String>?) {
         if (!selectIds.isNullOrEmpty()) {
             val channel = currentGroupChannel ?: return
-            channel.invite(selectIds.toList()) {
-                if (it != null) {
-                    showToast("${it.message}")
-                }
+            lifecycleScope.launch(exceptionHandler) {
+                channel.invite(selectIds.toList())
             }
         }
     }
@@ -420,14 +404,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
             return
         }
         if (channel.name != name) {
-            val params = GroupChannelUpdateParams()
-                .apply { this.name = name }
-            channel.updateChannel(
-                params
-            ) { _, e ->
-                if (e != null) {
-                    showToast("${e.message}")
-                }
+            lifecycleScope.launch(exceptionHandler) {
+                channel.updateChannel(GroupChannelUpdateParams().apply { this.name = name })
             }
         }
     }
@@ -443,13 +421,11 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
         val collection = messageCollection ?: return
         val channel = currentGroupChannel ?: return
-
-        val params = UserMessageCreateParams().apply {
-            this.message = message.trim()
-        }
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
-        channel.sendUserMessage(params, null)
+        channel.sendUserMessage(UserMessageCreateParams().apply { this.message = message.trim() })
+            .catch {}
+            .launchIn(lifecycleScope)
         if (collection.hasNext) {
             createMessageCollection(Long.MAX_VALUE)
         }
@@ -473,17 +449,17 @@ class GroupChannelChatActivity : AppCompatActivity() {
         )
         val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
         if (fileInfo != null) {
-            val params = FileMessageCreateParams().apply {
-                file = fileInfo.file
-                fileName = fileInfo.name
-                fileSize = fileInfo.size
-                this.thumbnailSizes = thumbnailSizes
-                mimeType = fileInfo.mime
-            }
             recyclerObserver.scrollToBottom(true)
             channel.sendFileMessage(
-                params,
-            ) { _, _ -> }
+                FileMessageCreateParams().apply {
+                    file = fileInfo.file
+                    fileName = fileInfo.name
+                    fileSize = fileInfo.size
+                    this.thumbnailSizes = thumbnailSizes
+                    mimeType = fileInfo.mime
+                }
+            ).catch {
+            }.launchIn(lifecycleScope)
             if (collection.hasNext) {
                 createMessageCollection(Long.MAX_VALUE)
             }
@@ -496,23 +472,26 @@ class GroupChannelChatActivity : AppCompatActivity() {
         val channel = currentGroupChannel ?: return
         when (baseMessage) {
             is UserMessage -> {
-                channel.resendMessage(baseMessage, null)
+                channel.resendMessage(baseMessage)
+                    .catch {}
+                    .launchIn(lifecycleScope)
             }
 
             is FileMessage -> {
                 val params = baseMessage.messageCreateParams
                 if (params != null) {
-                    channel.resendMessage(
-                        baseMessage,
-                        params.file
-                    ) { _, _ -> }
+                    channel.resendMessage(baseMessage, params.file)
+                        .catch {}
+                        .launchIn(lifecycleScope)
                 }
             }
         }
     }
 
     private fun markAsRead() {
-        currentGroupChannel?.markAsRead { e1 -> e1?.printStackTrace() }
+        lifecycleScope.launch(exceptionHandler) {
+            currentGroupChannel?.markAsRead()
+        }
     }
 
     private fun updateChannelView(groupChannel: GroupChannel) {
