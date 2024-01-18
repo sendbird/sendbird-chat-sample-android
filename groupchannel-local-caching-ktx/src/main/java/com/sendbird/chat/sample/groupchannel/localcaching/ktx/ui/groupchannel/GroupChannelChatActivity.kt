@@ -290,7 +290,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun deleteMessage(baseMessage: BaseMessage) {
         lifecycleScope.launch(exceptionHandler) {
-            currentGroupChannel?.deleteMessage(baseMessage)
+            currentGroupChannel?.deleteMessage(baseMessage.messageId)
         }
     }
 
