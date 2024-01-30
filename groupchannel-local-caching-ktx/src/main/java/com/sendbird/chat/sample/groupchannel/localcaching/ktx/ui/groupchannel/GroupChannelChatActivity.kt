@@ -265,13 +265,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
     private fun loadPreviousMessageItems() {
         val collection = messageCollection ?: return
         if (collection.hasPrevious) {
-            lifecycleScope.launch {
-                runCatching {
-                    collection.loadPrevious()
-                }.onSuccess {
+            lifecycleScope.launch(exceptionHandler) {
+                collection.loadPrevious().let {
                     adapter.addPreviousMessages(it)
-                }.onFailure {
-                    showToast("${it.message}")
                 }
             }
         }
