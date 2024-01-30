@@ -44,8 +44,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayoutVersion"
 
     //sendbird
-    //implementation "com.sendbird.sdk:sendbird-chat:$sendbirdVersion"
-    implementation "com.sendbird.sdk:sendbird-chat-local:$sendbirdVersion"
+    implementation "com.sendbird.sdk:sendbird-chat:$sendbirdVersion"
     //
 
     //Coil
