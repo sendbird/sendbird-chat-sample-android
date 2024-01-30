@@ -8,48 +8,22 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.SendbirdChat
 import com.sendbird.android.channel.GroupChannel
-import com.sendbird.android.collection.GroupChannelContext
-import com.sendbird.android.collection.MessageCollection
-import com.sendbird.android.collection.MessageCollectionInitPolicy
-import com.sendbird.android.collection.MessageContext
-import com.sendbird.android.handler.MessageCollectionHandler
-import com.sendbird.android.ktx.MessageCollectionInitResult
-import com.sendbird.android.ktx.extension.channel.delete
-import com.sendbird.android.ktx.extension.channel.deleteMessage
-import com.sendbird.android.ktx.extension.channel.getChannel
-import com.sendbird.android.ktx.extension.channel.invite
-import com.sendbird.android.ktx.extension.channel.leave
-import com.sendbird.android.ktx.extension.channel.markAsRead
-import com.sendbird.android.ktx.extension.channel.resendMessage
-import com.sendbird.android.ktx.extension.channel.sendFileMessage
-import com.sendbird.android.ktx.extension.channel.sendUserMessage
-import com.sendbird.android.ktx.extension.channel.updateChannel
-import com.sendbird.android.ktx.extension.channel.updateUserMessage
-import com.sendbird.android.ktx.extension.collection.initialize
-import com.sendbird.android.ktx.extension.collection.loadNext
-import com.sendbird.android.ktx.extension.collection.loadPrevious
-import com.sendbird.android.message.BaseMessage
-import com.sendbird.android.message.FileMessage
-import com.sendbird.android.message.SendingStatus
 import com.sendbird.android.message.ThumbnailSize
 import com.sendbird.android.message.UserMessage
 import com.sendbird.android.params.FileMessageCreateParams
 import com.sendbird.android.params.GroupChannelUpdateParams
-import com.sendbird.android.params.MessageCollectionCreateParams
-import com.sendbird.android.params.MessageListParams
 import com.sendbird.android.params.UserMessageCreateParams
-import com.sendbird.android.params.UserMessageUpdateParams
 import com.sendbird.chat.module.ui.ChatInputView
 import com.sendbird.chat.module.utils.ChatRecyclerDataObserver
 import com.sendbird.chat.module.utils.Constants
 import com.sendbird.chat.module.utils.FileUtils
-import com.sendbird.chat.module.utils.SharedPreferenceUtils
 import com.sendbird.chat.module.utils.TextUtils
 import com.sendbird.chat.module.utils.copy
 import com.sendbird.chat.module.utils.showAlertDialog
@@ -60,27 +34,20 @@ import com.sendbird.chat.sample.groupchannel.localcaching.ktx.R
 import com.sendbird.chat.sample.groupchannel.localcaching.ktx.databinding.ActivityGroupChannelChatBinding
 import com.sendbird.chat.sample.groupchannel.localcaching.ktx.ui.user.ChatMemberListActivity
 import com.sendbird.chat.sample.groupchannel.localcaching.ktx.ui.user.SelectUserActivity
-import kotlinx.coroutines.CoroutineExceptionHandler
+import com.sendbird.chat.sample.groupchannel.localcaching.ktx.ui.vm.ChannelEvent
+import com.sendbird.chat.sample.groupchannel.localcaching.ktx.ui.vm.ChannelViewModel
+import com.sendbird.chat.sample.groupchannel.localcaching.ktx.ui.vm.MessageEvent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.util.concurrent.ConcurrentHashMap
 
 class GroupChannelChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGroupChannelChatBinding
     private lateinit var adapter: GroupChannelChatAdapter
     private lateinit var recyclerObserver: ChatRecyclerDataObserver
-    private var channelUrl: String = ""
-    private var channelTitle: String = ""
-    private var currentGroupChannel: GroupChannel? = null
-    private var messageCollection: MessageCollection? = null
-    private var channelTSHashMap = ConcurrentHashMap<String, Long>()
-    private var isCollectionInitialized = false
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        showToast(throwable.message ?: "")
-    }
+    private val viewModel: ChannelViewModel by viewModels()
 
     private val startForResultFile =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { data ->
@@ -103,17 +70,14 @@ class GroupChannelChatActivity : AppCompatActivity() {
         binding = ActivityGroupChannelChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val intent = intent
-        channelUrl = intent.getStringExtra(Constants.INTENT_KEY_CHANNEL_URL) ?: ""
-        channelTitle = intent.getStringExtra(Constants.INTENT_KEY_CHANNEL_TITLE) ?: ""
-        channelTSHashMap = SharedPreferenceUtils.channelTSMap
-
-        init()
-        initRecyclerView()
-        getChannel(channelUrl)
+        initPage()
     }
 
-    private fun init() {
+    private fun initPage() {
+        val intent = intent
+        val channelUrl = intent.getStringExtra(Constants.INTENT_KEY_CHANNEL_URL) ?: ""
+        val channelTitle = intent.getStringExtra(Constants.INTENT_KEY_CHANNEL_TITLE) ?: ""
+
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
@@ -134,6 +98,69 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 )
             }
         })
+        initRecyclerView()
+        bindEvents()
+        viewModel.initialize(channelUrl)
+            .onEach {
+                val currentChannel = viewModel.channel
+                if (channelTitle == TextUtils.CHANNEL_DEFAULT_NAME) {
+                    binding.toolbar.title = TextUtils.getGroupChannelTitle(currentChannel)
+                } else {
+                    binding.toolbar.title = channelTitle
+                }
+            }.catch {
+                showToast(it.message ?: getString(R.string.channel_error))
+                finish()
+            }.launchIn(lifecycleScope)
+    }
+
+    private fun bindEvents() {
+        viewModel.exceptionalMessage.observe(this) {
+            showToast(it)
+        }
+        viewModel.messageEvent.observe(this) {
+            val messages = it.messages
+            val pendingMessages = it.pendingMessages
+            when (it.event) {
+                MessageEvent.INIT_FROM_CACHE -> {
+                    adapter.addMessages(messages)
+                    adapter.addPendingMessages(pendingMessages)
+                }
+                MessageEvent.INIT_FROM_API -> {
+                    adapter.changeMessages(messages, false)
+                    adapter.addPendingMessages(pendingMessages)
+                }
+                MessageEvent.LOADED_FROM_PREV -> adapter.addPreviousMessages(messages)
+                MessageEvent.LOADED_FROM_NEXT -> adapter.addNextMessages(messages)
+                MessageEvent.UPDATED -> adapter.updateSucceedMessages(messages)
+                MessageEvent.ADDED -> adapter.addMessages(messages)
+                MessageEvent.PENDING_ADDED -> adapter.addPendingMessages(messages)
+                MessageEvent.DELETED -> adapter.deleteMessages(messages)
+                MessageEvent.PENDING_UPDATED -> adapter.updatePendingMessages(messages)
+                MessageEvent.PENDING_DELETED -> adapter.deletePendingMessages(messages)
+                MessageEvent.HUGEGAP_DETECTED -> {
+                    val position: Int =
+                        (binding.recyclerviewChat.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    val sp = if (position >= 0) {
+                        adapter.currentList[position].createdAt
+                    } else {
+                        viewModel.startingPoint
+                    }
+
+                    viewModel.createAndInitCollection(sp)
+                }
+            }
+        }
+        viewModel.channelEvent.observe(this) {
+            val channel = it.second
+            when (it.first) {
+                ChannelEvent.UPDATED -> updateChannelView(channel)
+                ChannelEvent.DELETED -> {
+                    showToast(R.string.channel_deleted_event_msg)
+                    finish()
+                }
+            }
+        }
     }
 
     private fun initRecyclerView() {
@@ -143,7 +170,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     val deleteMenu =
                         contextMenu.add(Menu.NONE, 0, 0, getString(R.string.delete))
                     deleteMenu.setOnMenuItemClickListener {
-                        deleteMessage(baseMessage)
+                        viewModel.deleteMessage(baseMessage)
                         return@setOnMenuItemClickListener true
                     }
                     if (baseMessage is UserMessage) {
@@ -156,7 +183,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                                 baseMessage.message,
                                 getString(R.string.update),
                                 getString(R.string.cancel),
-                                { updateMessage(it, baseMessage) },
+                                { viewModel.updateMessage(it, baseMessage) },
                             )
                             return@setOnMenuItemClickListener true
                         }
@@ -175,7 +202,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                 listOf(getString(R.string.retry), getString(R.string.delete))
             ) { _, position ->
                 when (position) {
-                    0 -> resendMessage(it)
+                    0 -> viewModel.resendMessage(it)
                     1 -> adapter.deletePendingMessages(mutableListOf(it))
                 }
             }
@@ -189,116 +216,12 @@ class GroupChannelChatActivity : AppCompatActivity() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (!recyclerView.canScrollVertically(-1)) {
-                    loadPreviousMessageItems()
+                    viewModel.loadPrevious()
                 } else if (!recyclerView.canScrollVertically(1)) {
-                    loadNextMessageItems()
+                    viewModel.loadNext()
                 }
             }
         })
-    }
-
-    private fun getChannel(channelUrl: String?) {
-        if (channelUrl.isNullOrBlank()) {
-            showToast(getString(R.string.channel_url_error))
-            return
-        }
-
-        lifecycleScope.launch(exceptionHandler) {
-            currentGroupChannel = GroupChannel.getChannel(channelUrl)
-            setChannelTitle()
-            createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
-        }
-    }
-
-    private fun setChannelTitle() {
-        val currentChannel = currentGroupChannel
-        if (channelTitle == TextUtils.CHANNEL_DEFAULT_NAME && currentChannel != null) {
-            binding.toolbar.title = TextUtils.getGroupChannelTitle(currentChannel)
-        } else {
-            binding.toolbar.title = channelTitle
-        }
-    }
-
-    private fun createMessageCollection(timeStamp: Long) {
-        messageCollection?.dispose()
-        isCollectionInitialized = false
-        val channel = currentGroupChannel
-        if (channel == null) {
-            showToast(R.string.channel_error)
-            finish()
-            return
-        }
-
-        val messageListParams = MessageListParams().apply {
-            reverse = false
-            previousResultSize = 20
-            nextResultSize = 20
-        }
-        val messageCollectionCreateParams =
-            MessageCollectionCreateParams(channel, messageListParams)
-                .apply {
-                    startingPoint = timeStamp
-                    messageCollectionHandler = collectionHandler
-                }
-
-        messageCollection = SendbirdChat.createMessageCollection(messageCollectionCreateParams).apply {
-            initialize(MessageCollectionInitPolicy.CACHE_AND_REPLACE_BY_API)
-                .onEach {
-                    when (it) {
-                        is MessageCollectionInitResult.CachedResult -> {
-                            adapter.changeMessages(it.result)
-                            adapter.addPendingMessages(this@apply.pendingMessages)
-                        }
-                        is MessageCollectionInitResult.ApiResult -> {
-                            adapter.changeMessages(it.result, false)
-                            markAsRead()
-                        }
-                    }
-                }.catch {
-                    showToast("${it.message}")
-                }.onCompletion {
-                    isCollectionInitialized = true
-                }.launchIn(lifecycleScope)
-        }
-    }
-
-    private fun loadPreviousMessageItems() {
-        val collection = messageCollection ?: return
-        if (collection.hasPrevious) {
-            lifecycleScope.launch(exceptionHandler) {
-                collection.loadPrevious().let {
-                    adapter.addPreviousMessages(it)
-                }
-            }
-        }
-    }
-
-    private fun loadNextMessageItems() {
-        val collection = messageCollection ?: return
-        if (collection.hasNext) {
-            lifecycleScope.launch(exceptionHandler) {
-                val result = collection.loadNext()
-                adapter.addNextMessages(result)
-                markAsRead()
-            }
-        }
-    }
-
-    private fun deleteMessage(baseMessage: BaseMessage) {
-        lifecycleScope.launch(exceptionHandler) {
-            currentGroupChannel?.deleteMessage(baseMessage.messageId)
-        }
-    }
-
-    private fun updateMessage(msg: String, baseMessage: BaseMessage) {
-        if (msg.isBlank()) {
-            showToast(R.string.enter_message_msg)
-            return
-        }
-
-        lifecycleScope.launch(exceptionHandler) {
-            currentGroupChannel?.updateUserMessage(baseMessage.messageId, UserMessageUpdateParams(msg))
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -309,7 +232,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     getString(R.string.channel_delete_msg),
                     getString(R.string.delete),
                     getString(R.string.cancel),
-                    { deleteChannel() },
+                    { viewModel.deleteChannel() },
                 )
                 true
             }
@@ -320,14 +243,14 @@ class GroupChannelChatActivity : AppCompatActivity() {
                     getString(R.string.channel_leave_msg),
                     getString(R.string.leave),
                     getString(R.string.cancel),
-                    { leaveChannel() },
+                    { viewModel.leaveChannel() },
                 )
                 true
             }
 
             R.id.member_list -> {
                 val intent = Intent(this, ChatMemberListActivity::class.java)
-                intent.putExtra(Constants.INTENT_KEY_CHANNEL_URL, channelUrl)
+                intent.putExtra(Constants.INTENT_KEY_CHANNEL_URL, viewModel.channel.url)
                 startActivity(intent)
                 true
             }
@@ -338,7 +261,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
             }
 
             R.id.update_channel_name -> {
-                val channel = currentGroupChannel ?: return true
+                val channel = viewModel.channel
                 showInputDialog(
                     getString(R.string.update),
                     null,
@@ -359,26 +282,8 @@ class GroupChannelChatActivity : AppCompatActivity() {
         }
     }
 
-    private fun deleteChannel() {
-        lifecycleScope.launch(exceptionHandler) {
-            currentGroupChannel?.delete()
-            finish()
-        }
-    }
-
-    private fun leaveChannel() {
-        lifecycleScope.launch(exceptionHandler) {
-            currentGroupChannel?.leave()
-            finish()
-        }
-    }
-
     private fun selectInviteUser() {
-        val channel = currentGroupChannel
-        if (channel == null) {
-            showToast(R.string.channel_error)
-            return
-        }
+        val channel = viewModel.channel
         val memberIds = ArrayList(channel.members.map { it.userId })
         val intent = Intent(this, SelectUserActivity::class.java)
         intent.putExtra(Constants.INTENT_KEY_BASE_USER, memberIds)
@@ -387,10 +292,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     private fun inviteUser(selectIds: List<String>?) {
         if (!selectIds.isNullOrEmpty()) {
-            val channel = currentGroupChannel ?: return
-            lifecycleScope.launch(exceptionHandler) {
-                channel.invite(selectIds.toList())
-            }
+            viewModel.inviteUsers(selectIds)
         }
     }
 
@@ -400,9 +302,7 @@ class GroupChannelChatActivity : AppCompatActivity() {
             return
         }
         if (channel.name != name) {
-            lifecycleScope.launch(exceptionHandler) {
-                channel.updateChannel(GroupChannelUpdateParams().apply { this.name = name })
-            }
+            viewModel.updateChannel(GroupChannelUpdateParams().apply { this.name = name })
         }
     }
 
@@ -411,20 +311,9 @@ class GroupChannelChatActivity : AppCompatActivity() {
             showToast(R.string.enter_message_msg)
             return
         }
-        if (!isCollectionInitialized) {
-            showToast(R.string.message_collection_init_msg)
-            return
-        }
-        val collection = messageCollection ?: return
-        val channel = currentGroupChannel ?: return
         binding.chatInputView.clearText()
         recyclerObserver.scrollToBottom(true)
-        channel.sendUserMessage(UserMessageCreateParams().apply { this.message = message.trim() })
-            .catch {}
-            .launchIn(lifecycleScope)
-        if (collection.hasNext) {
-            createMessageCollection(Long.MAX_VALUE)
-        }
+        viewModel.sendUserMessage(UserMessageCreateParams().apply { this.message = message.trim() })
     }
 
     private fun sendFileMessage(imgUri: Uri?) {
@@ -432,66 +321,29 @@ class GroupChannelChatActivity : AppCompatActivity() {
             showToast(R.string.file_transfer_error)
             return
         }
-        if (!isCollectionInitialized) {
-            showToast(R.string.message_collection_init_msg)
-            return
-        }
-        val collection = messageCollection ?: return
-        val channel = currentGroupChannel ?: return
 
-        val thumbnailSizes = listOf(
-            ThumbnailSize(100, 100),
-            ThumbnailSize(200, 200)
-        )
-        val fileInfo = FileUtils.getFileInfo(imgUri, applicationContext)
-        if (fileInfo != null) {
-            recyclerObserver.scrollToBottom(true)
-            channel.sendFileMessage(
-                FileMessageCreateParams().apply {
-                    file = fileInfo.file
-                    fileName = fileInfo.name
-                    fileSize = fileInfo.size
-                    this.thumbnailSizes = thumbnailSizes
-                    mimeType = fileInfo.mime
-                }
-            ).catch {
-            }.launchIn(lifecycleScope)
-            if (collection.hasNext) {
-                createMessageCollection(Long.MAX_VALUE)
+        lifecycleScope.launch(Dispatchers.Default) {
+            FileUtils.getFileInfo(imgUri, applicationContext)?.let { fileInfo ->
+                recyclerObserver.scrollToBottom(true)
+                viewModel.sendFileMessage(
+                    FileMessageCreateParams().apply {
+                        file = fileInfo.file
+                        fileName = fileInfo.name
+                        fileSize = fileInfo.size
+                        thumbnailSizes = listOf(
+                            ThumbnailSize(100, 100),
+                            ThumbnailSize(200, 200)
+                        )
+                        mimeType = fileInfo.mime
+                    }
+                )
+            } ?: run {
+                showToast(R.string.file_transfer_error)
             }
-        } else {
-            showToast(R.string.file_transfer_error)
-        }
-    }
-
-    private fun resendMessage(baseMessage: BaseMessage) {
-        val channel = currentGroupChannel ?: return
-        when (baseMessage) {
-            is UserMessage -> {
-                channel.resendMessage(baseMessage)
-                    .catch {}
-                    .launchIn(lifecycleScope)
-            }
-
-            is FileMessage -> {
-                val params = baseMessage.messageCreateParams
-                if (params != null) {
-                    channel.resendMessage(baseMessage, params.file)
-                        .catch {}
-                        .launchIn(lifecycleScope)
-                }
-            }
-        }
-    }
-
-    private fun markAsRead() {
-        lifecycleScope.launch(exceptionHandler) {
-            currentGroupChannel?.markAsRead()
         }
     }
 
     private fun updateChannelView(groupChannel: GroupChannel) {
-        currentGroupChannel = groupChannel
         binding.toolbar.title =
             if (groupChannel.name.isBlank() || groupChannel.name == TextUtils.CHANNEL_DEFAULT_NAME)
                 TextUtils.getGroupChannelTitle(groupChannel)
@@ -505,100 +357,15 @@ class GroupChannelChatActivity : AppCompatActivity() {
 
     override fun onPause() {
         val lastMessage = adapter.currentList.lastOrNull()
-        if (lastMessage != null && channelUrl.isNotBlank()) {
-            channelTSHashMap[channelUrl] = lastMessage.createdAt
-            SharedPreferenceUtils.channelTSMap = channelTSHashMap
+        if (lastMessage != null) {
+            viewModel.updateLastVisibleMessageTs(lastMessage)
         }
         super.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        messageCollection?.dispose()
         SendbirdChat.autoBackgroundDetection = true
-    }
-
-    private val collectionHandler = object : MessageCollectionHandler {
-        override fun onMessagesAdded(
-            context: MessageContext,
-            channel: GroupChannel,
-            messages: List<BaseMessage>
-        ) {
-            when (context.messagesSendingStatus) {
-                SendingStatus.SUCCEEDED -> {
-                    adapter.addMessages(messages)
-                    markAsRead()
-                }
-
-                SendingStatus.PENDING -> adapter.addPendingMessages(messages)
-
-                else -> {
-                }
-            }
-        }
-
-        override fun onMessagesUpdated(
-            context: MessageContext,
-            channel: GroupChannel,
-            messages: List<BaseMessage>
-        ) {
-            when (context.messagesSendingStatus) {
-                SendingStatus.SUCCEEDED -> adapter.updateSucceedMessages(messages)
-
-                SendingStatus.PENDING -> adapter.updatePendingMessages(messages)
-
-                SendingStatus.FAILED -> adapter.updatePendingMessages(messages)
-
-                SendingStatus.CANCELED -> adapter.deletePendingMessages(messages)// The cancelled messages in the sample will be deleted
-
-                else -> {
-                }
-            }
-        }
-
-        override fun onMessagesDeleted(
-            context: MessageContext,
-            channel: GroupChannel,
-            messages: List<BaseMessage>
-        ) {
-            when (context.messagesSendingStatus) {
-                SendingStatus.SUCCEEDED -> adapter.deleteMessages(messages)
-
-                SendingStatus.FAILED -> adapter.deletePendingMessages(messages)
-
-                else -> {
-                }
-            }
-        }
-
-        override fun onChannelUpdated(context: GroupChannelContext, channel: GroupChannel) {
-            updateChannelView(channel)
-        }
-
-        override fun onChannelDeleted(context: GroupChannelContext, channelUrl: String) {
-            showToast(R.string.channel_deleted_event_msg)
-            finish()
-        }
-
-        override fun onHugeGapDetected() {
-            val collection = messageCollection
-            if (collection == null) {
-                showToast(R.string.channel_error)
-                finish()
-                return
-            }
-            val startingPoint = collection.startingPoint
-            collection.dispose()
-            val position: Int =
-                (binding.recyclerviewChat.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            if (position >= 0) {
-                val message: BaseMessage = adapter.currentList[position]
-                createMessageCollection(message.createdAt)
-            } else {
-                createMessageCollection(startingPoint)
-            }
-        }
-
     }
 
     override fun onRequestPermissionsResult(
