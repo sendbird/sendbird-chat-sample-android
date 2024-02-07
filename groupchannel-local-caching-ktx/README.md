@@ -8,6 +8,6 @@ For more information on SendbirdChat KTX, refer to [Kotlin extension (KTX)](http
 
 ## Running the app
 
-Open this project in Android Studio and select 'run configurations' to view a dropdown of feature-level Chat samples to choose from.
+Open this project in Android Studio and select 'run configurations' and choose `groupchannel-local-caching-ktx` from a dropdown.
 
 Once a sample is chosen, create a device and run the app on an Android device or Android emulator.
