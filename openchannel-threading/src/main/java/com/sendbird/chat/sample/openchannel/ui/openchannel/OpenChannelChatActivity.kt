@@ -34,7 +34,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
     private var channelTitle: String = ""
     private var hasPrevious: Boolean = true
     private var isMessageLoading: Boolean = false
-    private var changelogToken: String? = null
 
     private var replayMessageId: Long = -1L
 
@@ -184,15 +183,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 override fun onReconnectStarted() {}
 
                 override fun onReconnectSucceeded() {
-                    if (changelogToken != null) {
-                        getMessageChangeLogsSinceToken()
-                    } else {
-                        val lastMessage = adapter.currentList.lastOrNull()
-                        if (lastMessage != null) {
-                            getMessageChangeLogsSinceTimestamp(lastMessage.createdAt)
-                        }
-                    }
-                    loadToLatestMessages(adapter.currentList.lastOrNull()?.createdAt ?: 0)
+                    loadMessagesPreviousMessages(Long.MAX_VALUE, reload = true)
                 }
 
                 override fun onConnected(userId: String) {}
@@ -329,6 +320,7 @@ class OpenChannelChatActivity : AppCompatActivity() {
 
     private fun loadMessagesPreviousMessages(
         timeStamp: Long,
+        reload: Boolean = false
     ) {
         val channel = currentOpenChannel ?: return
         isMessageLoading = true
@@ -342,6 +334,10 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 showToast("${e.message}")
             }
             if (messages != null) {
+                if (reload) {
+                    recyclerObserver.scrollToBottom(true)
+                    adapter.clearMessages()
+                }
                 if (messages.isNotEmpty()) {
                     hasPrevious = messages.size >= params.previousResultSize
                     adapter.addPreviousMessages(messages)
@@ -350,30 +346,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
                 }
             }
             isMessageLoading = false
-        }
-    }
-
-    private fun loadToLatestMessages(timeStamp: Long) {
-        val channel = currentOpenChannel ?: return
-        isMessageLoading = true
-        val params = MessageListParams().apply {
-            nextResultSize = 100
-            reverse = false
-        }
-        channel.getMessagesByTimestamp(timeStamp, params) { messages, e ->
-            if (e != null) {
-                showToast("${e.message}")
-            }
-            if (!messages.isNullOrEmpty()) {
-                adapter.addNextMessages(messages)
-                if (messages.size >= params.nextResultSize) {
-                    loadToLatestMessages(messages.last().createdAt)
-                } else {
-                    isMessageLoading = false
-                }
-            } else {
-                isMessageLoading = false
-            }
         }
     }
 
@@ -461,52 +433,6 @@ class OpenChannelChatActivity : AppCompatActivity() {
                         params.file
                     ) { _, _ -> }
                 }
-            }
-        }
-    }
-
-    private fun getMessageChangeLogsSinceTimestamp(timeStamp: Long) {
-        val channel = currentOpenChannel ?: return
-        val params = MessageChangeLogsParams()
-        channel.getMessageChangeLogsSinceTimestamp(
-            timeStamp,
-            params
-        ) getMessageChangeLogsSinceTimestampLabel@{ updatedMessages, deletedMessageIds, hasMore, token, e ->
-            if (e != null) {
-                showToast("$e")
-                return@getMessageChangeLogsSinceTimestampLabel
-            }
-            adapter.updateMessages(updatedMessages)
-            adapter.deleteMessages(deletedMessageIds)
-            changelogToken = token
-            if (hasMore) {
-                getMessageChangeLogsSinceToken()
-            }
-
-        }
-    }
-
-    private fun getMessageChangeLogsSinceToken() {
-        if (changelogToken == null) return
-        val channel = currentOpenChannel
-        if (channel == null) {
-            showToast(R.string.channel_error)
-            return
-        }
-        val params = MessageChangeLogsParams()
-        channel.getMessageChangeLogsSinceToken(
-            changelogToken,
-            params
-        ) getMessageChangeLogsSinceTokenLabel@{ updatedMessages, deletedMessageIds, hasMore, token, e ->
-            if (e != null) {
-                showToast("$e")
-                return@getMessageChangeLogsSinceTokenLabel
-            }
-            adapter.updateMessages(updatedMessages)
-            adapter.deleteMessages(deletedMessageIds)
-            changelogToken = token
-            if (hasMore) {
-                getMessageChangeLogsSinceToken()
             }
         }
     }

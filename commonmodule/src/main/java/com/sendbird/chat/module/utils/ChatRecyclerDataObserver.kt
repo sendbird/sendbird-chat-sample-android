@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.sendbird.android.message.BaseMessage
+import okhttp3.internal.notify
 
 const val MESSAGE_REFRESH_RANGE = 3
 
@@ -42,6 +43,14 @@ class ChatRecyclerDataObserver(
         } else {
             super.onItemRangeChanged(positionStart, itemCount)
         }
+    }
+
+    override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+        if (scrollToBottom) {
+            notifyUpdate()
+            scrollToBottom = false
+        }
+        super.onItemRangeRemoved(positionStart, itemCount)
     }
 
     private fun notifyUpdate() {
