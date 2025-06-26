@@ -222,6 +222,13 @@ class OpenChannelChatAdapter(
         }
     }
 
+    fun clearMessages() {
+        if (baseMessageList.isNotEmpty()) {
+            baseMessageList.clear()
+            mergeList()
+        }
+    }
+
     private fun mergeList() = submitList(baseMessageList + pendingMessageList)
 
     open inner class BaseViewHolder(binding: ViewBinding) : RecyclerView.ViewHolder(binding.root) {
