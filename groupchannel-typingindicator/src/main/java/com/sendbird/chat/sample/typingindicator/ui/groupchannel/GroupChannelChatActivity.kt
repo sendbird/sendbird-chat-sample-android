@@ -169,19 +169,18 @@ class GroupChannelChatActivity : AppCompatActivity() {
         GroupChannel.getChannel(
             channelUrl
         ) getChannelLabel@{ groupChannel, e ->
-            if (e != null) {
-                showToast("${e.message}")
-                return@getChannelLabel
-            }
             if (groupChannel != null) {
                 currentGroupChannel = groupChannel
                 setChannelTitle()
                 createMessageCollection(channelTSHashMap[channelUrl] ?: Long.MAX_VALUE)
                 setupTypingListener()
+            } else {
+                if (e != null) {
+                    showToast("${e.message}")
+                }
             }
         }
     }
-
     private fun setChannelTitle() {
         val currentChannel = currentGroupChannel
         if (channelTitle == TextUtils.CHANNEL_DEFAULT_NAME && currentChannel != null) {
@@ -221,9 +220,6 @@ class GroupChannelChatActivity : AppCompatActivity() {
                             cachedList: List<BaseMessage>?,
                             e: SendbirdException?
                         ) {
-                            if (e != null) {
-                                showToast("${e.message}")
-                            }
                             adapter.changeMessages(cachedList)
                             adapter.addPendingMessages(this@apply.pendingMessages)
                         }
@@ -232,11 +228,14 @@ class GroupChannelChatActivity : AppCompatActivity() {
                             apiResultList: List<BaseMessage>?,
                             e: SendbirdException?
                         ) {
-                            if (e != null) {
-                                showToast("${e.message}")
+                            if (apiResultList != null) {
+                                adapter.changeMessages(apiResultList, false)
+                                markAsRead()
+                            } else {
+                                if (e != null) {
+                                    showToast("${e.message}")
+                                }
                             }
-                            adapter.changeMessages(apiResultList, false)
-                            markAsRead()
                             isCollectionInitialized = true
                         }
                     }
